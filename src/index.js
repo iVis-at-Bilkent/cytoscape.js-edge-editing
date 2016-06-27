@@ -1,6 +1,6 @@
 ;(function(){ 'use strict';
   
-  var sbgnBendPointUtilities = require('./sbgnBendPointUtilities');
+  var bendPointUtilities = require('./bendPointUtilities');
   
   // registers the extension on a cytoscape lib ref
   var register = function( cytoscape ){
