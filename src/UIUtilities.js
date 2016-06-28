@@ -70,6 +70,20 @@ module.exports = function (params) {
       function options() {
         return optCache || (optCache = $container.data('cyedgebendediting').options);
       }
+      
+      // we will need to convert model positons to rendered positions
+      function convertToRenderedPosition(modelPosition) {
+        var pan = cy.pan();
+        var zoom = cy.zoom();
+
+        var x = modelPosition.x * zoom + pan.x;
+        var y = modelPosition.y * zoom + pan.y;
+
+        return {
+          x: x,
+          y: y
+        };
+      }
 
       function clearDraws(renderSelectedBendShapes) {
 
@@ -112,9 +126,15 @@ module.exports = function (params) {
         var topLeftX = bendX - length / 2;
         var topLeftY = bendY - length / 2;
         
+        // convert to rendered parameters
+        var renderedTopLeftPos = convertToRenderedPosition({x: topLeftX, y: topLeftY});
+        length *= cy.zoom();
+        
         // render bend shape
-        ctx.rect(topLeftX, topLeftY, length, length);
+        ctx.beginPath();
+        ctx.rect(renderedTopLeftPos.x, renderedTopLeftPos.y, length, length);
         ctx.fill();
+        ctx.closePath();
       }
       
       // get the length of bend points to be rendered
@@ -158,21 +178,24 @@ module.exports = function (params) {
       };
 
       // last status of gestures
-      var lastPanningEnabled, lastZoomingEnabled;
+      var lastPanningEnabled, lastZoomingEnabled, lastBoxSelectionEnabled;
       
       // store the current status of gestures and set them to false
       function disableGestures() {
         lastPanningEnabled = cy.panningEnabled();
         lastZoomingEnabled = cy.zoomingEnabled();
+        lastBoxSelectionEnabled = cy.boxSelectionEnabled();
 
         cy.zoomingEnabled(false)
-          .panningEnabled(false);
+          .panningEnabled(false)
+          .boxSelectionEnabled(false);
       }
       
       // reset the gestures by their latest status
       function resetGestures() {
         cy.zoomingEnabled(lastZoomingEnabled)
-          .panningEnabled(lastPanningEnabled);
+          .panningEnabled(lastPanningEnabled)
+          .boxSelectionEnabled(lastBoxSelectionEnabled);
       }
 
       $container.cytoscape(function (e) {
@@ -181,18 +204,7 @@ module.exports = function (params) {
         
         lastPanningEnabled = cy.panningEnabled();
         lastZoomingEnabled = cy.zoomingEnabled();
-        
-        // define edgebendediting-hasbendpoints css class
-        cy.style().selector('.edgebendediting-hasbendpoints').css({
-          'curve-style': 'segments',
-          'segment-distances': function (ele) {
-            return bendPointUtilities.getSegmentDistancesString(ele);
-          },
-          'segment-weights': function (ele) {
-            return bendPointUtilities.getSegmentWeightsString(ele);
-          },
-          'edge-distances': 'node-position'
-        });
+        lastBoxSelectionEnabled = cy.boxSelectionEnabled();
         
         cy.bind('zoom pan', eZoom = function () {
           clearDraws(true);
@@ -201,7 +213,7 @@ module.exports = function (params) {
         cy.on('position', 'node', ePosition = function () {
           var node = this;
           
-          // TODO
+          clearDraws(true);
         });
 
         cy.on('remove', 'edge', eRemove = function () {
@@ -213,14 +225,62 @@ module.exports = function (params) {
         cy.on('select', 'edge', eSelect = function () {
           var edge = this;
           
-          // TODO
+          renderBendShapes(edge);
         });
         
         cy.on('unselect', 'edge', eUnselect = function () {
           var edge = this;
           
-          // TODO
+          clearDraws(true);
         });
+        
+        var movedBendIndex;
+        var movedBendEdge;
+        
+        cy.on('tapstart', 'edge', function (event) {
+          var edge = this;
+          
+          var cyPosX = event.cyPosition.x;
+          var cyPosY = event.cyPosition.y;
+
+          var index = getContainingBendShapeIndex(cyPosX, cyPosY, edge);
+          if (index != -1) {
+            movedBendIndex = index;
+            movedBendEdge = edge;
+            disableGestures();
+          }
+        });
+        
+        cy.on('tapdrag', function (event) {
+          var edge = movedBendEdge;
+          
+          if (movedBendEdge === undefined || movedBendIndex === undefined) {
+            return;
+          }
+
+          var weights = edge.data('weights');
+          var distances = edge.data('distances');
+
+          var relativeBendPosition = bendPointUtilities.convertToRelativeBendPosition(edge, event.cyPosition);
+          weights[movedBendIndex] = relativeBendPosition.weight;
+          distances[movedBendIndex] = relativeBendPosition.distance;
+
+          edge.data('weights', weights);
+          edge.data('distances', distances);
+          
+          clearDraws();
+          renderBendShapes(edge);
+        });
+        
+        cy.on('tapend', function (event) {
+
+          movedBendIndex = undefined;
+          movedBendEdge = undefined;
+
+          resetGestures();
+          clearDraws(true);
+        });
+        
       });
 
       $container.data('cyedgebendediting', data);

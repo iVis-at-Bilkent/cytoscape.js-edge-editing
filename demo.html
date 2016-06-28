@@ -6,7 +6,8 @@
 		<title>cytoscape-edge-bend-editing.js demo</title>
 
 		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1">
-
+                
+                <script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
 		<script src="http://cytoscape.github.io/cytoscape.js/api/cytoscape.js-latest/cytoscape.min.js"></script>
 
 		<!-- for testing with local version of cytoscape.js -->
@@ -86,8 +87,22 @@
 					},
 				});
 
-				// demo your collection ext
-//				cy.elements().edge-bend-editing( /* args... */ );
+				// demo your ext
+				cy.edgeBendEditing({
+                                    // this function specifies the poitions of bend points
+                                    bendPositionsFunction: function(ele) {
+                                      var srcPos = ele.source().position();
+                                      var tgtPos = ele.target().position();
+
+                                      var mid = {
+                                        x: ( srcPos.x + tgtPos.x ) / 2,
+                                        y: ( srcPos.y + tgtPos.y ) / 2
+                                      }
+
+                                      return [mid];
+                                      return ele.data('bendPointPositions');
+                                    }
+                                  });
 
 			});
 		</script>

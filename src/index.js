@@ -1,17 +1,54 @@
-;(function(){ 'use strict';
+;(function($$, $){ 'use strict';
   
   var bendPointUtilities = require('./bendPointUtilities');
+  $.fn.cytoscapeEdgeBendEditing = require('./UIUtilities');
+
   
   // registers the extension on a cytoscape lib ref
   var register = function( cytoscape ){
-
+    
     if( !cytoscape ){ return; } // can't register if cytoscape unspecified
 
-    cytoscape( 'collection', 'edgeBendEditing', function(){
-      var eles = this;
-      var cy = this.cy();
+    var options = {
+      // this function specifies the poitions of bend points
+      bendPositionsFunction: function(ele) {
+        return ele.data('bendPointPositions');
+      }
+    };
+    
+    function setOptions(from) {
+      var tempOpts = {};
+      for (var key in options)
+        tempOpts[key] = options[key];
 
-      // your extension impl...
+      for (var key in from)
+        if (tempOpts.hasOwnProperty(key))
+          tempOpts[key] = from[key];
+      return tempOpts;
+    }
+    
+    cytoscape( 'core', 'edgeBendEditing', function(opts){
+      var cy = this;
+      
+      // merge the options with default ones
+      options = setOptions(opts);
+      
+      // define edgebendediting-hasbendpoints css class
+      cy.style().selector('.edgebendediting-hasbendpoints').css({
+        'curve-style': 'segments',
+        'segment-distances': function (ele) {
+          return bendPointUtilities.getSegmentDistancesString(ele);
+        },
+        'segment-weights': function (ele) {
+          return bendPointUtilities.getSegmentWeightsString(ele);
+        },
+        'edge-distances': 'node-position'
+      });
+      
+      // init bend positions
+      bendPointUtilities.initBendPoints(options.bendPositionsFunction);
+      
+      $(cy.container()).cytoscapeEdgeBendEditing(options);
 
       return this; // chainability
     } );
@@ -32,4 +69,4 @@
     register( cytoscape );
   }
 
-})();
+})(cytoscape, jQuery);

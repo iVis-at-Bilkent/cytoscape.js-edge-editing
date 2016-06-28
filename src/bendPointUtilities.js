@@ -2,6 +2,26 @@ var bendPointUtilities = {
   currentCtxEdge: undefined,
   currentCtxPos: undefined,
   currentBendIndex: undefined,
+  // initilize bend points based on bendPositionsFcn
+  initBendPoints: function(bendPositionsFcn) {
+    var edges = cy.edges();
+
+    for (var i = 0; i < edges.length; i++) {
+      var edge = edges[i];
+      
+      // get the bend positions by applying the function for this edge
+      var bendPositions = bendPositionsFcn.apply(this, edge);
+      // calculate relative bend positions
+      var result = this.convertToRelativeBendPositions(edge, bendPositions);
+
+      // if there are bend points set weights and distances accordingly and add class to enable style changes
+      if (result.distances.length > 0) {
+        edge.data('weights', result.weights);
+        edge.data('distances', result.distances);
+        edge.addClass('edgebendediting-hasbendpoints');
+      }
+    }
+  },
   //Get the direction of the line from source point to the target point
   getLineDirection: function(srcPoint, tgtPoint){
     if(srcPoint.y == tgtPoint.y && srcPoint.x < tgtPoint.x){
@@ -127,14 +147,14 @@ var bendPointUtilities = {
       distance: distance
     };
   },
-  convertToRelativeBendPositions: function (edge) {
+  convertToRelativeBendPositions: function (edge, bendPoints) {
     var srcTgtPointsAndTangents = this.getSrcTgtPointsAndTangents(edge);
-    var bendPoints = edge.data('bendPointPositions');
+//    var bendPoints = edge.data('bendPointPositions');
     //output variables
     var weights = [];
     var distances = [];
 
-    for (var i = 0; i < bendPoints.length; i++) {
+    for (var i = 0; bendPoints && i < bendPoints.length; i++) {
       var bendPoint = bendPoints[i];
       var relativeBendPosition = this.convertToRelativeBendPosition(edge, bendPoint, srcTgtPointsAndTangents);
 
