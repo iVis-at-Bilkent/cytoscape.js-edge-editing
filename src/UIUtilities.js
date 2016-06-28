@@ -4,7 +4,7 @@ var bendPointUtilities = require('./bendPointUtilities');
 module.exports = function (params) {
   var fn = params;
 
-  var ePosition, eRemove, eZoom, eSelect, eUnselect;
+  var ePosition, eRemove, eZoom, eSelect, eUnselect, eTapStart, eTapDrag, eTapEnd;
   var functions = {
     init: function () {
       var self = this;
@@ -237,7 +237,7 @@ module.exports = function (params) {
         var movedBendIndex;
         var movedBendEdge;
         
-        cy.on('tapstart', 'edge', function (event) {
+        cy.on('tapstart', 'edge', eTapStart = function (event) {
           var edge = this;
           
           var cyPosX = event.cyPosition.x;
@@ -251,7 +251,7 @@ module.exports = function (params) {
           }
         });
         
-        cy.on('tapdrag', function (event) {
+        cy.on('tapdrag', eTapDrag = function (event) {
           var edge = movedBendEdge;
           
           if (movedBendEdge === undefined || movedBendIndex === undefined) {
@@ -272,7 +272,7 @@ module.exports = function (params) {
           renderBendShapes(edge);
         });
         
-        cy.on('tapend', function (event) {
+        cy.on('tapend', eTapEnd = function (event) {
 
           movedBendIndex = undefined;
           movedBendEdge = undefined;
@@ -289,7 +289,10 @@ module.exports = function (params) {
         cy.off('position', 'node', ePosition)
           .off('remove', 'node', eRemove)
           .off('select', 'edge', eSelect)
-          .off('unselect', 'edge', eUnselect);
+          .off('unselect', 'edge', eUnselect)
+          .off('tapstart', 'edge', eTapStart)
+          .off('tapdrag', eTapDrag)
+          .off('tapend', eTapEnd);
 
         cy.unbind("zoom pan", eZoom);
     }
