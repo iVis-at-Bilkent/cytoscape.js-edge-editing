@@ -73,3 +73,7 @@ This project is set up to automatically be published to npm and bower.  To publi
 1. Set the version number environment variable: `export VERSION=1.2.3`
 1. Publish: `gulp publish`
 1. If publishing to bower for the first time, you'll need to run `bower register cytoscape-edge-bend-editing https://github.com/iVis-at-Bilkent/cytoscape.js-edge-bend-editing.git`
+
+## Team
+
+  * [Metin Can Siper](https://github.com/metincansiper), [Ugur Dogrusoz](https://github.com/ugurdogrusoz) of [i-Vis at Bilkent University](http://www.cs.bilkent.edu.tr/~ivis)
