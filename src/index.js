@@ -14,7 +14,10 @@
       bendPositionsFunction: function(ele) {
         return ele.data('bendPointPositions');
       },
-      undoable: false
+      // whether the bend editing operations are undoable (requires cytoscape-undo-redo.js)
+      undoable: false,
+      // the size of bend shape is obtained by multipling width of edge with this parameter
+      bendShapeSizeFactor: 6
     };
     
     function setOptions(from) {

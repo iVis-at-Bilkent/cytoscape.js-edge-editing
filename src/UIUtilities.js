@@ -219,7 +219,7 @@ module.exports = function (params) {
       
       // get the length of bend points to be rendered
       function getBendShapesLenght(edge) {
-        var factor = 6;
+        var factor = options().bendShapeSizeFactor;
         var length = parseFloat(edge.css('width')) * factor;
         return length;
       }

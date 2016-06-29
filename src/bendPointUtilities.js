@@ -174,32 +174,6 @@ var bendPointUtilities = {
     
     return segpts;
   },
-//  convertToBendPosition: function(srcPos, tgtPos, weight, distance) {
-//    var realPosX;
-//    var realPosY;
-//    
-//    var m = -1 / ( ( tgtPos.y - srcPos.y ) / ( tgtPos.x - srcPos.x ) );
-//    
-//    var crossingEdgePosition = {
-//      x: srcPos.x + (tgtPos.x - srcPos.x) * weight,
-//      y: srcPos.y + (tgtPos.y - srcPos.y) * weight
-//    };
-//    
-//    if (m == -Infinity) {
-//      realPosX = crossingEdgePosition.x;
-//      realPosY = crossingEdgePosition.y + distance;
-//    }
-//    else {
-//      var xDiff = distance / Math.sqrt( ( Math.pow(m, 2) + 1 ) );
-//      realPosX = crossingEdgePosition.x + Math.sign(m) * xDiff;
-//      realPosY = crossingEdgePosition.y + m * xDiff;
-//    }
-// 
-//    return {
-//      x: realPosX,
-//      y: realPosY
-//    };
-//  },
   convertToRelativeBendPosition: function (edge, bendPoint, srcTgtPointsAndTangents) {
     if (srcTgtPointsAndTangents === undefined) {
       srcTgtPointsAndTangents = this.getSrcTgtPointsAndTangents(edge);

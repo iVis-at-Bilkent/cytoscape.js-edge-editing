@@ -9,8 +9,8 @@ A Cytoscape.js extension enables editing edge bend points
 
 ## Dependencies
 
- * Cytoscape.js ^x.y.z
- * <List your dependencies here please>
+ * Cytoscape.js ^1.7.0
+ * cytoscape-undo-redo.js(optional) ^1.0.1
 
 
 ## Usage instructions
@@ -44,22 +44,21 @@ Plain HTML/JS has the extension registered for you automatically, because no `re
 
 Please briefly describe your API here:
 
-```js
-cy.edge-bend-editing({
-  foo: 'bar', // some option that does this
-  baz: 'bat' // some options that does that
-  // ... and so on
-});
-```
+`cy.expandCollapse(options)`
+To initialize/set options whenever you want.
 
-Or maybe if you have a collection extension:
-
+## Default Options
 ```js
-cy.elements().test({
-  foo: 'bar', // some option that does this
-  baz: 'bat' // some options that does that
-  // ... and so on
-});
+    var options ={
+      // this function specifies the poitions of bend points
+      bendPositionsFunction: function(ele) {
+        return ele.data('bendPointPositions');
+      },
+      // whether the bend editing operations are undoable (requires cytoscape-undo-redo.js)
+      undoable: false,
+      // the size of bend shape is obtained by multipling width of edge with this parameter
+      bendShapeSizeFactor: 6
+    };
 ```
 
 
