@@ -45,7 +45,7 @@ Plain HTML/JS has the extension registered for you automatically, because no `re
 Please briefly describe your API here:
 
 `cy.expandCollapse(options)`
-To initialize/set options whenever you want.
+To initialize with options.
 
 ## Default Options
 ```js
