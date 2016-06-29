@@ -46,14 +46,12 @@ Plain HTML/JS has the extension registered for you automatically, because no `re
 
 ## API
 
-Please briefly describe your API here:
-
 `cy.expandCollapse(options)`
 To initialize with options.
 
 ## Default Options
 ```js
-    var options ={
+    var options = {
       // this function specifies the positions of bend points
       bendPositionsFunction: function(ele) {
         return ele.data('bendPointPositions');
