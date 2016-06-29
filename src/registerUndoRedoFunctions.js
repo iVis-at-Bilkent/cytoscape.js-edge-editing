@@ -30,7 +30,7 @@ module.exports = function () {
       }
     }
     
-    edge.trigger('changeBendPoints');
+    edge.trigger('cyedgebendediting.changeBendPoints');
 
     return result;
   }

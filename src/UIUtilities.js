@@ -413,7 +413,7 @@ module.exports = function (params) {
           $('.cy-edge-bend-editing-ctx-operation').css('display', 'none');
         });
         
-        cy.on('changeBendPoints', 'edge', function() {
+        cy.on('cyedgebendediting.changeBendPoints', 'edge', function() {
           var edge = this;
           clearDraws();
           renderBendShapes(edge);

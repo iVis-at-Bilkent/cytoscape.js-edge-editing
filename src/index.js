@@ -17,7 +17,9 @@
       // whether the bend editing operations are undoable (requires cytoscape-undo-redo.js)
       undoable: false,
       // the size of bend shape is obtained by multipling width of edge with this parameter
-      bendShapeSizeFactor: 6
+      bendShapeSizeFactor: 6,
+      // whether to start the plugin in the enabled state
+      enabled: true
     };
     
     function setOptions(from) {
@@ -52,7 +54,11 @@
       // init bend positions
       bendPointUtilities.initBendPoints(options.bendPositionsFunction);
       
-      $(cy.container()).cytoscapeEdgeBendEditing(options);
+      if(options.enabled)
+        $(cy.container()).cytoscapeEdgeBendEditing(options);
+      else
+        $(cy.container()).cytoscapeEdgeBendEditing("unbind");
+      
 
       return this; // chainability
     } );
