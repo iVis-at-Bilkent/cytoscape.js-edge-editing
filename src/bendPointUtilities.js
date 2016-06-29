@@ -106,32 +106,100 @@ var bendPointUtilities = {
     
     return intersectionPoint;
   },
-  convertToBendPosition: function(srcPos, tgtPos, weight, distance) {
-    var realPosX;
-    var realPosY;
+  getSegmentPoints: function(edge) {
+    var segpts = [];
+
+    var segmentWs = edge.pstyle( 'segment-weights' ).pfValue;
+    var segmentDs = edge.pstyle( 'segment-distances' ).pfValue;
+    var segmentsN = Math.min( segmentWs.length, segmentDs.length );
     
-    var m = -1 / ( ( tgtPos.y - srcPos.y ) / ( tgtPos.x - srcPos.x ) );
+    var srcPos = edge.source().position();
+    var tgtPos = edge.target().position();
+
+    var dy = ( tgtPos.y - srcPos.y );
+    var dx = ( tgtPos.x - srcPos.x );
     
-    var crossingEdgePosition = {
-      x: srcPos.x + (tgtPos.x - srcPos.x) * weight,
-      y: srcPos.y + (tgtPos.y - srcPos.y) * weight
+    var l = Math.sqrt( dx * dx + dy * dy );
+
+    var vector = {
+      x: dx,
+      y: dy
+    };
+
+    var vectorNorm = {
+      x: vector.x / l,
+      y: vector.y / l
     };
     
-    if (m == -Infinity) {
-      realPosX = crossingEdgePosition.x;
-      realPosY = crossingEdgePosition.y + distance;
-    }
-    else {
-      var xDiff = distance / Math.sqrt( ( Math.pow(m, 2) + 1 ) );
-      realPosX = crossingEdgePosition.x + Math.sign(m) * xDiff;
-      realPosY = crossingEdgePosition.y + m * xDiff;
-    }
- 
-    return {
-      x: realPosX,
-      y: realPosY
+    var vectorNormInverse = {
+      x: -vectorNorm.y,
+      y: vectorNorm.x
     };
+
+    for( var s = 0; s < segmentsN; s++ ){
+      var w = segmentWs[ s ];
+      var d = segmentDs[ s ];
+
+      // d = swappedDirection ? -d : d;
+      //
+      // d = Math.abs(d);
+
+      // var w1 = !swappedDirection ? (1 - w) : w;
+      // var w2 = !swappedDirection ? w : (1 - w);
+
+      var w1 = (1 - w);
+      var w2 = w;
+
+      var posPts = {
+        x1: srcPos.x,
+        x2: tgtPos.x,
+        y1: srcPos.y,
+        y2: tgtPos.y
+      };
+
+      var midptPts = posPts;
+      
+      
+
+      var adjustedMidpt = {
+        x: midptPts.x1 * w1 + midptPts.x2 * w2,
+        y: midptPts.y1 * w1 + midptPts.y2 * w2
+      };
+
+      segpts.push(
+        adjustedMidpt.x + vectorNormInverse.x * d,
+        adjustedMidpt.y + vectorNormInverse.y * d
+      );
+    }
+    
+    return segpts;
   },
+//  convertToBendPosition: function(srcPos, tgtPos, weight, distance) {
+//    var realPosX;
+//    var realPosY;
+//    
+//    var m = -1 / ( ( tgtPos.y - srcPos.y ) / ( tgtPos.x - srcPos.x ) );
+//    
+//    var crossingEdgePosition = {
+//      x: srcPos.x + (tgtPos.x - srcPos.x) * weight,
+//      y: srcPos.y + (tgtPos.y - srcPos.y) * weight
+//    };
+//    
+//    if (m == -Infinity) {
+//      realPosX = crossingEdgePosition.x;
+//      realPosY = crossingEdgePosition.y + distance;
+//    }
+//    else {
+//      var xDiff = distance / Math.sqrt( ( Math.pow(m, 2) + 1 ) );
+//      realPosX = crossingEdgePosition.x + Math.sign(m) * xDiff;
+//      realPosY = crossingEdgePosition.y + m * xDiff;
+//    }
+// 
+//    return {
+//      x: realPosX,
+//      y: realPosY
+//    };
+//  },
   convertToRelativeBendPosition: function (edge, bendPoint, srcTgtPointsAndTangents) {
     if (srcTgtPointsAndTangents === undefined) {
       srcTgtPointsAndTangents = this.getSrcTgtPointsAndTangents(edge);
@@ -309,15 +377,6 @@ var bendPointUtilities = {
       weights.splice(newBendIndex, 0, relativeBendPosition.weight);
       distances.splice(newBendIndex, 0, relativeBendPosition.distance);
     }
-    
-    if(!edge._private.rscratch.segpts) {
-      edge._private.rscratch.segpts = [];
-    }
-    
-    if( edge._private.rscratch.segpts && edge._private.rscratch.segpts.length === weights.length * 2 - 2 ) {
-      edge._private.rscratch.segpts.splice(newBendIndex * 2, 0, newBendPoint.x);
-      edge._private.rscratch.segpts.splice(newBendIndex * 2 + 1, 0, newBendPoint.y);
-    }
    
     edge.data('weights', weights);
     edge.data('distances', distances);
@@ -338,12 +397,8 @@ var bendPointUtilities = {
     distances.splice(bendPointIndex, 1);
     weights.splice(bendPointIndex, 1);
     
-    if( edge._private.rscratch.segpts.length === weights.length * 2 + 2 ) {
-      edge._private.rscratch.segpts.splice(bendPointIndex * 2, 2);
-    }
     
     if(distances.length == 0 || weights.lenght == 0){
-      edge._private.rscratch.segpts = [];
       edge.removeClass('edgebendediting-hasbendpoints');
     }
     else {

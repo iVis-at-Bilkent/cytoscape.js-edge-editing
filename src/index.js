@@ -13,7 +13,8 @@
       // this function specifies the poitions of bend points
       bendPositionsFunction: function(ele) {
         return ele.data('bendPointPositions');
-      }
+      },
+      undoable: false
     };
     
     function setOptions(from) {

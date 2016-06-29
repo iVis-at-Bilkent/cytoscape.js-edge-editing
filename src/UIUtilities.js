@@ -8,7 +8,9 @@ module.exports = function (params) {
   var ePosition, eRemove, eZoom, eSelect, eUnselect, eTapStart, eTapDrag, eTapEnd, eCxtTap, eTap;
   var functions = {
     init: function () {
+      // register undo redo functions
       registerUndoRedoFunctions();
+      
       var self = this;
       var opts = params;
       var $container = $(this);
@@ -45,12 +47,14 @@ module.exports = function (params) {
         var param = {
           edge: edge,
           weights: edge.data('weights')?[].concat(edge.data('weights')):edge.data('weights'),
-          distances: edge.data('distances')?[].concat(edge.data('distances')):edge.data('distances'),
-          segpts: jQuery.extend(true, {}, edge._private.rscratch.segpts)
+          distances: edge.data('distances')?[].concat(edge.data('distances')):edge.data('distances')
         };
         
         bendPointUtilities.addBendPoint();
-        cy.undoRedo().do('changeBendPoints', param);
+        
+        if(options().undoable) {
+          cy.undoRedo().do('changeBendPoints', param);
+        }
         
         clearDraws();
         renderBendShapes(edge);
@@ -67,12 +71,14 @@ module.exports = function (params) {
         var param = {
           edge: edge,
           weights: [].concat(edge.data('weights')),
-          distances: [].concat(edge.data('distances')),
-          segpts: jQuery.extend(true, {}, edge._private.rscratch.segpts)
+          distances: [].concat(edge.data('distances'))
         };
 
         bendPointUtilities.removeBendPoint();
-        cy.undoRedo().do("changeBendPoints", param);
+        
+        if(options().undoable) {
+          cy.undoRedo().do('changeBendPoints', param);
+        }
         
         clearDraws();
         renderBendShapes(edge);
@@ -165,6 +171,7 @@ module.exports = function (params) {
         }
       }
       
+      
       // render the bend shapes of the given edge
       function renderBendShapes(edge) {
         var cy = edge.cy();
@@ -173,7 +180,7 @@ module.exports = function (params) {
           return;
         }
         
-        var segpts = edge._private.rscratch.segpts;
+        var segpts = bendPointUtilities.getSegmentPoints(edge);//edge._private.rscratch.segpts;
         var length = getBendShapesLenght(edge);
         
         var srcPos = edge.source().position();
@@ -317,8 +324,7 @@ module.exports = function (params) {
           moveBendParam = {
             edge: edge,
             weights: edge.data('weights') ? [].concat(edge.data('weights')) : edge.data('weights'),
-            distances: edge.data('distances') ? [].concat(edge.data('distances')) : edge.data('distances'),
-            segpts: jQuery.extend(true, {}, edge._private.rscratch.segpts)
+            distances: edge.data('distances') ? [].concat(edge.data('distances')) : edge.data('distances')
           };
           
           var cyPosX = event.cyPosition.x;
@@ -359,7 +365,9 @@ module.exports = function (params) {
           if (edge !== undefined && moveBendParam !== undefined && edge.data('weights')
                   && edge.data('weights').toString() != moveBendParam.weights.toString()) {
             
-            cy.undoRedo().do("changeBendPoints", moveBendParam);
+            if(options().undoable) {
+              cy.undoRedo().do('changeBendPoints', moveBendParam);
+            }
           }
 
           movedBendIndex = undefined;
@@ -407,7 +415,6 @@ module.exports = function (params) {
         
         cy.on('changeBendPoints', 'edge', function() {
           var edge = this;
-          console.log(edge.id());
           clearDraws();
           renderBendShapes(edge);
         });

@@ -92,19 +92,7 @@
 
 				// demo your ext
 				cy.edgeBendEditing({
-                                    // this function specifies the poitions of bend points
-//                                    bendPositionsFunction: function(ele) {
-//                                      var srcPos = ele.source().position();
-//                                      var tgtPos = ele.target().position();
-//
-//                                      var mid = {
-//                                        x: ( srcPos.x + tgtPos.x ) / 2,
-//                                        y: ( srcPos.y + tgtPos.y ) / 2
-//                                      }
-//
-//                                      return [mid];
-//                                      return ele.data('bendPointPositions');
-//                                    }
+                                    undoable: true
                                   });
 
 			});
