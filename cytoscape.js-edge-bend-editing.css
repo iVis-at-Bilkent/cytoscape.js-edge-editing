@@ -1,0 +1,32 @@
+.cy-edge-bend-editing-ctx-operation{
+    display:none;
+    z-index:1000;
+    width:110px;
+    padding: 3px 20px;
+}
+
+menu.cy-edge-bend-editing-ctx-operation {
+    position:absolute;
+    margin:0;
+    border:1px solid;
+    background-color:white;
+    font-weight:normal;
+    font-size: 12px;
+    white-space:nowrap;
+}
+
+menu.cy-edge-bend-editing-ctx-operation:hover{
+    color: #ffffff;
+    text-decoration: none;
+    background-color: #0B9BCD;
+    background-image: none;
+    cursor: pointer;
+}
+
+menu.cy-edge-bend-editing-ctx-operation[title]:before{
+    content:attr(title);
+}
+
+menu.cy-edge-bend-editing-ctx-operation:not([title]):before{
+    content:"\2630";
+}

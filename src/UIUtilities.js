@@ -1,12 +1,14 @@
 var debounce = require('./debounce');
 var bendPointUtilities = require('./bendPointUtilities');
+var registerUndoRedoFunctions = require('./registerUndoRedoFunctions');
 
 module.exports = function (params) {
   var fn = params;
 
-  var ePosition, eRemove, eZoom, eSelect, eUnselect, eTapStart, eTapDrag, eTapEnd;
+  var ePosition, eRemove, eZoom, eSelect, eUnselect, eTapStart, eTapDrag, eTapEnd, eCxtTap, eTap;
   var functions = {
     init: function () {
+      registerUndoRedoFunctions();
       var self = this;
       var opts = params;
       var $container = $(this);
@@ -14,7 +16,68 @@ module.exports = function (params) {
       var $canvas = $('<canvas></canvas>');
 
       $container.append($canvas);
+      
+      var $ctxAddBendPoint = $('<menu title="Add Bend Point" id="cy-edge-bend-editing-ctx-add-bend-point" class="cy-edge-bend-editing-ctx-operation"></menu>');
+      var $ctxRemoveBendPoint = $('<menu title="Remove Bend Point" id="cy-edge-bend-editing-ctx-remove-bend-point" class="cy-edge-bend-editing-ctx-operation"></menu>');
+      
+      $('body').append($ctxAddBendPoint);
+      $('body').append($ctxRemoveBendPoint);
+      
+      document.getElementById("cy-edge-bend-editing-ctx-add-bend-point").addEventListener("contextmenu",function(event){
+        event.preventDefault();
+      },false);
 
+      document.getElementById("cy-edge-bend-editing-ctx-remove-bend-point").addEventListener("contextmenu",function(event){
+          event.preventDefault();
+      },false);
+
+      $('.cy-edge-bend-editing-ctx-operation').click(function (e) {
+        $('.cy-edge-bend-editing-ctx-operation').css('display', 'none');
+      });
+
+      $ctxAddBendPoint.click(function (e) {
+        var edge = bendPointUtilities.currentCtxEdge;
+        
+        if(!edge.selected()) {
+          return;
+        }
+        
+        var param = {
+          edge: edge,
+          weights: edge.data('weights')?[].concat(edge.data('weights')):edge.data('weights'),
+          distances: edge.data('distances')?[].concat(edge.data('distances')):edge.data('distances'),
+          segpts: jQuery.extend(true, {}, edge._private.rscratch.segpts)
+        };
+        
+        bendPointUtilities.addBendPoint();
+        cy.undoRedo().do('changeBendPoints', param);
+        
+        clearDraws();
+        renderBendShapes(edge);
+        
+      });
+
+      $ctxRemoveBendPoint.click(function (e) {
+        var edge = bendPointUtilities.currentCtxEdge;
+        
+        if(!edge.selected()) {
+          return;
+        }
+        
+        var param = {
+          edge: edge,
+          weights: [].concat(edge.data('weights')),
+          distances: [].concat(edge.data('distances')),
+          segpts: jQuery.extend(true, {}, edge._private.rscratch.segpts)
+        };
+
+        bendPointUtilities.removeBendPoint();
+        cy.undoRedo().do("changeBendPoints", param);
+        
+        clearDraws();
+        renderBendShapes(edge);
+      });
+      
       var _sizeCanvas = debounce(function () {
         $canvas
           .attr('height', $container.height())
@@ -106,8 +169,18 @@ module.exports = function (params) {
       function renderBendShapes(edge) {
         var cy = edge.cy();
         
+        if(!edge.hasClass('edgebendediting-hasbendpoints')) {
+          return;
+        }
+        
         var segpts = edge._private.rscratch.segpts;
         var length = getBendShapesLenght(edge);
+        
+        var srcPos = edge.source().position();
+        var tgtPos = edge.target().position();
+        
+        var weights = edge.data('weights');
+        var distances = edge.data('distances');
 
         for(var i = 0; segpts && i < segpts.length; i = i + 2){
           var bendX = segpts[i];
@@ -236,9 +309,17 @@ module.exports = function (params) {
         
         var movedBendIndex;
         var movedBendEdge;
+        var moveBendParam;
         
         cy.on('tapstart', 'edge', eTapStart = function (event) {
           var edge = this;
+          
+          moveBendParam = {
+            edge: edge,
+            weights: edge.data('weights') ? [].concat(edge.data('weights')) : edge.data('weights'),
+            distances: edge.data('distances') ? [].concat(edge.data('distances')) : edge.data('distances'),
+            segpts: jQuery.extend(true, {}, edge._private.rscratch.segpts)
+          };
           
           var cyPosX = event.cyPosition.x;
           var cyPosY = event.cyPosition.y;
@@ -273,12 +354,62 @@ module.exports = function (params) {
         });
         
         cy.on('tapend', eTapEnd = function (event) {
+          var edge = movedBendEdge;
+          
+          if (edge !== undefined && moveBendParam !== undefined && edge.data('weights')
+                  && edge.data('weights').toString() != moveBendParam.weights.toString()) {
+            
+            cy.undoRedo().do("changeBendPoints", moveBendParam);
+          }
 
           movedBendIndex = undefined;
           movedBendEdge = undefined;
+          moveBendParam = undefined;
 
           resetGestures();
           clearDraws(true);
+        });
+        
+        cy.on('cxttap', 'edge', eCxtTap = function (event) {
+          var edge = this;
+          var containerPos = $(cy.container()).position();
+
+          var left = containerPos.left + event.cyRenderedPosition.x;
+          left = left.toString() + 'px';
+
+          var top = containerPos.top + event.cyRenderedPosition.y;
+          top = top.toString() + 'px';
+
+          $('.cy-edge-bend-editing-ctx-operation').css('display', 'none');
+
+          var selectedBendIndex = getContainingBendShapeIndex(event.cyPosition.x, event.cyPosition.y, edge);
+          if (selectedBendIndex == -1) {
+            $ctxAddBendPoint.css('display', 'block');
+            bendPointUtilities.currentCtxPos = event.cyPosition;
+            ctxMenu = document.getElementById("cy-edge-bend-editing-ctx-add-bend-point");
+          }
+          else {
+            $ctxRemoveBendPoint.css('display', 'block');
+            bendPointUtilities.currentBendIndex = selectedBendIndex;
+            ctxMenu = document.getElementById("cy-edge-bend-editing-ctx-remove-bend-point");
+          }
+
+          ctxMenu.style.display = "block";
+          ctxMenu.style.left = left;
+          ctxMenu.style.top = top;
+
+          bendPointUtilities.currentCtxEdge = edge;
+        });
+        
+        cy.on('tap', eTap = function(event) {
+          $('.cy-edge-bend-editing-ctx-operation').css('display', 'none');
+        });
+        
+        cy.on('changeBendPoints', 'edge', function() {
+          var edge = this;
+          console.log(edge.id());
+          clearDraws();
+          renderBendShapes(edge);
         });
         
       });
@@ -292,7 +423,9 @@ module.exports = function (params) {
           .off('unselect', 'edge', eUnselect)
           .off('tapstart', 'edge', eTapStart)
           .off('tapdrag', eTapDrag)
-          .off('tapend', eTapEnd);
+          .off('tapend', eTapEnd)
+          .off('cxttap', eCxtTap)
+          .off('tap', eTap);
 
         cy.unbind("zoom pan", eZoom);
     }

@@ -7,12 +7,15 @@
 
 		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1">
                 
+                <link href="cytoscape.js-edge-bend-editing.css" rel="stylesheet" type="text/css" />
+                
                 <script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
 		<script src="http://cytoscape.github.io/cytoscape.js/api/cytoscape.js-latest/cytoscape.min.js"></script>
 
 		<!-- for testing with local version of cytoscape.js -->
 		<!--<script src="../cytoscape.js/build/cytoscape.js"></script>-->
-
+                
+                <script src="cytoscape-undo-redo.js"></script>
 		<script src="cytoscape-edge-bend-editing.js"></script>
 
 		<style>
@@ -77,12 +80,12 @@
 							{ data: { source: 'j', target: 'e' } },
 							{ data: { source: 'j', target: 'k' } },
 							{ data: { source: 'j', target: 'g' } },
-							{ data: { source: 'e', target: 'j' } },
-							{ data: { source: 'e', target: 'k' } },
-							{ data: { source: 'k', target: 'j' } },
-							{ data: { source: 'k', target: 'e' } },
-							{ data: { source: 'k', target: 'g' } },
-							{ data: { source: 'g', target: 'j' } }
+//							{ data: { source: 'e', target: 'j' } },
+//							{ data: { source: 'e', target: 'k' } },
+//							{ data: { source: 'k', target: 'j' } },
+//							{ data: { source: 'k', target: 'e' } },
+//							{ data: { source: 'k', target: 'g' } },
+//							{ data: { source: 'g', target: 'j' } }
 						]
 					},
 				});
@@ -90,18 +93,18 @@
 				// demo your ext
 				cy.edgeBendEditing({
                                     // this function specifies the poitions of bend points
-                                    bendPositionsFunction: function(ele) {
-                                      var srcPos = ele.source().position();
-                                      var tgtPos = ele.target().position();
-
-                                      var mid = {
-                                        x: ( srcPos.x + tgtPos.x ) / 2,
-                                        y: ( srcPos.y + tgtPos.y ) / 2
-                                      }
-
-                                      return [mid];
-                                      return ele.data('bendPointPositions');
-                                    }
+//                                    bendPositionsFunction: function(ele) {
+//                                      var srcPos = ele.source().position();
+//                                      var tgtPos = ele.target().position();
+//
+//                                      var mid = {
+//                                        x: ( srcPos.x + tgtPos.x ) / 2,
+//                                        y: ( srcPos.y + tgtPos.y ) / 2
+//                                      }
+//
+//                                      return [mid];
+//                                      return ele.data('bendPointPositions');
+//                                    }
                                   });
 
 			});

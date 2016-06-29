@@ -106,6 +106,32 @@ var bendPointUtilities = {
     
     return intersectionPoint;
   },
+  convertToBendPosition: function(srcPos, tgtPos, weight, distance) {
+    var realPosX;
+    var realPosY;
+    
+    var m = -1 / ( ( tgtPos.y - srcPos.y ) / ( tgtPos.x - srcPos.x ) );
+    
+    var crossingEdgePosition = {
+      x: srcPos.x + (tgtPos.x - srcPos.x) * weight,
+      y: srcPos.y + (tgtPos.y - srcPos.y) * weight
+    };
+    
+    if (m == -Infinity) {
+      realPosX = crossingEdgePosition.x;
+      realPosY = crossingEdgePosition.y + distance;
+    }
+    else {
+      var xDiff = distance / Math.sqrt( ( Math.pow(m, 2) + 1 ) );
+      realPosX = crossingEdgePosition.x + Math.sign(m) * xDiff;
+      realPosY = crossingEdgePosition.y + m * xDiff;
+    }
+ 
+    return {
+      x: realPosX,
+      y: realPosY
+    };
+  },
   convertToRelativeBendPosition: function (edge, bendPoint, srcTgtPointsAndTangents) {
     if (srcTgtPointsAndTangents === undefined) {
       srcTgtPointsAndTangents = this.getSrcTgtPointsAndTangents(edge);
@@ -171,7 +197,7 @@ var bendPointUtilities = {
     var str = "";
 
     var distances = edge.data('distances');
-    for (var i = 0; i < distances.length; i++) {
+    for (var i = 0; distances && i < distances.length; i++) {
       str = str + " " + distances[i];
     }
     
@@ -181,7 +207,7 @@ var bendPointUtilities = {
     var str = "";
 
     var weights = edge.data('weights');
-    for (var i = 0; i < weights.length; i++) {
+    for (var i = 0; weights && i < weights.length; i++) {
       str = str + " " + weights[i];
     }
     
@@ -273,6 +299,10 @@ var bendPointUtilities = {
     weights = weights?weights:[];
     distances = distances?distances:[];
     
+    if(weights.length === 0) {
+      newBendIndex = 0;
+    }
+    
 //    weights.push(relativeBendPosition.weight);
 //    distances.push(relativeBendPosition.distance);
     if(newBendIndex != -1){
@@ -280,9 +310,19 @@ var bendPointUtilities = {
       distances.splice(newBendIndex, 0, relativeBendPosition.distance);
     }
     
+    if(!edge._private.rscratch.segpts) {
+      edge._private.rscratch.segpts = [];
+    }
+    
+    if( edge._private.rscratch.segpts && edge._private.rscratch.segpts.length === weights.length * 2 - 2 ) {
+      edge._private.rscratch.segpts.splice(newBendIndex * 2, 0, newBendPoint.x);
+      edge._private.rscratch.segpts.splice(newBendIndex * 2 + 1, 0, newBendPoint.y);
+    }
+   
     edge.data('weights', weights);
     edge.data('distances', distances);
-    edge.css('curve-style', 'segments');
+    
+    edge.addClass('edgebendediting-hasbendpoints');
     
     return relativeBendPosition;
   },
@@ -298,11 +338,13 @@ var bendPointUtilities = {
     distances.splice(bendPointIndex, 1);
     weights.splice(bendPointIndex, 1);
     
+    if( edge._private.rscratch.segpts.length === weights.length * 2 + 2 ) {
+      edge._private.rscratch.segpts.splice(bendPointIndex * 2, 2);
+    }
+    
     if(distances.length == 0 || weights.lenght == 0){
-      edge.removeData('distances');
-      edge.removeData('weights');
       edge._private.rscratch.segpts = [];
-      edge.css('curve-style', 'bezier');
+      edge.removeClass('edgebendediting-hasbendpoints');
     }
     else {
       edge.data('distances', distances);
