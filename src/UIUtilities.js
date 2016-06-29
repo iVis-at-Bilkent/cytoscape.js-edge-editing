@@ -299,7 +299,7 @@ module.exports = function (params) {
         cy.on('remove', 'edge', eRemove = function () {
           var node = this;
           
-          // TODO
+          clearDraws(true);
         });
         
         cy.on('select', 'edge', eSelect = function () {
