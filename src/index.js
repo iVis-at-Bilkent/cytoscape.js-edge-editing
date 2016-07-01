@@ -66,7 +66,7 @@
     /*
      * get segment points of an edge in an array A,
      * A[2 * i] is the x coordinate and A[2 * i + 1] is the y coordinate
-     * of the ith bend point.
+     * of the ith bend point. (Returns undefined if the curve style is not segments)
      */
     cytoscape( 'collection', 'getSegmentPoints', function(){
       var ele = this;

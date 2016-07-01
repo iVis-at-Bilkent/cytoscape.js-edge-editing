@@ -50,7 +50,9 @@ Plain HTML/JS has the extension registered for you automatically, because no `re
 To initialize with options.
 
 `ele.getSegmentPoints()`
-Returns the coordinates of segment points (Returns undefined is curve style is not segments).
+get segment points of an edge in an array A,
+A[2 * i] is the x coordinate and A[2 * i + 1] is the y coordinate
+of the ith bend point. (Returns undefined if the curve style is not segments)
 
 ## Default Options
 ```js
