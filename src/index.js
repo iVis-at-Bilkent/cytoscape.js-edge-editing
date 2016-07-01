@@ -62,6 +62,17 @@
 
       return this; // chainability
     } );
+    
+    /*
+     * get segment points of an edge in an array A,
+     * A[2 * i] is the x coordinate and A[2 * i + 1] is the y coordinate
+     * of the ith bend point.
+     */
+    cytoscape( 'collection', 'getSegmentPoints', function(){
+      var ele = this;
+      
+      return bendPointUtilities.getSegmentPoints(ele);
+    } );
 
   };
 

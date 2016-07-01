@@ -273,12 +273,12 @@ var bendPointUtilities = {
     var endWeight = this.convertToRelativeBendPosition(edge, {x: edgeEndX, y: edgeEndY}).weight;
     var weightsWithTgtSrc = [startWeight].concat(edge.data('weights')?edge.data('weights'):[]).concat([endWeight]);
     
-    var segPts = this.getSegmentPoints(edge);
+//    var segPts = this.getSegmentPoints(edge);
     
     var minDist = Infinity;
     var intersection;
     var segptsWithTgtSrc = [edgeStartX, edgeStartY]
-            .concat(segPts?segPts:[])
+            .concat(edge._private.rscratch.segpts?edge._private.rscratch.segpts:[])
             .concat([edgeEndX, edgeEndY]);
     var newBendIndex = -1;
     
