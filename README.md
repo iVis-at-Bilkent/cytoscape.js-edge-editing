@@ -49,6 +49,9 @@ Plain HTML/JS has the extension registered for you automatically, because no `re
 `cy.expandCollapse(options)`
 To initialize with options.
 
+`ele.getSegmentPoints()`
+Returns the center coordinates of segment points.
+
 ## Default Options
 ```js
     var options = {
