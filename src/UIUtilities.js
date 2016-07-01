@@ -241,7 +241,7 @@ module.exports = function (params) {
           return -1;
         }
 
-        var segpts = edge._private.rscratch.segpts;
+        var segpts = bendPointUtilities.getSegmentPoints(edge);//edge._private.rscratch.segpts;
         var length = getBendShapesLenght(edge);
 
         for(var i = 0; segpts && i < segpts.length; i = i + 2){
