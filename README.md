@@ -46,11 +46,11 @@ Plain HTML/JS has the extension registered for you automatically, because no `re
 
 ## API
 
-`cy.expandCollapse(options)`
+`cy.edgeBendEditing(options)`
 To initialize with options.
 
 `ele.getSegmentPoints()`
-Returns the center coordinates of segment points.
+Returns the coordinates of segment points (Returns undefined is curve style is not segments).
 
 ## Default Options
 ```js
