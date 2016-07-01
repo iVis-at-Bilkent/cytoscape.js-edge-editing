@@ -380,6 +380,11 @@ module.exports = function (params) {
         
         cy.on('cxttap', 'edge', eCxtTap = function (event) {
           var edge = this;
+          
+          if(!edge.selected()) {
+            return;
+          }
+          
           var containerPos = $(cy.container()).position();
 
           var left = containerPos.left + event.cyRenderedPosition.x;
