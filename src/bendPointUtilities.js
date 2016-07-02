@@ -206,15 +206,6 @@ var bendPointUtilities = {
         distance = -1 * distance;
     }
     
-    var minDiff = 0.001;
-    
-    if(Math.abs(weight - 0) < minDiff){
-      weight = minDiff;
-    }
-    else if(Math.abs(weight - 1) < minDiff){
-      weight = 1 - minDiff;
-    }
-    
     return {
       weight: weight,
       distance: distance
