@@ -56,8 +56,7 @@ module.exports = function (params) {
           cy.undoRedo().do('changeBendPoints', param);
         }
         
-        clearDraws();
-        renderBendShapes(edge);
+        clearDraws(true);
         
       });
 
@@ -80,8 +79,7 @@ module.exports = function (params) {
           cy.undoRedo().do('changeBendPoints', param);
         }
         
-        clearDraws();
-        renderBendShapes(edge);
+        clearDraws(true);
       });
       
       var _sizeCanvas = debounce(function () {
@@ -355,8 +353,7 @@ module.exports = function (params) {
           edge.data('weights', weights);
           edge.data('distances', distances);
           
-          clearDraws();
-          renderBendShapes(edge);
+          clearDraws(true);
         });
         
         cy.on('tapend', eTapEnd = function (event) {
@@ -420,8 +417,8 @@ module.exports = function (params) {
         
         cy.on('cyedgebendediting.changeBendPoints', 'edge', function() {
           var edge = this;
-          clearDraws();
-          renderBendShapes(edge);
+          edge.select();
+          clearDraws(true);
         });
         
       });
