@@ -11,15 +11,15 @@ module.exports = function () {
     var edge = param.edge;
     var result = {
       edge: edge,
-      weights: param.set ? edge.data('weights') : param.weights,
-      distances: param.set ? edge.data('distances') : param.distances,
+      weights: param.set ? edge.scratch('cyedgebendeditingWeights') : param.weights,
+      distances: param.set ? edge.scratch('cyedgebendeditingDistances') : param.distances,
       set: true//As the result will not be used for the first function call params should be used to set the data
     };
 
     //Check if we need to set the weights and distances by the param values
     if (param.set) {
-      param.weights ? edge.data('weights', param.weights) : edge.removeData('weights');
-      param.distances ? edge.data('distances', param.distances) : edge.removeData('distances');
+      param.weights ? edge.scratch('cyedgebendeditingWeights', param.weights) : edge.removeScratch('cyedgebendeditingWeights');
+      param.distances ? edge.scratch('cyedgebendeditingDistances', param.distances) : edge.removeScratch('cyedgebendeditingDistances');
 
       //refresh the curve style as the number of bend point would be changed by the previous operation
       if (param.weights) {

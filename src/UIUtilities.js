@@ -46,8 +46,8 @@ module.exports = function (params) {
         
         var param = {
           edge: edge,
-          weights: edge.data('weights')?[].concat(edge.data('weights')):edge.data('weights'),
-          distances: edge.data('distances')?[].concat(edge.data('distances')):edge.data('distances')
+          weights: edge.scratch('cyedgebendeditingWeights')?[].concat(edge.scratch('cyedgebendeditingWeights')):edge.scratch('cyedgebendeditingWeights'),
+          distances: edge.scratch('cyedgebendeditingDistances')?[].concat(edge.scratch('cyedgebendeditingDistances')):edge.scratch('cyedgebendeditingDistances')
         };
         
         bendPointUtilities.addBendPoint();
@@ -69,8 +69,8 @@ module.exports = function (params) {
         
         var param = {
           edge: edge,
-          weights: [].concat(edge.data('weights')),
-          distances: [].concat(edge.data('distances'))
+          weights: [].concat(edge.scratch('cyedgebendeditingWeights')),
+          distances: [].concat(edge.scratch('cyedgebendeditingDistances'))
         };
 
         bendPointUtilities.removeBendPoint();
@@ -184,8 +184,8 @@ module.exports = function (params) {
         var srcPos = edge.source().position();
         var tgtPos = edge.target().position();
         
-        var weights = edge.data('weights');
-        var distances = edge.data('distances');
+        var weights = edge.scratch('cyedgebendeditingWeights');
+        var distances = edge.scratch('cyedgebendeditingDistances');
 
         for(var i = 0; segpts && i < segpts.length; i = i + 2){
           var bendX = segpts[i];
@@ -235,7 +235,7 @@ module.exports = function (params) {
 
       // get tge index of bend point containing the point represented by {x, y}
       function getContainingBendShapeIndex(x, y, edge) {
-        if(edge.data('weights') == null || edge.data('weights').lenght == 0){
+        if(edge.scratch('cyedgebendeditingWeights') == null || edge.scratch('cyedgebendeditingWeights').lenght == 0){
           return -1;
         }
 
@@ -321,8 +321,8 @@ module.exports = function (params) {
           
           moveBendParam = {
             edge: edge,
-            weights: edge.data('weights') ? [].concat(edge.data('weights')) : edge.data('weights'),
-            distances: edge.data('distances') ? [].concat(edge.data('distances')) : edge.data('distances')
+            weights: edge.scratch('cyedgebendeditingWeights') ? [].concat(edge.scratch('cyedgebendeditingWeights')) : edge.scratch('cyedgebendeditingWeights'),
+            distances: edge.scratch('cyedgebendeditingDistances') ? [].concat(edge.scratch('cyedgebendeditingDistances')) : edge.scratch('cyedgebendeditingDistances')
           };
           
           var cyPosX = event.cyPosition.x;
@@ -343,15 +343,15 @@ module.exports = function (params) {
             return;
           }
 
-          var weights = edge.data('weights');
-          var distances = edge.data('distances');
+          var weights = edge.scratch('cyedgebendeditingWeights');
+          var distances = edge.scratch('cyedgebendeditingDistances');
 
           var relativeBendPosition = bendPointUtilities.convertToRelativeBendPosition(edge, event.cyPosition);
           weights[movedBendIndex] = relativeBendPosition.weight;
           distances[movedBendIndex] = relativeBendPosition.distance;
 
-          edge.data('weights', weights);
-          edge.data('distances', distances);
+          edge.scratch('cyedgebendeditingWeights', weights);
+          edge.scratch('cyedgebendeditingDistances', distances);
           
           clearDraws(true);
         });
@@ -359,8 +359,8 @@ module.exports = function (params) {
         cy.on('tapend', eTapEnd = function (event) {
           var edge = movedBendEdge;
           
-          if (edge !== undefined && moveBendParam !== undefined && edge.data('weights')
-                  && edge.data('weights').toString() != moveBendParam.weights.toString()) {
+          if (edge !== undefined && moveBendParam !== undefined && edge.scratch('cyedgebendeditingWeights')
+                  && edge.scratch('cyedgebendeditingWeights').toString() != moveBendParam.weights.toString()) {
             
             if(options().undoable) {
               cy.undoRedo().do('changeBendPoints', moveBendParam);

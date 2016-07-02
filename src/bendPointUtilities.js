@@ -16,8 +16,8 @@ var bendPointUtilities = {
 
       // if there are bend points set weights and distances accordingly and add class to enable style changes
       if (result.distances.length > 0) {
-        edge.data('weights', result.weights);
-        edge.data('distances', result.distances);
+        edge.scratch('cyedgebendeditingWeights', result.weights);
+        edge.scratch('cyedgebendeditingDistances', result.distances);
         edge.addClass('edgebendediting-hasbendpoints');
       }
     }
@@ -243,7 +243,7 @@ var bendPointUtilities = {
   getSegmentDistancesString: function (edge) {
     var str = "";
 
-    var distances = edge.data('distances');
+    var distances = edge.scratch('cyedgebendeditingDistances');
     for (var i = 0; distances && i < distances.length; i++) {
       str = str + " " + distances[i];
     }
@@ -253,7 +253,7 @@ var bendPointUtilities = {
   getSegmentWeightsString: function (edge) {
     var str = "";
 
-    var weights = edge.data('weights');
+    var weights = edge.scratch('cyedgebendeditingWeights');
     for (var i = 0; weights && i < weights.length; i++) {
       str = str + " " + weights[i];
     }
@@ -276,7 +276,7 @@ var bendPointUtilities = {
     
     var startWeight = this.convertToRelativeBendPosition(edge, {x: edgeStartX, y: edgeStartY}).weight;
     var endWeight = this.convertToRelativeBendPosition(edge, {x: edgeEndX, y: edgeEndY}).weight;
-    var weightsWithTgtSrc = [startWeight].concat(edge.data('weights')?edge.data('weights'):[]).concat([endWeight]);
+    var weightsWithTgtSrc = [startWeight].concat(edge.scratch('cyedgebendeditingWeights')?edge.scratch('cyedgebendeditingWeights'):[]).concat([endWeight]);
     
 //    var segPts = this.getSegmentPoints(edge);
     
@@ -342,8 +342,8 @@ var bendPointUtilities = {
       relativeBendPosition.distance = 0;
     }
 
-    var weights = edge.data('weights');
-    var distances = edge.data('distances');
+    var weights = edge.scratch('cyedgebendeditingWeights');
+    var distances = edge.scratch('cyedgebendeditingDistances');
     
     weights = weights?weights:[];
     distances = distances?distances:[];
@@ -359,8 +359,8 @@ var bendPointUtilities = {
       distances.splice(newBendIndex, 0, relativeBendPosition.distance);
     }
    
-    edge.data('weights', weights);
-    edge.data('distances', distances);
+    edge.scratch('cyedgebendeditingWeights', weights);
+    edge.scratch('cyedgebendeditingDistances', distances);
     
     edge.addClass('edgebendediting-hasbendpoints');
     
@@ -372,8 +372,8 @@ var bendPointUtilities = {
       bendPointIndex = this.currentBendIndex;
     }
     
-    var distances = edge.data('distances');
-    var weights = edge.data('weights');
+    var distances = edge.scratch('cyedgebendeditingDistances');
+    var weights = edge.scratch('cyedgebendeditingWeights');
     
     distances.splice(bendPointIndex, 1);
     weights.splice(bendPointIndex, 1);
@@ -383,8 +383,8 @@ var bendPointUtilities = {
       edge.removeClass('edgebendediting-hasbendpoints');
     }
     else {
-      edge.data('distances', distances);
-      edge.data('weights', weights);
+      edge.scratch('cyedgebendeditingDistances', distances);
+      edge.scratch('cyedgebendeditingWeights', weights);
     }
   },
   calculateDistance: function(pt1, pt2) {
