@@ -1,6 +1,10 @@
 cytoscape-edge-bend-editing
 ================================================================================
 
+## Important Note
+ 
+ To use this extension you should include 'cytoscape.js-context-menus' extension. 
+ Please see 'https://github.com/iVis-at-Bilkent/cytoscape.js-context-menus'.
 
 ## Description
 

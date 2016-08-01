@@ -5,7 +5,9 @@ var registerUndoRedoFunctions = require('./registerUndoRedoFunctions');
 module.exports = function (params) {
   var fn = params;
 
-  var ePosition, eRemove, eZoom, eSelect, eUnselect, eTapStart, eTapDrag, eTapEnd, eCxtTap, eTap;
+  var addBendPointCxtMenuId = 'cy-edge-bend-editing-cxt-add-bend-point';
+  var removeBendPointCxtMenuId = 'cy-edge-bend-editing-cxt-remove-bend-point';
+  var ePosition, eRemove, eZoom, eSelect, eUnselect, eTapStart, eTapDrag, eTapEnd, eCxtTap;
   var functions = {
     init: function () {
       // register undo redo functions
@@ -14,35 +16,13 @@ module.exports = function (params) {
       var self = this;
       var opts = params;
       var $container = $(this);
-      var cy;
+//      var cy;
       var $canvas = $('<canvas></canvas>');
 
       $container.append($canvas);
-      
-      var $ctxAddBendPoint = $('<menu title="Add Bend Point" id="cy-edge-bend-editing-ctx-add-bend-point" class="cy-edge-bend-editing-ctx-operation"></menu>');
-      var $ctxRemoveBendPoint = $('<menu title="Remove Bend Point" id="cy-edge-bend-editing-ctx-remove-bend-point" class="cy-edge-bend-editing-ctx-operation"></menu>');
-      
-      $('body').append($ctxAddBendPoint);
-      $('body').append($ctxRemoveBendPoint);
-      
-      document.getElementById("cy-edge-bend-editing-ctx-add-bend-point").addEventListener("contextmenu",function(event){
-        event.preventDefault();
-      },false);
 
-      document.getElementById("cy-edge-bend-editing-ctx-remove-bend-point").addEventListener("contextmenu",function(event){
-          event.preventDefault();
-      },false);
-
-      $('.cy-edge-bend-editing-ctx-operation').click(function (e) {
-        $('.cy-edge-bend-editing-ctx-operation').css('display', 'none');
-      });
-
-      $ctxAddBendPoint.click(function (e) {
-        var edge = bendPointUtilities.currentCtxEdge;
-        
-        if(!edge.selected()) {
-          return;
-        }
+      var cxtAddBendPointFcn = function (event) {
+        var edge = event.cyTarget;
         
         var param = {
           edge: edge,
@@ -57,15 +37,10 @@ module.exports = function (params) {
         }
         
         clearDraws(true);
-        
-      });
+      };
 
-      $ctxRemoveBendPoint.click(function (e) {
-        var edge = bendPointUtilities.currentCtxEdge;
-        
-        if(!edge.selected()) {
-          return;
-        }
+      var cxtRemoveBendPointFcn = function (event) {
+        var edge = event.cyTarget;
         
         var param = {
           edge: edge,
@@ -80,7 +55,41 @@ module.exports = function (params) {
         }
         
         clearDraws(true);
-      });
+      };
+      
+      if(cy.contextMenus == null) {
+        var exceptionStr = "To use cytoscape.js-edge-bend-editing extension you must include cytoscape.js-context-menus extension"
+          + "\n" + "Please see 'https://github.com/iVis-at-Bilkent/cytoscape.js-context-menus'";
+  
+        throw exceptionStr;
+      }
+      
+      var menuItems = [
+        {
+          id: addBendPointCxtMenuId,
+          title: 'Add Bend Point',
+          selector: 'edge:selected',
+          onClickFunction: cxtAddBendPointFcn
+        },
+        {
+          id: removeBendPointCxtMenuId,
+          title: 'Remove Bend Point',
+          selector: 'edge:selected',
+          onClickFunction: cxtRemoveBendPointFcn
+        }
+      ];
+      
+      // If context menus is active just append menu items else activate the extension
+      // with initial menu items
+      if (cy.isContextMenusActive()) {
+        cy.appendMenuItems(menuItems);
+      }
+      else {
+        cy.contextMenus({
+          menuItems: menuItems,
+          menuItemClasses: ['cy-edge-bend-editing-cxt-operation']
+        });
+      }
       
       var _sizeCanvas = debounce(function () {
         $canvas
@@ -381,44 +390,25 @@ module.exports = function (params) {
           if(!edge.selected()) {
             return;
           }
-          
-          var containerPos = $(cy.container()).position();
-
-          var left = containerPos.left + event.cyRenderedPosition.x;
-          left = left.toString() + 'px';
-
-          var top = containerPos.top + event.cyRenderedPosition.y;
-          top = top.toString() + 'px';
-
-          $('.cy-edge-bend-editing-ctx-operation').css('display', 'none');
 
           var selectedBendIndex = getContainingBendShapeIndex(event.cyPosition.x, event.cyPosition.y, edge);
           if (selectedBendIndex == -1) {
-            $ctxAddBendPoint.css('display', 'block');
+            $('#' + removeBendPointCxtMenuId).css('display', 'none');
             bendPointUtilities.currentCtxPos = event.cyPosition;
-            ctxMenu = document.getElementById("cy-edge-bend-editing-ctx-add-bend-point");
           }
           else {
-            $ctxRemoveBendPoint.css('display', 'block');
+            $('#' + addBendPointCxtMenuId).css('display', 'none');
             bendPointUtilities.currentBendIndex = selectedBendIndex;
-            ctxMenu = document.getElementById("cy-edge-bend-editing-ctx-remove-bend-point");
           }
 
-          ctxMenu.style.display = "block";
-          ctxMenu.style.left = left;
-          ctxMenu.style.top = top;
-
           bendPointUtilities.currentCtxEdge = edge;
-        });
-        
-        cy.on('tap', eTap = function(event) {
-          $('.cy-edge-bend-editing-ctx-operation').css('display', 'none');
         });
         
         cy.on('cyedgebendediting.changeBendPoints', 'edge', function() {
           var edge = this;
           edge.select();
           clearDraws(true);
+          
         });
         
       });
@@ -433,8 +423,7 @@ module.exports = function (params) {
           .off('tapstart', 'edge', eTapStart)
           .off('tapdrag', eTapDrag)
           .off('tapend', eTapEnd)
-          .off('cxttap', eCxtTap)
-          .off('tap', eTap);
+          .off('cxttap', eCxtTap);
 
         cy.unbind("zoom pan", eZoom);
     }
