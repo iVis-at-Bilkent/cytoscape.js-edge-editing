@@ -70,7 +70,11 @@ of the ith bend point. (Returns undefined if the curve style is not segments)
       // the size of bend shape is obtained by multipling width of edge with this parameter
       bendShapeSizeFactor: 6,
       // whether to start the plugin in the enabled state
-      enabled: true
+      enabled: true,
+      // title of add bend point menu item (User may need to adjust width of menu items according to length of this option)
+      addBendMenuItemTitle: "Add Bend Point",
+      // title of remove bend point menu item (User may need to adjust width of menu items according to length of this option)
+      removeBendMenuItemTitle: "Remove Bend Point"
     };
 ```
 

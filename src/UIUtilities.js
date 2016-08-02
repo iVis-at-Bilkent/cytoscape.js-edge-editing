@@ -67,13 +67,13 @@ module.exports = function (params) {
       var menuItems = [
         {
           id: addBendPointCxtMenuId,
-          title: 'Add Bend Point',
+          title: opts.addBendMenuItemTitle,
           selector: 'edge:selected',
           onClickFunction: cxtAddBendPointFcn
         },
         {
           id: removeBendPointCxtMenuId,
-          title: 'Remove Bend Point',
+          title: opts.removeBendMenuItemTitle,
           selector: 'edge:selected',
           onClickFunction: cxtRemoveBendPointFcn
         }
