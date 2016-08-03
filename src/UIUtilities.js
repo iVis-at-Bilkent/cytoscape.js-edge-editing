@@ -2,7 +2,7 @@ var debounce = require('./debounce');
 var bendPointUtilities = require('./bendPointUtilities');
 var registerUndoRedoFunctions = require('./registerUndoRedoFunctions');
 
-module.exports = function (params) {
+module.exports = function (params, cy) {
   var fn = params;
 
   var addBendPointCxtMenuId = 'cy-edge-bend-editing-cxt-add-bend-point';
@@ -11,12 +11,11 @@ module.exports = function (params) {
   var functions = {
     init: function () {
       // register undo redo functions
-      registerUndoRedoFunctions();
+      registerUndoRedoFunctions(cy);
       
       var self = this;
       var opts = params;
       var $container = $(this);
-//      var cy;
       var $canvas = $('<canvas></canvas>');
 
       $container.append($canvas);
@@ -56,13 +55,6 @@ module.exports = function (params) {
         
         clearDraws(true);
       };
-      
-      if(cy.contextMenus == null) {
-        var exceptionStr = "To use cytoscape.js-edge-bend-editing extension you must include cytoscape.js-context-menus extension"
-          + "\n" + "Please see 'https://github.com/iVis-at-Bilkent/cytoscape.js-context-menus'";
-  
-        throw exceptionStr;
-      }
       
       var menuItems = [
         {
@@ -181,7 +173,6 @@ module.exports = function (params) {
       
       // render the bend shapes of the given edge
       function renderBendShapes(edge) {
-        var cy = edge.cy();
         
         if(!edge.hasClass('edgebendediting-hasbendpoints')) {
           return;
@@ -286,7 +277,6 @@ module.exports = function (params) {
       }
 
       $container.cytoscape(function (e) {
-        cy = this;
         clearDraws(true);
         
         lastPanningEnabled = cy.panningEnabled();

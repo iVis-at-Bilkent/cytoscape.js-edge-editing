@@ -3,9 +3,7 @@ var bendPointUtilities = {
   currentCtxPos: undefined,
   currentBendIndex: undefined,
   // initilize bend points based on bendPositionsFcn
-  initBendPoints: function(bendPositionsFcn) {
-    var edges = cy.edges();
-
+  initBendPoints: function(bendPositionsFcn, edges) {
     for (var i = 0; i < edges.length; i++) {
       var edge = edges[i];
       

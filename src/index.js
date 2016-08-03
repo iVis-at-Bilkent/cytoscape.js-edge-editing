@@ -40,6 +40,13 @@
     cytoscape( 'core', 'edgeBendEditing', function(opts){
       var cy = this;
       
+      if(cy.contextMenus == null) {
+        var exceptionStr = "To use cytoscape.js-edge-bend-editing extension you must include cytoscape.js-context-menus extension"
+          + "\n" + "Please see 'https://github.com/iVis-at-Bilkent/cytoscape.js-context-menus'";
+  
+        throw exceptionStr;
+      }
+      
       // merge the options with default ones
       options = setOptions(opts);
       
@@ -56,12 +63,12 @@
       });
       
       // init bend positions
-      bendPointUtilities.initBendPoints(options.bendPositionsFunction);
+      bendPointUtilities.initBendPoints(options.bendPositionsFunction, cy.edges());
       
       if(options.enabled)
-        $(cy.container()).cytoscapeEdgeBendEditing(options);
+        $(cy.container()).cytoscapeEdgeBendEditing(options, cy);
       else
-        $(cy.container()).cytoscapeEdgeBendEditing("unbind");
+        $(cy.container()).cytoscapeEdgeBendEditing("unbind", cy);
       
 
       return this; // chainability
