@@ -1,6 +1,6 @@
 {
   "name": "cytoscape-edge-bend-editing",
-  "version": "snapshot-ab54662964-1470210709300",
+  "version": "1.1.2",
   "description": "A Cytoscape.js extension enables editing edge bend points",
   "main": "cytoscape-edge-bend-editing.js",
   "spm": {
