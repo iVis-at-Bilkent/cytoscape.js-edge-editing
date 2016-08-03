@@ -9,7 +9,7 @@
     
     if( !cytoscape ){ return; } // can't register if cytoscape unspecified
 
-    var options = {
+    var defaults = {
       // this function specifies the poitions of bend points
       bendPositionsFunction: function(ele) {
         return ele.data('bendPointPositions');
@@ -26,16 +26,22 @@
       removeBendMenuItemTitle: "Remove Bend Point"
     };
     
-    function setOptions(from) {
-      var tempOpts = {};
-      for (var key in options)
-        tempOpts[key] = options[key];
+    var options;
+    
+    // Merge default options with the ones coming from parameter
+    function extend(defaults, options) {
+      var obj = {};
 
-      for (var key in from)
-        if (tempOpts.hasOwnProperty(key))
-          tempOpts[key] = from[key];
-      return tempOpts;
-    }
+      for (var i in defaults) {
+        obj[i] = defaults[i];
+      }
+
+      for (var i in options) {
+        obj[i] = options[i];
+      }
+
+      return obj;
+    };
     
     cytoscape( 'core', 'edgeBendEditing', function(opts){
       var cy = this;
@@ -48,7 +54,7 @@
       }
       
       // merge the options with default ones
-      options = setOptions(opts);
+      options = extend(defaults, opts);
       
       // define edgebendediting-hasbendpoints css class
       cy.style().selector('.edgebendediting-hasbendpoints').css({
