@@ -16,13 +16,15 @@ module.exports = function (cy) {
       set: true//As the result will not be used for the first function call params should be used to set the data
     };
 
+    var hasBend = param.weights && param.weights.length > 0;
+
     //Check if we need to set the weights and distances by the param values
     if (param.set) {
-      param.weights ? edge.scratch('cyedgebendeditingWeights', param.weights) : edge.removeScratch('cyedgebendeditingWeights');
-      param.distances ? edge.scratch('cyedgebendeditingDistances', param.distances) : edge.removeScratch('cyedgebendeditingDistances');
+      hasBend ? edge.scratch('cyedgebendeditingWeights', param.weights) : edge.removeScratch('cyedgebendeditingWeights');
+      hasBend ? edge.scratch('cyedgebendeditingDistances', param.distances) : edge.removeScratch('cyedgebendeditingDistances');
 
       //refresh the curve style as the number of bend point would be changed by the previous operation
-      if (param.weights) {
+      if (hasBend) {
         edge.addClass('edgebendediting-hasbendpoints');
       }
       else {
