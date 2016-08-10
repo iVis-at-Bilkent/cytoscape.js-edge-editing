@@ -358,6 +358,14 @@ module.exports = function (params, cy) {
         cy.on('tapend', eTapEnd = function (event) {
           var edge = movedBendEdge;
           
+          if( edge !== undefined ) {
+            var distances = edge.scratch('cyedgebendeditingDistances');
+          
+            if( Math.abs(distances[movedBendIndex]) <= 3 ) {
+              bendPointUtilities.removeBendPoint();
+            }
+          }
+          
           if (edge !== undefined && moveBendParam !== undefined && edge.scratch('cyedgebendeditingWeights')
                   && edge.scratch('cyedgebendeditingWeights').toString() != moveBendParam.weights.toString()) {
             
