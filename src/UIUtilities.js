@@ -71,16 +71,18 @@ module.exports = function (params, cy) {
         }
       ];
       
-      // If context menus is active just append menu items else activate the extension
-      // with initial menu items
-      if (cy.isContextMenusActive()) {
-        cy.appendMenuItems(menuItems);
-      }
-      else {
-        cy.contextMenus({
-          menuItems: menuItems,
-          menuItemClasses: ['cy-edge-bend-editing-cxt-operation']
-        });
+      if(cy.contextMenus) {
+        // If context menus is active just append menu items else activate the extension
+        // with initial menu items
+        if (cy.isContextMenusActive()) {
+          cy.appendMenuItems(menuItems);
+        }
+        else {
+          cy.contextMenus({
+            menuItems: menuItems,
+            menuItemClasses: ['cy-edge-bend-editing-cxt-operation']
+          });
+        }
       }
       
       var _sizeCanvas = debounce(function () {
