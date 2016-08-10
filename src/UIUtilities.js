@@ -314,14 +314,16 @@ module.exports = function (params, cy) {
         var movedBendIndex;
         var movedBendEdge;
         var moveBendParam;
+        var createBendOnDrag;
         
         cy.on('tapstart', 'edge', eTapStart = function (event) {
           var edge = this;
+          movedBendEdge = edge;
           
           moveBendParam = {
             edge: edge,
-            weights: edge.scratch('cyedgebendeditingWeights') ? [].concat(edge.scratch('cyedgebendeditingWeights')) : edge.scratch('cyedgebendeditingWeights'),
-            distances: edge.scratch('cyedgebendeditingDistances') ? [].concat(edge.scratch('cyedgebendeditingDistances')) : edge.scratch('cyedgebendeditingDistances')
+            weights: edge.scratch('cyedgebendeditingWeights') ? [].concat(edge.scratch('cyedgebendeditingWeights')) : [],
+            distances: edge.scratch('cyedgebendeditingDistances') ? [].concat(edge.scratch('cyedgebendeditingDistances')) : []
           };
           
           var cyPosX = event.cyPosition.x;
@@ -330,13 +332,24 @@ module.exports = function (params, cy) {
           var index = getContainingBendShapeIndex(cyPosX, cyPosY, edge);
           if (index != -1) {
             movedBendIndex = index;
-            movedBendEdge = edge;
+//            movedBendEdge = edge;
             disableGestures();
+          }
+          else {
+            createBendOnDrag = true;
           }
         });
         
         cy.on('tapdrag', eTapDrag = function (event) {
           var edge = movedBendEdge;
+          
+          if(createBendOnDrag) {
+            bendPointUtilities.addBendPoint(edge, event.cyPosition);
+            movedBendIndex = getContainingBendShapeIndex(event.cyPosition.x, event.cyPosition.y, edge);
+            movedBendEdge = edge;
+            createBendOnDrag = undefined;
+            disableGestures();
+          }
           
           if (movedBendEdge === undefined || movedBendIndex === undefined) {
             return;
@@ -361,8 +374,8 @@ module.exports = function (params, cy) {
           if( edge !== undefined ) {
             var distances = edge.scratch('cyedgebendeditingDistances');
           
-            if( Math.abs(distances[movedBendIndex]) <= 3 ) {
-              bendPointUtilities.removeBendPoint();
+            if( distances != undefined && movedBendIndex != undefined && Math.abs(distances[movedBendIndex]) <= 3 ) {
+              bendPointUtilities.removeBendPoint(edge, movedBendIndex);
             }
           }
           
@@ -377,6 +390,7 @@ module.exports = function (params, cy) {
           movedBendIndex = undefined;
           movedBendEdge = undefined;
           moveBendParam = undefined;
+          createBendOnDrag = undefined;
 
           resetGestures();
           clearDraws(true);
