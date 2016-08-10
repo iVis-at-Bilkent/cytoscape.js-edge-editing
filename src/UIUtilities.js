@@ -372,10 +372,68 @@ module.exports = function (params, cy) {
           var edge = movedBendEdge;
           
           if( edge !== undefined ) {
-            var distances = edge.scratch('cyedgebendeditingDistances');
-          
-            if( distances != undefined && movedBendIndex != undefined && Math.abs(distances[movedBendIndex]) <= 3 ) {
-              bendPointUtilities.removeBendPoint(edge, movedBendIndex);
+            if( movedBendIndex != undefined ) {
+              var edgeStartX = edge._private.rscratch.startX;
+              var edgeStartY = edge._private.rscratch.startY;
+              var edgeEndX = edge._private.rscratch.endX;
+              var edgeEndY = edge._private.rscratch.endY;
+              var segPts = bendPointUtilities.getSegmentPoints(edge);
+              var allPts = [edgeStartX, edgeStartY].concat(segPts).concat([edgeEndX, edgeEndY]);
+              
+              var pointIndex = movedBendIndex + 1;
+              var preIndex = pointIndex - 1;
+              var posIndex = pointIndex + 1;
+              
+              var point = {
+                x: allPts[2 * pointIndex],
+                y: allPts[2 * pointIndex + 1]
+              };
+              
+              var prePoint = {
+                x: allPts[2 * preIndex],
+                y: allPts[2 * preIndex + 1]
+              };
+              
+              var posPoint = {
+                x: allPts[2 * posIndex],
+                y: allPts[2 * posIndex + 1]
+              };
+              
+              var nearToLine;
+              
+              if( ( point.x === prePoint.x && point.y === prePoint.y ) || ( point.x === prePoint.x && point.y === prePoint.y ) ) {
+                nearToLine = true;
+              }
+              else {
+                var m1 = ( prePoint.y - posPoint.y ) / ( prePoint.x - posPoint.x );
+                var m2 = -1 / m1;
+
+                var srcTgtPointsAndTangents = {
+                  srcPoint: prePoint,
+                  tgtPoint: posPoint,
+                  m1: m1,
+                  m2: m2
+                };
+
+                //get the intersection of the current segment with the new bend point
+                var currentIntersection = bendPointUtilities.getIntersection(edge, point, srcTgtPointsAndTangents);
+                var dist = Math.sqrt( Math.pow( (point.x - currentIntersection.x), 2 ) 
+                        + Math.pow( (point.y - currentIntersection.y), 2 ));
+                
+//                var length = Math.sqrt( Math.pow( (posPoint.x - prePoint.x), 2 ) 
+//                        + Math.pow( (posPoint.y - prePoint.y), 2 ));
+                
+                if( dist  < 8 ) {
+                  nearToLine = true;
+                }
+                
+              }
+              
+              if( nearToLine )
+              {
+                bendPointUtilities.removeBendPoint(edge, movedBendIndex);
+              }
+              
             }
           }
           
