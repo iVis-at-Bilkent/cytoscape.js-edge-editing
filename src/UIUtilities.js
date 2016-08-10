@@ -373,10 +373,13 @@ module.exports = function (params, cy) {
           
           if( edge !== undefined ) {
             if( movedBendIndex != undefined ) {
-              var edgeStartX = edge._private.rscratch.startX;
-              var edgeStartY = edge._private.rscratch.startY;
-              var edgeEndX = edge._private.rscratch.endX;
-              var edgeEndY = edge._private.rscratch.endY;
+              var startAndEndPoints = bendPointUtilities.getStartAndEndPoints(edge);
+              
+              var edgeStartX = startAndEndPoints.startX;
+              var edgeStartY = startAndEndPoints.startY;
+              var edgeEndX = startAndEndPoints.endX;
+              var edgeEndY = startAndEndPoints.endY;
+              
               var segPts = bendPointUtilities.getSegmentPoints(edge);
               var allPts = [edgeStartX, edgeStartY].concat(segPts).concat([edgeEndX, edgeEndY]);
               

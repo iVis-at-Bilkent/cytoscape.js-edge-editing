@@ -189,7 +189,10 @@ var bendPointUtilities = {
     var srcPoint = srcTgtPointsAndTangents.srcPoint;
     var tgtPoint = srcTgtPointsAndTangents.tgtPoint;
     
-    var weight = intersectX == srcPoint.x?0:(intersectX - srcPoint.x) / (tgtPoint.x - srcPoint.x);
+    var d1 = this.calculateDistance(srcPoint, tgtPoint);
+    var d2 = this.calculateDistance(srcPoint, intersectionPoint);
+    var weight = d2 / d1;
+    
     var distance = Math.sqrt(Math.pow((intersectY - bendPoint.y), 2)
         + Math.pow((intersectX - bendPoint.x), 2));
     
@@ -258,10 +261,12 @@ var bendPointUtilities = {
     var relativeBendPosition = this.convertToRelativeBendPosition(edge, newBendPoint);
     var originalPointWeight = relativeBendPosition.weight;
     
-    var edgeStartX = edge._private.rscratch.startX;
-    var edgeStartY = edge._private.rscratch.startY;
-    var edgeEndX = edge._private.rscratch.endX;
-    var edgeEndY = edge._private.rscratch.endY;
+    var startAndEndPoints = this.getStartAndEndPoints(edge);
+    
+    var edgeStartX = startAndEndPoints.startX;
+    var edgeStartY = startAndEndPoints.startY;
+    var edgeEndX = startAndEndPoints.endX;
+    var edgeEndY = startAndEndPoints.endY;
     
     var startWeight = this.convertToRelativeBendPosition(edge, {x: edgeStartX, y: edgeStartY}).weight;
     var endWeight = this.convertToRelativeBendPosition(edge, {x: edgeEndX, y: edgeEndY}).weight;
@@ -382,6 +387,31 @@ var bendPointUtilities = {
     
     var dist = Math.sqrt( Math.pow( diffX, 2 ) + Math.pow( diffY, 2 ) );
     return dist;
+  },
+  // Get the start and end points of the given edge in case of they are not included in rscratch
+  getStartAndEndPoints: function(edge) {
+    var rs = edge._private.rscratch;
+    var isHaystack = rs.edgeType === 'haystack';
+    var startX, startY, endX, endY;
+    
+    if( isHaystack ){
+      startX = rs.haystackPts[0];
+      startY = rs.haystackPts[1];
+      endX = rs.haystackPts[2];
+      endY = rs.haystackPts[3];
+    } else {
+      startX = rs.arrowStartX;
+      startY = rs.arrowStartY;
+      endX = rs.arrowEndX;
+      endY = rs.arrowEndY;
+    }
+    
+    return {
+      startX: startX,
+      startY: startY,
+      endX: endX,
+      endY: endY
+    };
   }
 };
 
