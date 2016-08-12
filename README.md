@@ -20,7 +20,7 @@ A Cytoscape.js extension enables editing edge bend points.
 
  * Cytoscape.js ^1.7.0
  * cytoscape-undo-redo.js(optional) ^1.0.1
- * cytoscape-context-menus.js(optional) ^1.0.3
+ * cytoscape-context-menus.js(optional) ^2.0.0
 
 
 ## Usage instructions
