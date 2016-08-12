@@ -46,42 +46,43 @@
     cytoscape( 'core', 'edgeBendEditing', function(opts){
       var cy = this;
       
-      // merge the options with default ones
-      options = extend(defaults, opts);
-      
-      // define edgebendediting-hasbendpoints css class
-      cy.style().selector('.edgebendediting-hasbendpoints').css({
-        'curve-style': 'segments',
-        'segment-distances': function (ele) {
-          return bendPointUtilities.getSegmentDistancesString(ele);
-        },
-        'segment-weights': function (ele) {
-          return bendPointUtilities.getSegmentWeightsString(ele);
-        },
-        'edge-distances': 'node-position'
-      });
-      
-      // init bend positions
-      bendPointUtilities.initBendPoints(options.bendPositionsFunction, cy.edges());
-      
-      if(options.enabled)
-        $(cy.container()).cytoscapeEdgeBendEditing(options, cy);
-      else
-        $(cy.container()).cytoscapeEdgeBendEditing("unbind", cy);
-      
+      if( opts !== 'get' ) {
+        // merge the options with default ones
+        options = extend(defaults, opts);
 
-      return this; // chainability
-    } );
-    
-    /*
-     * get segment points of an edge in an array A,
-     * A[2 * i] is the x coordinate and A[2 * i + 1] is the y coordinate
-     * of the ith bend point. (Returns undefined if the curve style is not segments)
-     */
-    cytoscape( 'collection', 'getSegmentPoints', function(){
-      var ele = this;
+        // define edgebendediting-hasbendpoints css class
+        cy.style().selector('.edgebendediting-hasbendpoints').css({
+          'curve-style': 'segments',
+          'segment-distances': function (ele) {
+            return bendPointUtilities.getSegmentDistancesString(ele);
+          },
+          'segment-weights': function (ele) {
+            return bendPointUtilities.getSegmentWeightsString(ele);
+          },
+          'edge-distances': 'node-position'
+        });
+
+        // init bend positions
+        bendPointUtilities.initBendPoints(options.bendPositionsFunction, cy.edges());
+
+        if(options.enabled)
+          $(cy.container()).cytoscapeEdgeBendEditing(options, cy);
+        else
+          $(cy.container()).cytoscapeEdgeBendEditing("unbind", cy);
+      }
       
-      return bendPointUtilities.getSegmentPoints(ele);
+      var instance = {
+        /*
+        * get segment points of the given edge in an array A,
+        * A[2 * i] is the x coordinate and A[2 * i + 1] is the y coordinate
+        * of the ith bend point. (Returns undefined if the curve style is not segments)
+        */
+        getSegmentPoints: function(ele) {
+          return bendPointUtilities.getSegmentPoints(ele);
+        }
+      };
+
+      return instance; // chainability
     } );
 
   };

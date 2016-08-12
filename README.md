@@ -52,13 +52,26 @@ Plain HTML/JS has the extension registered for you automatically, because no `re
 
 ## API
 
-`cy.edgeBendEditing(options)`
-To initialize with options.
+```js
+var instance = cy.edgeBendEditing( options );
+```
 
-`ele.getSegmentPoints()`
-get segment points of an edge in an array A,
-A[2 * i] is the x coordinate and A[2 * i + 1] is the y coordinate
-of the ith bend point. (Returns undefined if the curve style is not segments)
+An instance has a number of functions available:
+
+```js
+/*
+* Get segment points of the given edge in an array A,
+* A[2 * i] is the x coordinate and A[2 * i + 1] is the y coordinate
+* of the ith bend point. (Returns undefined if the curve style is not segments)
+*/
+instance.getSegmentPoints(ele);
+```
+
+You can also get an existing instance:
+
+```js
+cy.contextMenus('get');
+```
 
 ## Default Options
 ```js
