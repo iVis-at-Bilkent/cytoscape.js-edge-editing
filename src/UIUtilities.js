@@ -72,10 +72,11 @@ module.exports = function (params, cy) {
       ];
       
       if(cy.contextMenus) {
+        var menus = cy.contextMenus('get');
         // If context menus is active just append menu items else activate the extension
         // with initial menu items
-        if (cy.isContextMenusActive()) {
-          cy.appendMenuItems(menuItems);
+        if (menus.isActive()) {
+          menus.appendMenuItems(menuItems);
         }
         else {
           cy.contextMenus({
