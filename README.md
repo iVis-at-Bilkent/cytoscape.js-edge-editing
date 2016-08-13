@@ -3,7 +3,7 @@ cytoscape-edge-bend-editing
 
 ## Important Note
  
- To use this extension you should include 'cytoscape.js-context-menus' extension. 
+ To use this extension you must include 'cytoscape.js-context-menus' extension. 
  Please see 'https://github.com/iVis-at-Bilkent/cytoscape.js-context-menus'.
 
 ## Description
@@ -14,7 +14,7 @@ A Cytoscape.js extension enables editing edge bend points.
  * To move a bend point drag and drop it when the edge is selected.
  * Alternatively, 
     * You can click anywhere on the edge to introduce and relocate a bend point by dragging.
-    * A bend point is removed if it is dropped near to the line between its neighbours.
+    * A bend point is removed if it is dropped near the line segment between its two neighbours.
 
 ## Dependencies
 
