@@ -8,7 +8,7 @@ cytoscape-edge-bend-editing
 
 ## Description
 
-A Cytoscape.js extension enabling editing edge bend points, distributed under [The MIT License](https://opensource.org/licenses/MIT). 
+A Cytoscape.js extension enabling interactive editing of edge bend points, distributed under [The MIT License](https://opensource.org/licenses/MIT). 
  * To add a bend point select the edge, right click where you want to add the bend point and click 'Add Bend Point' on the context menu (requires 'cytoscape.js-context-menus' extension). 
  * To remove a bend point select the edge, right click on the bend point and click 'Remove Bend Point' on the context menu (requires 'cytoscape.js-context-menus' extension). 
  * To move a bend point drag and drop it when the edge is selected.
