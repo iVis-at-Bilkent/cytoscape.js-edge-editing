@@ -1,11 +1,10 @@
-;(function($$, $){ 'use strict';
+;(function(){ 'use strict';
   
   var bendPointUtilities = require('./bendPointUtilities');
-  $.fn.cytoscapeEdgeBendEditing = require('./UIUtilities');
-
   
   // registers the extension on a cytoscape lib ref
-  var register = function( cytoscape ){
+  var register = function( cytoscape, $ ){
+    var uiUtilities = require('./UIUtilities');
     
     if( !cytoscape ){ return; } // can't register if cytoscape unspecified
 
@@ -66,9 +65,9 @@
         bendPointUtilities.initBendPoints(options.bendPositionsFunction, cy.edges());
 
         if(options.enabled)
-          $(cy.container()).cytoscapeEdgeBendEditing(options, cy);
+          uiUtilities(options, cy);
         else
-          $(cy.container()).cytoscapeEdgeBendEditing("unbind", cy);
+          uiUtilities("unbind", cy);
       }
       
       var instance = {
@@ -97,8 +96,8 @@
     });
   }
 
-  if( typeof cytoscape !== 'undefined' ){ // expose to global cytoscape (i.e. window.cytoscape)
-    register( cytoscape );
+  if( typeof cytoscape !== 'undefined' && $ ){ // expose to global cytoscape (i.e. window.cytoscape)
+    register( cytoscape, $ );
   }
 
-})(cytoscape, jQuery);
+})();

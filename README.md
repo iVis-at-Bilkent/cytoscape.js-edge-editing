@@ -19,6 +19,7 @@ A Cytoscape.js extension enabling interactive editing of edge bend points, distr
 ## Dependencies
 
  * Cytoscape.js ^1.7.0
+ * jQuery ^1.7.0 || ^2.0.0 || ^3.0.0
  * cytoscape-undo-redo.js(optional) ^1.0.1
  * cytoscape-context-menus.js(optional) ^2.0.0
 
@@ -35,9 +36,10 @@ Download the library:
 CommonJS:
 ```js
 var cytoscape = require('cytoscape');
-var edge-bend-editing = require('cytoscape-edge-bend-editing');
+var jquery = require('jquery');
+var edgeBendEditing = require('cytoscape-edge-bend-editing');
 
-edge-bend-editing( cytoscape ); // register extension
+edgeBendEditing( cytoscape, jquery ); // register extension
 ```
 
 AMD:
