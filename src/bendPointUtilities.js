@@ -189,9 +189,17 @@ var bendPointUtilities = {
     var srcPoint = srcTgtPointsAndTangents.srcPoint;
     var tgtPoint = srcTgtPointsAndTangents.tgtPoint;
     
-    var d1 = this.calculateDistance(srcPoint, tgtPoint);
-    var d2 = this.calculateDistance(srcPoint, intersectionPoint);
-    var weight = d2 / d1;
+    var weight;
+    
+    if( intersectX != srcPoint.x ) {
+      weight = (intersectX - srcPoint.x) / (tgtPoint.x - srcPoint.x);
+    }
+    else if( intersectY != srcPoint.y ) {
+      weight = (intersectY - srcPoint.y) / (tgtPoint.y - srcPoint.y);
+    }
+    else {
+      weight = 0;
+    }
     
     var distance = Math.sqrt(Math.pow((intersectY - bendPoint.y), 2)
         + Math.pow((intersectX - bendPoint.x), 2));
