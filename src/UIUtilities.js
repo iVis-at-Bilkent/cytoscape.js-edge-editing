@@ -376,15 +376,13 @@ module.exports = function (params, cy) {
           
           if( edge !== undefined ) {
             if( movedBendIndex != undefined ) {
-              var startAndEndPoints = bendPointUtilities.getStartAndEndPoints(edge);
-              
-              var edgeStartX = startAndEndPoints.startX;
-              var edgeStartY = startAndEndPoints.startY;
-              var edgeEndX = startAndEndPoints.endX;
-              var edgeEndY = startAndEndPoints.endY;
+              var startX = edge.source().position('x');
+              var startY = edge.source().position('y');
+              var endX = edge.target().position('x');
+              var endY = edge.target().position('y');
               
               var segPts = bendPointUtilities.getSegmentPoints(edge);
-              var allPts = [edgeStartX, edgeStartY].concat(segPts).concat([edgeEndX, edgeEndY]);
+              var allPts = [startX, startY].concat(segPts).concat([endX, endY]);
               
               var pointIndex = movedBendIndex + 1;
               var preIndex = pointIndex - 1;

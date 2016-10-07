@@ -269,24 +269,22 @@ var bendPointUtilities = {
     var relativeBendPosition = this.convertToRelativeBendPosition(edge, newBendPoint);
     var originalPointWeight = relativeBendPosition.weight;
     
-    var startAndEndPoints = this.getStartAndEndPoints(edge);
+    var startX = edge.source().position('x');
+    var startY = edge.source().position('y');
+    var endX = edge.target().position('x');
+    var endY = edge.target().position('y');
     
-    var edgeStartX = startAndEndPoints.startX;
-    var edgeStartY = startAndEndPoints.startY;
-    var edgeEndX = startAndEndPoints.endX;
-    var edgeEndY = startAndEndPoints.endY;
-    
-    var startWeight = this.convertToRelativeBendPosition(edge, {x: edgeStartX, y: edgeStartY}).weight;
-    var endWeight = this.convertToRelativeBendPosition(edge, {x: edgeEndX, y: edgeEndY}).weight;
+    var startWeight = this.convertToRelativeBendPosition(edge, {x: startX, y: startY}).weight;
+    var endWeight = this.convertToRelativeBendPosition(edge, {x: endX, y: endY}).weight;
     var weightsWithTgtSrc = [startWeight].concat(edge.scratch('cyedgebendeditingWeights')?edge.scratch('cyedgebendeditingWeights'):[]).concat([endWeight]);
     
     var segPts = this.getSegmentPoints(edge);
     
     var minDist = Infinity;
     var intersection;
-    var segptsWithTgtSrc = [edgeStartX, edgeStartY]
+    var segptsWithTgtSrc = [startX, startY]
             .concat(segPts?segPts:[])
-            .concat([edgeEndX, edgeEndY]);
+            .concat([endX, endY]);
     var newBendIndex = -1;
     
     for(var i = 0; i < weightsWithTgtSrc.length - 1; i++){
@@ -395,31 +393,6 @@ var bendPointUtilities = {
     
     var dist = Math.sqrt( Math.pow( diffX, 2 ) + Math.pow( diffY, 2 ) );
     return dist;
-  },
-  // Get the start and end points of the given edge in case of they are not included in rscratch
-  getStartAndEndPoints: function(edge) {
-    var rs = edge._private.rscratch;
-    var isHaystack = rs.edgeType === 'haystack';
-    var startX, startY, endX, endY;
-    
-    if( isHaystack ){
-      startX = rs.haystackPts[0];
-      startY = rs.haystackPts[1];
-      endX = rs.haystackPts[2];
-      endY = rs.haystackPts[3];
-    } else {
-      startX = rs.arrowStartX;
-      startY = rs.arrowStartY;
-      endX = rs.arrowEndX;
-      endY = rs.arrowEndY;
-    }
-    
-    return {
-      startX: startX,
-      startY: startY,
-      endX: endX,
-      endY: endY
-    };
   }
 };
 
