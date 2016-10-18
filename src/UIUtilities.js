@@ -22,20 +22,22 @@ module.exports = function (params, cy) {
 
       var cxtAddBendPointFcn = function (event) {
         var edge = event.cyTarget;
-        
-        var param = {
-          edge: edge,
-          weights: edge.scratch('cyedgebendeditingWeights')?[].concat(edge.scratch('cyedgebendeditingWeights')):edge.scratch('cyedgebendeditingWeights'),
-          distances: edge.scratch('cyedgebendeditingDistances')?[].concat(edge.scratch('cyedgebendeditingDistances')):edge.scratch('cyedgebendeditingDistances')
-        };
-        
-        bendPointUtilities.addBendPoint();
-        
-        if(options().undoable) {
-          cy.undoRedo().do('changeBendPoints', param);
+        if(!edge.hasClass('edgebendediting-ignore')) {
+
+          var param = {
+            edge: edge,
+            weights: edge.scratch('cyedgebendeditingWeights') ? [].concat(edge.scratch('cyedgebendeditingWeights')) : edge.scratch('cyedgebendeditingWeights'),
+            distances: edge.scratch('cyedgebendeditingDistances') ? [].concat(edge.scratch('cyedgebendeditingDistances')) : edge.scratch('cyedgebendeditingDistances')
+          };
+
+          bendPointUtilities.addBendPoint();
+
+          if (options().undoable) {
+            cy.undoRedo().do('changeBendPoints', param);
+          }
+
+          clearDraws(true);
         }
-        
-        clearDraws(true);
       };
 
       var cxtRemoveBendPointFcn = function (event) {
@@ -345,6 +347,9 @@ module.exports = function (params, cy) {
         
         cy.on('tapdrag', eTapDrag = function (event) {
           var edge = movedBendEdge;
+          if(movedBendEdge !== undefined && edge.hasClass('edgebendediting-ignore') ) {
+            return;
+          }
           
           if(createBendOnDrag) {
             bendPointUtilities.addBendPoint(edge, event.cyPosition);

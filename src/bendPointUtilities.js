@@ -6,17 +6,19 @@ var bendPointUtilities = {
   initBendPoints: function(bendPositionsFcn, edges) {
     for (var i = 0; i < edges.length; i++) {
       var edge = edges[i];
-      
-      // get the bend positions by applying the function for this edge
-      var bendPositions = bendPositionsFcn.apply(this, edge);
-      // calculate relative bend positions
-      var result = this.convertToRelativeBendPositions(edge, bendPositions);
+      if(!edge.hasClass('edgebendediting-ignore')) {
 
-      // if there are bend points set weights and distances accordingly and add class to enable style changes
-      if (result.distances.length > 0) {
-        edge.scratch('cyedgebendeditingWeights', result.weights);
-        edge.scratch('cyedgebendeditingDistances', result.distances);
-        edge.addClass('edgebendediting-hasbendpoints');
+        // get the bend positions by applying the function for this edge
+        var bendPositions = bendPositionsFcn.apply(this, edge);
+        // calculate relative bend positions
+        var result = this.convertToRelativeBendPositions(edge, bendPositions);
+
+        // if there are bend points set weights and distances accordingly and add class to enable style changes
+        if (result.distances.length > 0) {
+          edge.scratch('cyedgebendeditingWeights', result.weights);
+          edge.scratch('cyedgebendeditingDistances', result.distances);
+          edge.addClass('edgebendediting-hasbendpoints');
+        }
       }
     }
   },

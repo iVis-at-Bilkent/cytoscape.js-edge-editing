@@ -9,6 +9,8 @@ module.exports = function (cy) {
 
   function changeBendPoints(param) {
     var edge = param.edge;
+    if(edge.hasClass('cyedgebendediting-ignore'))
+      return;
     var result = {
       edge: edge,
       weights: param.set ? edge.scratch('cyedgebendeditingWeights') : param.weights,
