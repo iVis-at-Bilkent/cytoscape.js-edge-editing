@@ -22,7 +22,7 @@ module.exports = function (params, cy) {
 
       var cxtAddBendPointFcn = function (event) {
         var edge = event.cyTarget;
-        if(!edge.hasClass('edgebendediting-ignore')) {
+        if(!bendPointUtilities.ignoreEdge(edge)) {
 
           var param = {
             edge: edge,
@@ -347,7 +347,7 @@ module.exports = function (params, cy) {
         
         cy.on('tapdrag', eTapDrag = function (event) {
           var edge = movedBendEdge;
-          if(movedBendEdge !== undefined && edge.hasClass('edgebendediting-ignore') ) {
+          if(movedBendEdge !== undefined && bendPointUtilities.ignoreEdge(edge) ) {
             return;
           }
           

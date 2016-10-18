@@ -2,11 +2,14 @@ var bendPointUtilities = {
   currentCtxEdge: undefined,
   currentCtxPos: undefined,
   currentBendIndex: undefined,
+  ignoreClasses: undefined,
+
   // initilize bend points based on bendPositionsFcn
-  initBendPoints: function(bendPositionsFcn, edges) {
+  initBendPoints: function(bendPositionsFcn, edges, ignoreClasses) {
     for (var i = 0; i < edges.length; i++) {
       var edge = edges[i];
-      if(!edge.hasClass('edgebendediting-ignore')) {
+      this.ignoreClasses = ignoreClasses;
+      if(!this.ignoreEdge(edge)) {
 
         // get the bend positions by applying the function for this edge
         var bendPositions = bendPositionsFcn.apply(this, edge);
@@ -21,6 +24,14 @@ var bendPointUtilities = {
         }
       }
     }
+  },
+
+  ignoreEdge: function(edge) {
+    for(var i = 0; i < this.ignoreClasses.length; i++){
+      if(edge.hasClass(this.ignoreClasses[i]))
+        return true;
+    }
+    return false;
   },
   //Get the direction of the line from source point to the target point
   getLineDirection: function(srcPoint, tgtPoint){
