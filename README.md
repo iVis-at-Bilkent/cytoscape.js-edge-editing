@@ -67,6 +67,8 @@ An instance has a number of functions available:
 * of the ith bend point. (Returns undefined if the curve style is not segments)
 */
 instance.getSegmentPoints(ele);
+// Initilize bend points for the given edges using 'options.bendPositionsFunction'
+instance.initBendPoints(eles)
 ```
 
 You can also get an existing instance:
@@ -82,6 +84,8 @@ cy.contextMenus('get');
       bendPositionsFunction: function(ele) {
         return ele.data('bendPointPositions');
       },
+      // whether to initilize bend points on creation of this extension automatically
+      initBendPointsAutomatically: true,
       // whether the bend editing operations are undoable (requires cytoscape-undo-redo.js)
       undoable: false,
       // the size of bend shape is obtained by multipling width of edge with this parameter

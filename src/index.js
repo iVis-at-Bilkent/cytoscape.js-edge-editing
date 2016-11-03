@@ -13,6 +13,8 @@
       bendPositionsFunction: function(ele) {
         return ele.data('bendPointPositions');
       },
+      // whether to initilize bend points on creation of this extension automatically
+      initBendPointsAutomatically: true,
       // whether the bend editing operations are undoable (requires cytoscape-undo-redo.js)
       undoable: false,
       // the size of bend shape is obtained by multipling width of edge with this parameter
@@ -61,8 +63,10 @@
           'edge-distances': 'node-position'
         });
 
-        // init bend positions
-        bendPointUtilities.initBendPoints(options.bendPositionsFunction, cy.edges());
+        // init bend positions conditionally
+        if (options.initBendPointsAutomatically) {
+          bendPointUtilities.initBendPoints(options.bendPositionsFunction, cy.edges());
+        }
 
         if(options.enabled)
           uiUtilities(options, cy);
@@ -78,6 +82,10 @@
         */
         getSegmentPoints: function(ele) {
           return bendPointUtilities.getSegmentPoints(ele);
+        },
+        // Initilize bend points for the given edges using 'options.bendPositionsFunction'
+        initBendPoints: function(eles) {
+          bendPointUtilities.initBendPoints(options.bendPositionsFunction, eles);
         }
       };
 
