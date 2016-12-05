@@ -80,8 +80,7 @@ module.exports = function (params, cy) {
         }
         else {
           cy.contextMenus({
-            menuItems: menuItems,
-            menuItemClasses: ['cy-edge-bend-editing-cxt-operation']
+            menuItems: menuItems
           });
         }
       }
