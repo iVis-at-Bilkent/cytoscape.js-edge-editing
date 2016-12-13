@@ -28,6 +28,7 @@
     };
     
     var options;
+    var initilized = false;
     
     // Merge default options with the ones coming from parameter
     function extend(defaults, options) {
@@ -47,9 +48,14 @@
     cytoscape( 'core', 'edgeBendEditing', function(opts){
       var cy = this;
       
+      if( opts === 'initilized' ) {
+        return initilized;
+      }
+      
       if( opts !== 'get' ) {
         // merge the options with default ones
         options = extend(defaults, opts);
+        initilized = true;
 
         // define edgebendediting-hasbendpoints css class
         cy.style().selector('.edgebendediting-hasbendpoints').css({
@@ -74,7 +80,7 @@
           uiUtilities("unbind", cy);
       }
       
-      var instance = {
+      var instance = initilized ? {
         /*
         * get segment points of the given edge in an array A,
         * A[2 * i] is the x coordinate and A[2 * i + 1] is the y coordinate
@@ -87,7 +93,7 @@
         initBendPoints: function(eles) {
           bendPointUtilities.initBendPoints(options.bendPositionsFunction, eles);
         }
-      };
+      } : undefined;
 
       return instance; // chainability
     } );

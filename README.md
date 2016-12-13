@@ -74,7 +74,12 @@ instance.initBendPoints(eles)
 You can also get an existing instance:
 
 ```js
-cy.contextMenus('get');
+cy.edgeBendEditing('get'); // Returns undefined if the extension is not initialized yet
+```
+
+Or you can check if the extension is initilized before
+```js
+cy.edgeBendEditing('initialized');
 ```
 
 ## Default Options
