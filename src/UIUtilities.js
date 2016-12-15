@@ -35,7 +35,7 @@ module.exports = function (params, cy) {
           cy.undoRedo().do('changeBendPoints', param);
         }
         
-        clearDraws(true);
+        clearDraws(true); // clear draws and render bend shapes for the selected edges
       };
 
       var cxtRemoveBendPointFcn = function (event) {
@@ -53,7 +53,7 @@ module.exports = function (params, cy) {
           cy.undoRedo().do('changeBendPoints', param);
         }
         
-        clearDraws(true);
+        clearDraws(true); // clear draws and render bend shapes for the selected edges
       };
       
       var menuItems = [
@@ -110,7 +110,7 @@ module.exports = function (params, cy) {
 
           // redraw on canvas resize
           if(cy){
-            clearDraws(true);
+            clearDraws(true); // clear draws and render bend shapes for the selected edges
           }
         }, 0);
 
@@ -155,18 +155,20 @@ module.exports = function (params, cy) {
         };
       }
 
-      function clearDraws(renderSelectedBendShapes) {
+      // Clear node draws and render bend shapes for all selected edges if param is true,
+      // if param is a node render bend shapes for selected connected edges of that node
+      function clearDraws(param) {
 
         var w = $container.width();
         var h = $container.height();
 
         ctx.clearRect(0, 0, w, h);
         
-        if( renderSelectedBendShapes ) {
-          var selectedEdges = cy.edges(':selected');
-        
-          for( var i = 0; i < selectedEdges.length; i++ ) {
-            var edge = selectedEdges[i];
+        if( param ) {
+          var edges = param.isNode && param.isNode() ? param.connectedEdges(':selected') : cy.edges(':selected');
+          
+          for( var i = 0; i < edges.length; i++ ) {
+            var edge = edges[i];
             renderBendShapes(edge);
           }
         }
@@ -279,26 +281,24 @@ module.exports = function (params, cy) {
       }
 
       $container.cytoscape(function (e) {
-        clearDraws(true);
         
         lastPanningEnabled = cy.panningEnabled();
         lastZoomingEnabled = cy.zoomingEnabled();
         lastBoxSelectionEnabled = cy.boxSelectionEnabled();
         
         cy.bind('zoom pan', eZoom = function () {
-          clearDraws(true);
+          clearDraws(true); // clear draws and render bend shapes for the selected edges
         });
 
         cy.on('position', 'node', ePosition = function () {
           var node = this;
-          
-          clearDraws(true);
+          clearDraws(node); // clear draws and render bend shapes for selected connected edges of this node
         });
 
         cy.on('remove', 'edge', eRemove = function () {
           var node = this;
           
-          clearDraws(true);
+          clearDraws(true); // clear draws and render bend shapes for the selected edges
         });
         
         cy.on('select', 'edge', eSelect = function () {
@@ -310,7 +310,7 @@ module.exports = function (params, cy) {
         cy.on('unselect', 'edge', eUnselect = function () {
           var edge = this;
           
-          clearDraws(true);
+          clearDraws(true); // clear draws and render bend shapes for the selected edges
         });
         
         var movedBendIndex;
@@ -367,7 +367,7 @@ module.exports = function (params, cy) {
           edge.scratch('cyedgebendeditingWeights', weights);
           edge.scratch('cyedgebendeditingDistances', distances);
           
-          clearDraws(true);
+          clearDraws(true); // clear draws and render bend shapes for the selected edges
         });
         
         cy.on('tapend', eTapEnd = function (event) {
@@ -454,7 +454,7 @@ module.exports = function (params, cy) {
           createBendOnDrag = undefined;
 
           resetGestures();
-          clearDraws(true);
+          clearDraws(true); // clear draws and render bend shapes for the selected edges
         });
         
         cy.on('cxttap', 'edge', eCxtTap = function (event) {
@@ -480,7 +480,7 @@ module.exports = function (params, cy) {
         cy.on('cyedgebendediting.changeBendPoints', 'edge', function() {
           var edge = this;
           edge.select();
-          clearDraws(true);
+          clearDraws(true); // clear draws and render bend shapes for the selected edges
           
         });
         
