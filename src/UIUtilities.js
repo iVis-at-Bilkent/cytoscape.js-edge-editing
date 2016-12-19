@@ -7,7 +7,12 @@ module.exports = function (params, cy) {
 
   var addBendPointCxtMenuId = 'cy-edge-bend-editing-cxt-add-bend-point';
   var removeBendPointCxtMenuId = 'cy-edge-bend-editing-cxt-remove-bend-point';
-  var ePosition, eRemove, eZoom, eSelect, eUnselect, eTapStart, eTapDrag, eTapEnd, eCxtTap;
+  var ePosition, eRemove, eAdd, eZoom, eSelect, eUnselect, eTapStart, eTapDrag, eTapEnd, eCxtTap;
+  // last status of gestures
+  var lastPanningEnabled, lastZoomingEnabled, lastBoxSelectionEnabled;
+  // status of edge to highlight bends and selected edges
+  var edgeToHighlightBends, numberOfSelectedEdges;
+  
   var functions = {
     init: function () {
       // register undo redo functions
@@ -35,7 +40,7 @@ module.exports = function (params, cy) {
           cy.undoRedo().do('changeBendPoints', param);
         }
         
-        clearDraws(true); // clear draws and render bend shapes for the selected edges
+        refreshDraws();
       };
 
       var cxtRemoveBendPointFcn = function (event) {
@@ -53,20 +58,20 @@ module.exports = function (params, cy) {
           cy.undoRedo().do('changeBendPoints', param);
         }
         
-        clearDraws(true); // clear draws and render bend shapes for the selected edges
+        refreshDraws();
       };
       
       var menuItems = [
         {
           id: addBendPointCxtMenuId,
           title: opts.addBendMenuItemTitle,
-          selector: 'edge:selected',
+          selector: 'edge.cy-edge-bend-editing-highlight-bends',
           onClickFunction: cxtAddBendPointFcn
         },
         {
           id: removeBendPointCxtMenuId,
           title: opts.removeBendMenuItemTitle,
-          selector: 'edge:selected',
+          selector: 'edge.cy-edge-bend-editing-highlight-bends',
           onClickFunction: cxtRemoveBendPointFcn
         }
       ];
@@ -110,7 +115,7 @@ module.exports = function (params, cy) {
 
           // redraw on canvas resize
           if(cy){
-            clearDraws(true); // clear draws and render bend shapes for the selected edges
+            refreshDraws();
           }
         }, 0);
 
@@ -154,23 +159,16 @@ module.exports = function (params, cy) {
           y: y
         };
       }
-
-      // Clear node draws and render bend shapes for all selected edges if param is true,
-      // if param is a node render bend shapes for selected connected edges of that node
-      function clearDraws(param) {
+      
+      function refreshDraws() {
 
         var w = $container.width();
         var h = $container.height();
 
         ctx.clearRect(0, 0, w, h);
         
-        if( param ) {
-          var edges = param.isNode && param.isNode() ? param.connectedEdges(':selected') : cy.edges(':selected');
-          
-          for( var i = 0; i < edges.length; i++ ) {
-            var edge = edges[i];
-            renderBendShapes(edge);
-          }
+        if( edgeToHighlightBends ) {
+          renderBendShapes(edgeToHighlightBends);
         }
       }
       
@@ -258,9 +256,6 @@ module.exports = function (params, cy) {
 
         return -1;
       };
-
-      // last status of gestures
-      var lastPanningEnabled, lastZoomingEnabled, lastBoxSelectionEnabled;
       
       // store the current status of gestures and set them to false
       function disableGestures() {
@@ -286,31 +281,131 @@ module.exports = function (params, cy) {
         lastZoomingEnabled = cy.zoomingEnabled();
         lastBoxSelectionEnabled = cy.boxSelectionEnabled();
         
+        // Initilize the edgeToHighlightBends and numberOfSelectedEdges
+        {
+          var selectedEdges = cy.edges(':selected');
+          var numberOfSelectedEdges = selectedEdges.length;
+          
+          if ( numberOfSelectedEdges === 1 ) {
+            edgeToHighlightBends = selectedEdges[0];
+          }
+        }
+        
         cy.bind('zoom pan', eZoom = function () {
-          clearDraws(true); // clear draws and render bend shapes for the selected edges
+          refreshDraws();
         });
 
         cy.on('position', 'node', ePosition = function () {
-          var node = this;
-          clearDraws(node); // clear draws and render bend shapes for selected connected edges of this node
+          refreshDraws();
         });
 
         cy.on('remove', 'edge', eRemove = function () {
-          var node = this;
-          
-          clearDraws(true); // clear draws and render bend shapes for the selected edges
+          var edge = this;
+          if (edge.selected()) {
+            numberOfSelectedEdges = numberOfSelectedEdges - 1;
+            
+            cy.startBatch();
+            
+            if (edgeToHighlightBends) {
+              edgeToHighlightBends.removeClass('cy-edge-bend-editing-highlight-bends');
+            }
+            
+            if (numberOfSelectedEdges === 1) {
+              var selectedEdges = cy.edges(':selected');
+              
+              // If user removes all selected edges at a single operation then our 'numberOfSelectedEdges'
+              // may be misleading. Therefore we need to check if the number of edges to highlight is realy 1 here.
+              if (selectedEdges.length === 1) {
+                edgeToHighlightBends = selectedEdges[0];
+                edgeToHighlightBends.addClass('cy-edge-bend-editing-highlight-bends');
+              }
+              else {
+                edgeToHighlightBends = undefined;
+              }
+            }
+            else {
+              edgeToHighlightBends = undefined;
+            }
+            
+            cy.endBatch();
+          }
+          refreshDraws();
+        });
+        
+         cy.on('add', 'edge', eAdd = function () {
+          var edge = this;
+          if (edge.selected()) {
+            numberOfSelectedEdges = numberOfSelectedEdges + 1;
+            
+            cy.startBatch();
+            
+            if (edgeToHighlightBends) {
+              edgeToHighlightBends.removeClass('cy-edge-bend-editing-highlight-bends');
+            }
+            
+            if (numberOfSelectedEdges === 1) {
+              edgeToHighlightBends = edge;
+              edgeToHighlightBends.addClass('cy-edge-bend-editing-highlight-bends');
+            }
+            else {
+              edgeToHighlightBends = undefined;
+            }
+            
+            cy.endBatch();
+          }
+          refreshDraws();
         });
         
         cy.on('select', 'edge', eSelect = function () {
           var edge = this;
+          numberOfSelectedEdges = numberOfSelectedEdges + 1;
           
-          renderBendShapes(edge);
+          cy.startBatch();
+            
+          if (edgeToHighlightBends) {
+            edgeToHighlightBends.removeClass('cy-edge-bend-editing-highlight-bends');
+          }
+            
+          if (numberOfSelectedEdges === 1) {
+            edgeToHighlightBends = edge;
+            edgeToHighlightBends.addClass('cy-edge-bend-editing-highlight-bends');
+          }
+          else {
+            edgeToHighlightBends = undefined;
+          }
+          
+          cy.endBatch();
+          refreshDraws();
         });
         
         cy.on('unselect', 'edge', eUnselect = function () {
-          var edge = this;
+          numberOfSelectedEdges = numberOfSelectedEdges - 1;
+            
+          cy.startBatch();
+            
+          if (edgeToHighlightBends) {
+            edgeToHighlightBends.removeClass('cy-edge-bend-editing-highlight-bends');
+          }
+            
+          if (numberOfSelectedEdges === 1) {
+            var selectedEdges = cy.edges(':selected');
+            
+            // If user unselects all edges by tapping to the core etc. then our 'numberOfSelectedEdges'
+            // may be misleading. Therefore we need to check if the number of edges to highlight is realy 1 here.
+            if (selectedEdges.length === 1) {
+              edgeToHighlightBends = selectedEdges[0];
+              edgeToHighlightBends.addClass('cy-edge-bend-editing-highlight-bends');
+            }
+            else {
+              edgeToHighlightBends = undefined;
+            }
+          }
+          else {
+            edgeToHighlightBends = undefined;
+          }
           
-          clearDraws(true); // clear draws and render bend shapes for the selected edges
+          cy.endBatch();
+          refreshDraws();
         });
         
         var movedBendIndex;
@@ -320,6 +415,12 @@ module.exports = function (params, cy) {
         
         cy.on('tapstart', 'edge', eTapStart = function (event) {
           var edge = this;
+          
+          if (!edgeToHighlightBends || edgeToHighlightBends.id() !== edge.id()) {
+            createBendOnDrag = false;
+            return;
+          }
+          
           movedBendEdge = edge;
           
           moveBendParam = {
@@ -367,7 +468,7 @@ module.exports = function (params, cy) {
           edge.scratch('cyedgebendeditingWeights', weights);
           edge.scratch('cyedgebendeditingDistances', distances);
           
-          clearDraws(true); // clear draws and render bend shapes for the selected edges
+          refreshDraws();
         });
         
         cy.on('tapend', eTapEnd = function (event) {
@@ -454,7 +555,7 @@ module.exports = function (params, cy) {
           createBendOnDrag = undefined;
 
           resetGestures();
-          clearDraws(true); // clear draws and render bend shapes for the selected edges
+          refreshDraws();
         });
         
         cy.on('cxttap', 'edge', eCxtTap = function (event) {
@@ -479,9 +580,7 @@ module.exports = function (params, cy) {
         
         cy.on('cyedgebendediting.changeBendPoints', 'edge', function() {
           var edge = this;
-          edge.select();
-          clearDraws(true); // clear draws and render bend shapes for the selected edges
-          
+          refreshDraws();
         });
         
       });
@@ -491,6 +590,7 @@ module.exports = function (params, cy) {
     unbind: function () {
         cy.off('position', 'node', ePosition)
           .off('remove', 'node', eRemove)
+          .off('add', 'node', eAdd)
           .off('select', 'edge', eSelect)
           .off('unselect', 'edge', eUnselect)
           .off('tapstart', 'edge', eTapStart)
