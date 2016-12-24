@@ -292,10 +292,22 @@ module.exports = function (params, cy) {
         }
         
         cy.bind('zoom pan', eZoom = function () {
+          if ( !edgeToHighlightBends ) {
+            return;
+          }
+          
           refreshDraws();
         });
 
         cy.on('position', 'node', ePosition = function () {
+          var node = this;
+          
+          // If there is no edge to highlight bends or this node is not any end of that edge return directly
+          if ( !edgeToHighlightBends || !( edgeToHighlightBends.data('source') === node.id() 
+                  || edgeToHighlightBends.data('target') === node.id() ) ) {
+            return;
+          }
+          
           refreshDraws();
         });
 
