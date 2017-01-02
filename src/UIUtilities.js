@@ -27,7 +27,7 @@ module.exports = function (params, cy) {
 
       var cxtAddBendPointFcn = function (event) {
         var edge = event.cyTarget;
-        if(!bendPointUtilities.ignoreEdge(edge)) {
+        if(!bendPointUtilities.isIgnoredEdge(edge)) {
 
           var param = {
             edge: edge,
@@ -459,7 +459,7 @@ module.exports = function (params, cy) {
         
         cy.on('tapdrag', eTapDrag = function (event) {
           var edge = movedBendEdge;
-          if(movedBendEdge !== undefined && bendPointUtilities.ignoreEdge(edge) ) {
+          if(movedBendEdge !== undefined && bendPointUtilities.isIgnoredEdge(edge) ) {
             return;
           }
           
@@ -580,7 +580,7 @@ module.exports = function (params, cy) {
           
           var menus = cy.contextMenus('get'); // get context menus instance
           
-          if(!edgeToHighlightBends || edgeToHighlightBends.id() != edge.id() || bendPointUtilities.ignoreEdge(edge)) {
+          if(!edgeToHighlightBends || edgeToHighlightBends.id() != edge.id() || bendPointUtilities.isIgnoredEdge(edge)) {
             menus.hideMenuItem(removeBendPointCxtMenuId);
             menus.hideMenuItem(addBendPointCxtMenuId);
             return;

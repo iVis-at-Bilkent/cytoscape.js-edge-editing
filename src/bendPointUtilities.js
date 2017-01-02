@@ -2,15 +2,15 @@ var bendPointUtilities = {
   currentCtxEdge: undefined,
   currentCtxPos: undefined,
   currentBendIndex: undefined,
-  ignoreClasses: undefined,
-  setIgnoreClasses: function(_ignoreClasses) {
-    this.ignoreClasses = _ignoreClasses;
+  ignoredClasses: undefined,
+  setIgnoredClasses: function(_ignoredClasses) {
+    this.ignoredClasses = _ignoredClasses;
   },
   // initilize bend points based on bendPositionsFcn
   initBendPoints: function(bendPositionsFcn, edges) {
     for (var i = 0; i < edges.length; i++) {
       var edge = edges[i];
-      if(!this.ignoreEdge(edge)) {
+      if(!this.isIgnoredEdge(edge)) {
 
         // get the bend positions by applying the function for this edge
         var bendPositions = bendPositionsFcn.apply(this, edge);
@@ -27,9 +27,9 @@ var bendPointUtilities = {
     }
   },
 
-  ignoreEdge: function(edge) {
-    for(var i = 0; i < this.ignoreClasses && this.ignoreClasses.length; i++){
-      if(edge.hasClass(this.ignoreClasses[i]))
+  isIgnoredEdge: function(edge) {
+    for(var i = 0; this.ignoredClasses && i <  this.ignoredClasses.length; i++){
+      if(edge.hasClass(this.ignoredClasses[i]))
         return true;
     }
     return false;
