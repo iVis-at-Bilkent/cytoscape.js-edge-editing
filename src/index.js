@@ -15,6 +15,8 @@
       },
       // whether to initilize bend points on creation of this extension automatically
       initBendPointsAutomatically: true,
+      // the classes of those edges that should be ignored
+      ignoreClasses: [],
       // whether the bend editing operations are undoable (requires cytoscape-undo-redo.js)
       undoable: false,
       // the size of bend shape is obtained by multipling width of edge with this parameter
@@ -69,9 +71,11 @@
           'edge-distances': 'node-position'
         });
 
+        bendPointUtilities.setIgnoreClasses(options.ignoreClasses);
+
         // init bend positions conditionally
         if (options.initBendPointsAutomatically) {
-          bendPointUtilities.initBendPoints(options.bendPositionsFunction, cy.edges());
+          bendPointUtilities.initBendPoints(options.bendPositionsFunction, cy.edges(), options.ignoreClasses);
         }
 
         if(options.enabled)

@@ -27,17 +27,19 @@ module.exports = function (params, cy) {
 
       var cxtAddBendPointFcn = function (event) {
         var edge = event.cyTarget;
-        
-        var param = {
-          edge: edge,
-          weights: edge.scratch('cyedgebendeditingWeights')?[].concat(edge.scratch('cyedgebendeditingWeights')):edge.scratch('cyedgebendeditingWeights'),
-          distances: edge.scratch('cyedgebendeditingDistances')?[].concat(edge.scratch('cyedgebendeditingDistances')):edge.scratch('cyedgebendeditingDistances')
-        };
-        
-        bendPointUtilities.addBendPoint();
-        
-        if(options().undoable) {
-          cy.undoRedo().do('changeBendPoints', param);
+        if(!bendPointUtilities.ignoreEdge(edge)) {
+
+          var param = {
+            edge: edge,
+            weights: edge.scratch('cyedgebendeditingWeights') ? [].concat(edge.scratch('cyedgebendeditingWeights')) : edge.scratch('cyedgebendeditingWeights'),
+            distances: edge.scratch('cyedgebendeditingDistances') ? [].concat(edge.scratch('cyedgebendeditingDistances')) : edge.scratch('cyedgebendeditingDistances')
+          };
+
+          bendPointUtilities.addBendPoint();
+
+          if (options().undoable) {
+            cy.undoRedo().do('changeBendPoints', param);
+          }
         }
         
         refreshDraws();
@@ -65,13 +67,13 @@ module.exports = function (params, cy) {
         {
           id: addBendPointCxtMenuId,
           title: opts.addBendMenuItemTitle,
-          selector: 'edge.cy-edge-bend-editing-highlight-bends',
+          selector: 'edge',
           onClickFunction: cxtAddBendPointFcn
         },
         {
           id: removeBendPointCxtMenuId,
           title: opts.removeBendMenuItemTitle,
-          selector: 'edge.cy-edge-bend-editing-highlight-bends',
+          selector: 'edge',
           onClickFunction: cxtRemoveBendPointFcn
         }
       ];
@@ -457,6 +459,9 @@ module.exports = function (params, cy) {
         
         cy.on('tapdrag', eTapDrag = function (event) {
           var edge = movedBendEdge;
+          if(movedBendEdge !== undefined && bendPointUtilities.ignoreEdge(edge) ) {
+            return;
+          }
           
           if(createBendOnDrag) {
             bendPointUtilities.addBendPoint(edge, event.cyPosition);
@@ -573,17 +578,23 @@ module.exports = function (params, cy) {
         cy.on('cxttap', 'edge', eCxtTap = function (event) {
           var edge = this;
           
-          if(!edge.selected()) {
+          var menus = cy.contextMenus('get'); // get context menus instance
+          
+          if(!edgeToHighlightBends || edgeToHighlightBends.id() != edge.id() || bendPointUtilities.ignoreEdge(edge)) {
+            menus.hideMenuItem(removeBendPointCxtMenuId);
+            menus.hideMenuItem(addBendPointCxtMenuId);
             return;
           }
 
           var selectedBendIndex = getContainingBendShapeIndex(event.cyPosition.x, event.cyPosition.y, edge);
           if (selectedBendIndex == -1) {
-            $('#' + removeBendPointCxtMenuId).css('display', 'none');
+            menus.hideMenuItem(removeBendPointCxtMenuId);
+            menus.showMenuItem(addBendPointCxtMenuId);
             bendPointUtilities.currentCtxPos = event.cyPosition;
           }
           else {
-            $('#' + addBendPointCxtMenuId).css('display', 'none');
+            menus.hideMenuItem(addBendPointCxtMenuId);
+            menus.showMenuItem(removeBendPointCxtMenuId);
             bendPointUtilities.currentBendIndex = selectedBendIndex;
           }
 

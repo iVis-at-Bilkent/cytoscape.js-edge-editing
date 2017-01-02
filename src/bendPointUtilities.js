@@ -2,23 +2,37 @@ var bendPointUtilities = {
   currentCtxEdge: undefined,
   currentCtxPos: undefined,
   currentBendIndex: undefined,
+  ignoreClasses: undefined,
+  setIgnoreClasses: function(_ignoreClasses) {
+    this.ignoreClasses = _ignoreClasses;
+  },
   // initilize bend points based on bendPositionsFcn
   initBendPoints: function(bendPositionsFcn, edges) {
     for (var i = 0; i < edges.length; i++) {
       var edge = edges[i];
-      
-      // get the bend positions by applying the function for this edge
-      var bendPositions = bendPositionsFcn.apply(this, edge);
-      // calculate relative bend positions
-      var result = this.convertToRelativeBendPositions(edge, bendPositions);
+      if(!this.ignoreEdge(edge)) {
 
-      // if there are bend points set weights and distances accordingly and add class to enable style changes
-      if (result.distances.length > 0) {
-        edge.scratch('cyedgebendeditingWeights', result.weights);
-        edge.scratch('cyedgebendeditingDistances', result.distances);
-        edge.addClass('edgebendediting-hasbendpoints');
+        // get the bend positions by applying the function for this edge
+        var bendPositions = bendPositionsFcn.apply(this, edge);
+        // calculate relative bend positions
+        var result = this.convertToRelativeBendPositions(edge, bendPositions);
+
+        // if there are bend points set weights and distances accordingly and add class to enable style changes
+        if (result.distances.length > 0) {
+          edge.scratch('cyedgebendeditingWeights', result.weights);
+          edge.scratch('cyedgebendeditingDistances', result.distances);
+          edge.addClass('edgebendediting-hasbendpoints');
+        }
       }
     }
+  },
+
+  ignoreEdge: function(edge) {
+    for(var i = 0; i < this.ignoreClasses && this.ignoreClasses.length; i++){
+      if(edge.hasClass(this.ignoreClasses[i]))
+        return true;
+    }
+    return false;
   },
   //Get the direction of the line from source point to the target point
   getLineDirection: function(srcPoint, tgtPoint){
