@@ -16,8 +16,7 @@
 		<!--<script src="../cytoscape.js/build/cytoscape.js"></script>-->
                 
                 <script src="https://cdn.rawgit.com/ivis-at-bilkent/cytoscape.js-context-menus/master/cytoscape-context-menus.js"></script>
-                <!--<script src="https://cdn.rawgit.com/ivis-at-bilkent/cytoscape.js-undo-redo/master/cytoscape-undo-redo.js"></script>-->
-		<script src="cytoscape-undo-redo.js"></script>
+		<script src="https://cdn.rawgit.com/ivis-at-bilkent/cytoscape.js-undo-redo/master/cytoscape-undo-redo.js"></script>
                 <script src="cytoscape-edge-bend-editing.js"></script>
 
 		<style>
@@ -98,6 +97,15 @@
                                   });
 
 			});
+                        
+                        document.addEventListener('keydown', function (e){
+                                if (e.ctrlKey && e.which == '90') {
+                                        cy.undoRedo().undo();	     
+                                }
+                                else if (e.ctrlKey && e.which == '89') {
+                                        cy.undoRedo().redo();     
+                                }
+                        }, true );
 		</script>
 	</head>
 
