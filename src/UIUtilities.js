@@ -239,7 +239,7 @@ module.exports = function (params, cy) {
 
       // get tge index of bend point containing the point represented by {x, y}
       function getContainingBendShapeIndex(x, y, edge) {
-        if(edge.scratch('cyedgebendeditingWeights') == null || edge.scratch('cyedgebendeditingWeights').lenght == 0){
+        if(edge.scratch('cyedgebendeditingWeights') == null || edge.scratch('cyedgebendeditingWeights').length == 0){
           return -1;
         }
 

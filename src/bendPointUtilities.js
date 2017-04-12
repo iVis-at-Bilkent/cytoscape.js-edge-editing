@@ -393,7 +393,7 @@ var bendPointUtilities = {
     weights.splice(bendPointIndex, 1);
     
     
-    if(distances.length == 0 || weights.lenght == 0){
+    if(distances.length == 0 || weights.length == 0){
       edge.removeClass('edgebendediting-hasbendpoints');
     }
     else {
