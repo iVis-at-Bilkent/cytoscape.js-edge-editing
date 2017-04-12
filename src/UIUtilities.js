@@ -26,7 +26,7 @@ module.exports = function (params, cy) {
       $container.append($canvas);
 
       var cxtAddBendPointFcn = function (event) {
-        var edge = event.cyTarget;
+        var edge = event.target || event.cyTarget;
         if(!bendPointUtilities.isIgnoredEdge(edge)) {
 
           var param = {
@@ -46,7 +46,7 @@ module.exports = function (params, cy) {
       };
 
       var cxtRemoveBendPointFcn = function (event) {
-        var edge = event.cyTarget;
+        var edge = event.target || event.cyTarget;
         
         var param = {
           edge: edge,
@@ -276,9 +276,8 @@ module.exports = function (params, cy) {
           .panningEnabled(lastPanningEnabled)
           .boxSelectionEnabled(lastBoxSelectionEnabled);
       }
-
-      $container.cytoscape(function (e) {
-        
+      
+      {  
         lastPanningEnabled = cy.panningEnabled();
         lastZoomingEnabled = cy.zoomingEnabled();
         lastBoxSelectionEnabled = cy.boxSelectionEnabled();
@@ -443,8 +442,9 @@ module.exports = function (params, cy) {
             distances: edge.scratch('cyedgebendeditingDistances') ? [].concat(edge.scratch('cyedgebendeditingDistances')) : []
           };
           
-          var cyPosX = event.cyPosition.x;
-          var cyPosY = event.cyPosition.y;
+          var cyPos = event.position || event.cyPosition;
+          var cyPosX = cyPos.x;
+          var cyPosY = cyPos.y;
 
           var index = getContainingBendShapeIndex(cyPosX, cyPosY, edge);
           if (index != -1) {
@@ -464,8 +464,9 @@ module.exports = function (params, cy) {
           }
           
           if(createBendOnDrag) {
-            bendPointUtilities.addBendPoint(edge, event.cyPosition);
-            movedBendIndex = getContainingBendShapeIndex(event.cyPosition.x, event.cyPosition.y, edge);
+            var cyPos = event.position || event.cyPosition;
+            bendPointUtilities.addBendPoint(edge, cyPos);
+            movedBendIndex = getContainingBendShapeIndex(cyPos.x, cyPos.y, edge);
             movedBendEdge = edge;
             createBendOnDrag = undefined;
             disableGestures();
@@ -478,7 +479,7 @@ module.exports = function (params, cy) {
           var weights = edge.scratch('cyedgebendeditingWeights');
           var distances = edge.scratch('cyedgebendeditingDistances');
 
-          var relativeBendPosition = bendPointUtilities.convertToRelativeBendPosition(edge, event.cyPosition);
+          var relativeBendPosition = bendPointUtilities.convertToRelativeBendPosition(edge, event.position || event.cyPosition);
           weights[movedBendIndex] = relativeBendPosition.weight;
           distances[movedBendIndex] = relativeBendPosition.distance;
 
@@ -586,11 +587,12 @@ module.exports = function (params, cy) {
             return;
           }
 
-          var selectedBendIndex = getContainingBendShapeIndex(event.cyPosition.x, event.cyPosition.y, edge);
+          var cyPos = event.position || event.cyPosition;
+          var selectedBendIndex = getContainingBendShapeIndex(cyPos.x, cyPos.y, edge);
           if (selectedBendIndex == -1) {
             menus.hideMenuItem(removeBendPointCxtMenuId);
             menus.showMenuItem(addBendPointCxtMenuId);
-            bendPointUtilities.currentCtxPos = event.cyPosition;
+            bendPointUtilities.currentCtxPos = cyPos;
           }
           else {
             menus.hideMenuItem(addBendPointCxtMenuId);
@@ -609,8 +611,7 @@ module.exports = function (params, cy) {
           cy.endBatch();
           refreshDraws();
         });
-        
-      });
+      }
 
       $container.data('cyedgebendediting', data);
     },
