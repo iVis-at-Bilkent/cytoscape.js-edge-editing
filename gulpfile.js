@@ -92,7 +92,7 @@ gulp.task('push', shell.task([
 ]));
 
 gulp.task('tag', shell.task([
-  'git tag -a $VERSION -m "tagging v$VERSION"',
+  'git tag -a v$VERSION -m "tagging v$VERSION"',
   'git push origin $VERSION'
 ]));
 
