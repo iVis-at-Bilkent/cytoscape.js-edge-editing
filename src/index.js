@@ -1,6 +1,7 @@
 ;(function(){ 'use strict';
   
   var bendPointUtilities = require('./bendPointUtilities');
+  var debounce = require("./debounce");
   
   // registers the extension on a cytoscape lib ref
   var register = function( cytoscape, $ ){

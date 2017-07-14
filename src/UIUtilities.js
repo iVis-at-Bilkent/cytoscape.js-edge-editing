@@ -31,8 +31,8 @@ module.exports = function (params, cy) {
 
           var param = {
             edge: edge,
-            weights: edge.scratch('cyedgebendeditingWeights') ? [].concat(edge.scratch('cyedgebendeditingWeights')) : edge.scratch('cyedgebendeditingWeights'),
-            distances: edge.scratch('cyedgebendeditingDistances') ? [].concat(edge.scratch('cyedgebendeditingDistances')) : edge.scratch('cyedgebendeditingDistances')
+            weights: edge.data('cyedgebendeditingWeights') ? [].concat(edge.data('cyedgebendeditingWeights')) : edge.data('cyedgebendeditingWeights'),
+            distances: edge.data('cyedgebendeditingDistances') ? [].concat(edge.data('cyedgebendeditingDistances')) : edge.data('cyedgebendeditingDistances')
           };
 
           bendPointUtilities.addBendPoint();
@@ -50,8 +50,8 @@ module.exports = function (params, cy) {
         
         var param = {
           edge: edge,
-          weights: [].concat(edge.scratch('cyedgebendeditingWeights')),
-          distances: [].concat(edge.scratch('cyedgebendeditingDistances'))
+          weights: [].concat(edge.data('cyedgebendeditingWeights')),
+          distances: [].concat(edge.data('cyedgebendeditingDistances'))
         };
 
         bendPointUtilities.removeBendPoint();
@@ -184,14 +184,14 @@ module.exports = function (params, cy) {
           return;
         }
         
-        var segpts = bendPointUtilities.getSegmentPoints(edge);//edge._private.rscratch.segpts;
+        var segpts = bendPointUtilities.getSegmentPoints(edge);//edge._private.rdata.segpts;
         var length = getBendShapesLenght(edge);
         
         var srcPos = edge.source().position();
         var tgtPos = edge.target().position();
         
-        var weights = edge.scratch('cyedgebendeditingWeights');
-        var distances = edge.scratch('cyedgebendeditingDistances');
+        var weights = edge.data('cyedgebendeditingWeights');
+        var distances = edge.data('cyedgebendeditingDistances');
 
         for(var i = 0; segpts && i < segpts.length; i = i + 2){
           var bendX = segpts[i];
@@ -241,11 +241,11 @@ module.exports = function (params, cy) {
 
       // get tge index of bend point containing the point represented by {x, y}
       function getContainingBendShapeIndex(x, y, edge) {
-        if(edge.scratch('cyedgebendeditingWeights') == null || edge.scratch('cyedgebendeditingWeights').length == 0){
+        if(edge.data('cyedgebendeditingWeights') == null || edge.data('cyedgebendeditingWeights').length == 0){
           return -1;
         }
 
-        var segpts = bendPointUtilities.getSegmentPoints(edge);//edge._private.rscratch.segpts;
+        var segpts = bendPointUtilities.getSegmentPoints(edge);//edge._private.rdata.segpts;
         var length = getBendShapesLenght(edge);
 
         for(var i = 0; segpts && i < segpts.length; i = i + 2){
@@ -440,8 +440,8 @@ module.exports = function (params, cy) {
           
           moveBendParam = {
             edge: edge,
-            weights: edge.scratch('cyedgebendeditingWeights') ? [].concat(edge.scratch('cyedgebendeditingWeights')) : [],
-            distances: edge.scratch('cyedgebendeditingDistances') ? [].concat(edge.scratch('cyedgebendeditingDistances')) : []
+            weights: edge.data('cyedgebendeditingWeights') ? [].concat(edge.data('cyedgebendeditingWeights')) : [],
+            distances: edge.data('cyedgebendeditingDistances') ? [].concat(edge.data('cyedgebendeditingDistances')) : []
           };
           
           var cyPos = event.position || event.cyPosition;
@@ -478,15 +478,15 @@ module.exports = function (params, cy) {
             return;
           }
 
-          var weights = edge.scratch('cyedgebendeditingWeights');
-          var distances = edge.scratch('cyedgebendeditingDistances');
+          var weights = edge.data('cyedgebendeditingWeights');
+          var distances = edge.data('cyedgebendeditingDistances');
 
           var relativeBendPosition = bendPointUtilities.convertToRelativeBendPosition(edge, event.position || event.cyPosition);
           weights[movedBendIndex] = relativeBendPosition.weight;
           distances[movedBendIndex] = relativeBendPosition.distance;
 
-          edge.scratch('cyedgebendeditingWeights', weights);
-          edge.scratch('cyedgebendeditingDistances', distances);
+          edge.data('cyedgebendeditingWeights', weights);
+          edge.data('cyedgebendeditingDistances', distances);
           
           refreshDraws();
         });
@@ -561,8 +561,8 @@ module.exports = function (params, cy) {
             }
           }
           
-          if (edge !== undefined && moveBendParam !== undefined && edge.scratch('cyedgebendeditingWeights')
-                  && edge.scratch('cyedgebendeditingWeights').toString() != moveBendParam.weights.toString()) {
+          if (edge !== undefined && moveBendParam !== undefined && edge.data('cyedgebendeditingWeights')
+                  && edge.data('cyedgebendeditingWeights').toString() != moveBendParam.weights.toString()) {
             
             if(options().undoable) {
               cy.undoRedo().do('changeBendPoints', moveBendParam);
