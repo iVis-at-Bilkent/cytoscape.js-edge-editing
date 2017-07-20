@@ -224,9 +224,10 @@ module.exports = function (params, cy) {
       
       // get the length of bend points to be rendered
       function getBendShapesLenght(edge) {
-        var factor = options().bendShapeSizeFactor;
-        var length = parseFloat(edge.css('width')) * factor;
-        return length;
+          var factor = options().bendShapeSizeFactor;
+          if (parseFloat(edge.css('width')) <= 2.5)
+              return 2.5 * factor;
+          else return parseFloat(edge.css('width'))*factor;
       }
       
       // check if the point represented by {x, y} is inside the bend shape
