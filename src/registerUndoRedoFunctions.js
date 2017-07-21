@@ -20,8 +20,8 @@ module.exports = function (cy) {
 
     //Check if we need to set the weights and distances by the param values
     if (param.set) {
-      hasBend ? edge.data('cyedgebendeditingWeights', param.weights) : edge.removeScratch('cyedgebendeditingWeights');
-      hasBend ? edge.data('cyedgebendeditingDistances', param.distances) : edge.removeScratch('cyedgebendeditingDistances');
+      hasBend ? edge.data('cyedgebendeditingWeights', param.weights) : edge.removeData('cyedgebendeditingWeights');
+      hasBend ? edge.data('cyedgebendeditingDistances', param.distances) : edge.removeData('cyedgebendeditingDistances');
 
       //refresh the curve style as the number of bend point would be changed by the previous operation
       if (hasBend) {
