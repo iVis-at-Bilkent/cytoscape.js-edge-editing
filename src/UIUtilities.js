@@ -315,6 +315,10 @@ module.exports = function (params, cy) {
           refreshDraws();
         });
 
+        cy.on('style', 'edge.edgebendediting-hasbendpoints:selected', eStyle = function () {
+          refreshDraws();
+        });
+
         cy.on('remove', 'edge', eRemove = function () {
           var edge = this;
           if (edge.selected()) {
