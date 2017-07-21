@@ -7,7 +7,7 @@ module.exports = function (params, cy) {
 
   var addBendPointCxtMenuId = 'cy-edge-bend-editing-cxt-add-bend-point';
   var removeBendPointCxtMenuId = 'cy-edge-bend-editing-cxt-remove-bend-point';
-  var ePosition, eRemove, eAdd, eZoom, eSelect, eUnselect, eTapStart, eTapDrag, eTapEnd, eCxtTap;
+  var ePosition, eStyle, eRemove, eAdd, eZoom, eSelect, eUnselect, eTapStart, eTapDrag, eTapEnd, eCxtTap;
   // last status of gestures
   var lastPanningEnabled, lastZoomingEnabled, lastBoxSelectionEnabled;
   // status of edge to highlight bends and selected edges
@@ -626,6 +626,7 @@ module.exports = function (params, cy) {
         cy.off('position', 'node', ePosition)
           .off('remove', 'node', eRemove)
           .off('add', 'node', eAdd)
+          .off('style', 'edge.edgebendediting-hasbendpoints:selected', eStyle)
           .off('select', 'edge', eSelect)
           .off('unselect', 'edge', eUnselect)
           .off('tapstart', 'edge', eTapStart)
