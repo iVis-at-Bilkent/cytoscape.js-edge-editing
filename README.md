@@ -11,6 +11,10 @@ A Cytoscape.js extension enabling interactive editing of edge bend points, distr
  * Alternatively, 
     * You can click anywhere on the edge (if it is the only selected edge) to introduce and relocate a bend point by dragging.
     * A bend point is removed if it is dropped near the line segment between its two neighbours.
+    
+## Demo
+
+Click [here](https://rawgit.com/iVis-at-Bilkent/cytoscape.js-edge-bend-editing/master/demo.html) for demo
 
 ## Dependencies
 
