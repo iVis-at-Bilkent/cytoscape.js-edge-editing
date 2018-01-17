@@ -303,6 +303,10 @@ module.exports = function (params, cy) {
           refreshDraws();
         });
 
+        cy.on('data', 'edge',  function () {
+          refreshDraws();
+        });
+
         cy.on('position', 'node', ePosition = function () {
           var node = this;
           
@@ -615,6 +619,7 @@ module.exports = function (params, cy) {
           cy.startBatch();
           cy.edges().unselect();
           edge.select();
+          cy.trigger('bendPointMovement');
           cy.endBatch();
           refreshDraws();
         });

@@ -97,7 +97,10 @@
         // Initilize bend points for the given edges using 'options.bendPositionsFunction'
         initBendPoints: function(eles) {
           bendPointUtilities.initBendPoints(options.bendPositionsFunction, eles);
-        }
+        },
+        deleteSelectedBendPoint: function(ele, index) {
+          bendPointUtilities.removeBendPoint(ele,index);
+          }
       } : undefined;
 
       return instance; // chainability

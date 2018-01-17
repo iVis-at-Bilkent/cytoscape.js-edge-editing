@@ -395,6 +395,8 @@ var bendPointUtilities = {
     
     if(distances.length == 0 || weights.length == 0){
       edge.removeClass('edgebendediting-hasbendpoints');
+        edge.data('cyedgebendeditingDistances', []);
+        edge.data('cyedgebendeditingWeights', []);
     }
     else {
       edge.data('cyedgebendeditingDistances', distances);

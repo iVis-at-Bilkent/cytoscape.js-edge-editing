@@ -304,6 +304,10 @@ module.exports = function (params, cy) {
           refreshDraws();
         });
 
+        cy.on('data', 'edge',  function () {
+            refreshDraws();
+        });
+
         cy.on('position', 'node', ePosition = function () {
           var node = this;
           
@@ -616,6 +620,7 @@ module.exports = function (params, cy) {
           cy.startBatch();
           cy.edges().unselect();
           edge.select();
+          cy.trigger('bendPointMovement');
           cy.endBatch();
           refreshDraws();
         });
@@ -1048,6 +1053,8 @@ var bendPointUtilities = {
     
     if(distances.length == 0 || weights.length == 0){
       edge.removeClass('edgebendediting-hasbendpoints');
+        edge.data('cyedgebendeditingDistances', []);
+        edge.data('cyedgebendeditingWeights', []);
     }
     else {
       edge.data('cyedgebendeditingDistances', distances);
@@ -1404,6 +1411,9 @@ module.exports = debounce;
         // Initilize bend points for the given edges using 'options.bendPositionsFunction'
         initBendPoints: function(eles) {
           bendPointUtilities.initBendPoints(options.bendPositionsFunction, eles);
+        },
+        deleteSelectedBendPoint: function(ele, index) {
+            bendPointUtilities.removeBendPoint(ele,index);
         }
       } : undefined;
 
