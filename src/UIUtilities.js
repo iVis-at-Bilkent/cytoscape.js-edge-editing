@@ -240,7 +240,7 @@ module.exports = function (params, cy) {
         return inside;
       }
 
-      // get tge index of bend point containing the point represented by {x, y}
+      // get the index of bend point containing the point represented by {x, y}
       function getContainingBendShapeIndex(x, y, edge) {
         if(edge.data('cyedgebendeditingWeights') == null || edge.data('cyedgebendeditingWeights').length == 0){
           return -1;
@@ -279,7 +279,26 @@ module.exports = function (params, cy) {
           .panningEnabled(lastPanningEnabled)
           .boxSelectionEnabled(lastBoxSelectionEnabled);
       }
-      
+
+      function moveBendPoints(positionDiff, edges) {
+          edges.forEach(function( edge ){
+              var previousBendPointsPosition = bendPointUtilities.getSegmentPoints(edge);
+              var nextBendPointsPosition = [];
+              if (previousBendPointsPosition != undefined)
+              {
+                for (i=0; i<previousBendPointsPosition.length; i+=2)
+                {
+                    nextBendPointsPosition = nextBendPointsPosition.concat(previousBendPointsPosition[i]+positionDiff.x);
+                    nextBendPointsPosition = nextBendPointsPosition.concat(previousBendPointsPosition[i+1]+positionDiff.y);
+
+                }
+                edge.data('bendPointPositions',nextBendPointsPosition);
+              }
+
+          });
+          bendPointUtilities.initBendPoints(options().bendPositionsFunction, edges);
+      }
+
       {  
         lastPanningEnabled = cy.panningEnabled();
         lastZoomingEnabled = cy.zoomingEnabled();
@@ -586,7 +605,60 @@ module.exports = function (params, cy) {
           resetGestures();
           refreshDraws();
         });
-        
+
+        //Variables used for starting and ending the movement of bend points with arrows
+        var moveparam;
+        var firstBendPoint;
+        var edgeContainingFirstBendPoint;
+        var firstBendPointFound;
+        cy.on("edgebendediting.movestart", function (e, edges) {
+            firstBendPointFound = false;
+            if (edges[0] != undefined)
+            {
+                edges.forEach(function( edge ){
+                  if (bendPointUtilities.getSegmentPoints(edge) != undefined && !firstBendPointFound)
+                  {
+                      firstBendPoint = { x: bendPointUtilities.getSegmentPoints(edge)[0], y: bendPointUtilities.getSegmentPoints(edge)[1]};
+                      moveparam = {
+                          firstTime: true,
+                          firstBendPointPosition: {
+                              x: firstBendPoint.x,
+                              y: firstBendPoint.y
+                          },
+                          edges: edges
+                      };
+                      edgeContainingFirstBendPoint = edge;
+                      firstBendPointFound = true;
+                  }
+                });
+            }
+        });
+
+        cy.on("edgebendediting.moveend", function (e, edges) {
+            if (moveparam != undefined)
+            {
+                var initialPos = moveparam.firstBendPointPosition;
+                var movedFirstBendPoint = {
+                    x: bendPointUtilities.getSegmentPoints(edgeContainingFirstBendPoint)[0],
+                    y: bendPointUtilities.getSegmentPoints(edgeContainingFirstBendPoint)[1]
+                };
+
+
+                moveparam.positionDiff = {
+                    x: -movedFirstBendPoint.x + initialPos.x,
+                    y: -movedFirstBendPoint.y + initialPos.y
+                }
+
+                delete moveparam.firstBendPointPosition;
+
+                if(options().undoable) {
+                    cy.undoRedo().do("moveBendPoints", moveparam);
+                }
+
+                moveparam = undefined;
+            }
+        });
+
         cy.on('cxttap', 'edge', eCxtTap = function (event) {
           var edge = this;
           
@@ -624,6 +696,113 @@ module.exports = function (params, cy) {
           refreshDraws();
         });
       }
+
+      var selectedEdges;
+      var bendPointsMoving = false;
+
+      function keyDown(e) {
+
+          // var shouldMove = typeof options.moveSelectedNodesOnKeyEvents === 'function'
+          //     ? options.moveSelectedNodesOnKeyEvents() : options.moveSelectedNodesOnKeyEvents;
+          //
+          // if (!shouldMove) {
+          //     return;
+          // }
+
+          //Checks if the tagname is textarea or input
+          var tn = document.activeElement.tagName;
+          if (tn != "TEXTAREA" && tn != "INPUT")
+          {
+              switch(e.keyCode){
+                  case 37: case 39: case 38:  case 40: // Arrow keys
+                  case 32: e.preventDefault(); break; // Space
+                  default: break; // do not block other keys
+              }
+
+
+              if (e.keyCode < '37' || e.keyCode > '40') {
+                  return;
+              }
+
+              if (!bendPointsMoving)
+              {
+                  selectedEdges = cy.edges(':selected');
+                  cy.trigger("edgebendediting.movestart", [selectedEdges]);
+                  bendPointsMoving = true;
+              }
+              if (e.altKey && e.which == '38') {
+                  // up arrow and alt
+                  moveBendPoints ({x:0, y:-1},selectedEdges);
+              }
+              else if (e.altKey && e.which == '40') {
+                  // down arrow and alt
+                  moveBendPoints ({x:0, y:1},selectedEdges);
+              }
+              else if (e.altKey && e.which == '37') {
+                  // left arrow and alt
+                  moveBendPoints ({x:-1, y:0},selectedEdges);
+              }
+              else if (e.altKey && e.which == '39') {
+                  // right arrow and alt
+                  moveBendPoints ({x:1, y:0},selectedEdges);
+              }
+
+              else if (e.shiftKey && e.which == '38') {
+                  // up arrow and shift
+                  moveBendPoints ({x:0, y:-10},selectedEdges);
+              }
+              else if (e.shiftKey && e.which == '40') {
+                  // down arrow and shift
+                  moveBendPoints ({x:0, y:10},selectedEdges);
+              }
+              else if (e.shiftKey && e.which == '37') {
+                  // left arrow and shift
+                  moveBendPoints ({x:-10, y:0},selectedEdges);
+
+              }
+              else if (e.shiftKey && e.which == '39' ) {
+                  // right arrow and shift
+                  moveBendPoints ({x:10, y:0},selectedEdges);
+              }
+              else if (e.keyCode == '38') {
+                  // up arrow
+                  moveBendPoints({x: 0, y: -3}, selectedEdges);
+              }
+
+              else if (e.keyCode == '40') {
+                  // down arrow
+                  moveBendPoints ({x:0, y:3},selectedEdges);
+              }
+              else if (e.keyCode == '37') {
+                  // left arrow
+                  moveBendPoints ({x:-3, y:0},selectedEdges);
+              }
+              else if (e.keyCode == '39') {
+                  //right arrow
+                  moveBendPoints ({x:3, y:0},selectedEdges);
+              }
+          }
+      }
+      function keyUp(e) {
+
+          if (e.keyCode < '37' || e.keyCode > '40') {
+              return;
+          }
+
+          // var shouldMove = typeof options.moveSelectedNodesOnKeyEvents === 'function'
+          //     ? options.moveSelectedNodesOnKeyEvents() : options.moveSelectedNodesOnKeyEvents;
+          //
+          // if (!shouldMove) {
+          //     return;
+          // }
+
+          cy.trigger("edgebendediting.moveend", [selectedEdges]);
+          selectedEdges = undefined;
+          bendPointsMoving = false;
+
+      }
+      document.addEventListener("keydown",keyDown, true);
+      document.addEventListener("keyup",keyUp, true);
 
       $container.data('cyedgebendediting', data);
     },

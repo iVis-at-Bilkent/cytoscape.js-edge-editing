@@ -27,7 +27,12 @@
       // title of add bend point menu item (User may need to adjust width of menu items according to length of this option)
       addBendMenuItemTitle: "Add Bend Point",
       // title of remove bend point menu item (User may need to adjust width of menu items according to length of this option)
-      removeBendMenuItemTitle: "Remove Bend Point"
+      removeBendMenuItemTitle: "Remove Bend Point",
+
+      //TODO
+      // moveSelectedBendPointsOnKeyEvents: function () {
+      //     return true;
+      // }
     };
     
     var options;
@@ -100,7 +105,7 @@
         },
         deleteSelectedBendPoint: function(ele, index) {
           bendPointUtilities.removeBendPoint(ele,index);
-          }
+        }
       } : undefined;
 
       return instance; // chainability

@@ -37,5 +37,29 @@ module.exports = function (cy) {
     return result;
   }
 
+  function moveDo(arg) {
+      if (arg.firstTime) {
+          delete arg.firstTime;
+          return arg;
+      }
+
+      var edges = arg.edges;
+      var positionDiff = arg.positionDiff;
+      var result = {
+          edges: edges,
+          positionDiff: {
+              x: -positionDiff.x,
+              y: -positionDiff.y
+          }
+      };
+      moveBendPointsUndoable(positionDiff, edges);
+
+      return result;
+  };
+  function moveBendPointsUndoable(positionDiff, edges) {
+      //TODO
+  }
+
   ur.action('changeBendPoints', changeBendPoints, changeBendPoints);
+  ur.action("moveBendPoints", moveDo, moveDo);
 };
