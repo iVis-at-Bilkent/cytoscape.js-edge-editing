@@ -16,7 +16,7 @@ module.exports = function (params, cy) {
   var functions = {
     init: function () {
       // register undo redo functions
-      registerUndoRedoFunctions(cy);
+      registerUndoRedoFunctions(cy, bendPointUtilities, params);
       
       var self = this;
       var opts = params;
@@ -149,7 +149,7 @@ module.exports = function (params, cy) {
       function options() {
         return optCache || (optCache = $container.data('cyedgebendediting').options);
       }
-      
+
       // we will need to convert model positons to rendered positions
       function convertToRenderedPosition(modelPosition) {
         var pan = cy.pan();
@@ -288,9 +288,7 @@ module.exports = function (params, cy) {
               {
                 for (i=0; i<previousBendPointsPosition.length; i+=2)
                 {
-                    nextBendPointsPosition = nextBendPointsPosition.concat(previousBendPointsPosition[i]+positionDiff.x);
-                    nextBendPointsPosition = nextBendPointsPosition.concat(previousBendPointsPosition[i+1]+positionDiff.y);
-
+                    nextBendPointsPosition.push({x: previousBendPointsPosition[i]+positionDiff.x, y: previousBendPointsPosition[i+1]+positionDiff.y});
                 }
                 edge.data('bendPointPositions',nextBendPointsPosition);
               }
@@ -702,12 +700,12 @@ module.exports = function (params, cy) {
 
       function keyDown(e) {
 
-          // var shouldMove = typeof options.moveSelectedNodesOnKeyEvents === 'function'
-          //     ? options.moveSelectedNodesOnKeyEvents() : options.moveSelectedNodesOnKeyEvents;
-          //
-          // if (!shouldMove) {
-          //     return;
-          // }
+          var shouldMove = typeof options().moveSelectedBendPointsOnKeyEvents === 'function'
+              ? options().moveSelectedBendPointsOnKeyEvents() : options().moveSelectedBendPointsOnKeyEvents;
+
+          if (!shouldMove) {
+              return;
+          }
 
           //Checks if the tagname is textarea or input
           var tn = document.activeElement.tagName;
@@ -722,6 +720,13 @@ module.exports = function (params, cy) {
 
               if (e.keyCode < '37' || e.keyCode > '40') {
                   return;
+              }
+
+              //Checks if only edges are selected (not any node) and if only 1 edge is selected
+              //If the second checking is removed the bend points of multiple edges would move
+              if (cy.edges(":selected").length != cy.elements(":selected").length || cy.edges(":selected").length != 1)
+              {
+                return;
               }
 
               if (!bendPointsMoving)
@@ -789,12 +794,12 @@ module.exports = function (params, cy) {
               return;
           }
 
-          // var shouldMove = typeof options.moveSelectedNodesOnKeyEvents === 'function'
-          //     ? options.moveSelectedNodesOnKeyEvents() : options.moveSelectedNodesOnKeyEvents;
-          //
-          // if (!shouldMove) {
-          //     return;
-          // }
+          var shouldMove = typeof options().moveSelectedBendPointsOnKeyEvents === 'function'
+              ? options().moveSelectedBendPointsOnKeyEvents() : options().moveSelectedBendPointsOnKeyEvents;
+
+          if (!shouldMove) {
+              return;
+          }
 
           cy.trigger("edgebendediting.moveend", [selectedEdges]);
           selectedEdges = undefined;

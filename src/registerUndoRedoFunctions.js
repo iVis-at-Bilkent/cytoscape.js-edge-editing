@@ -1,4 +1,4 @@
-module.exports = function (cy) {
+module.exports = function (cy, bendPointUtilities, params) {
   if (cy.undoRedo == null)
     return;
 
@@ -55,9 +55,24 @@ module.exports = function (cy) {
       moveBendPointsUndoable(positionDiff, edges);
 
       return result;
-  };
+  }
+
   function moveBendPointsUndoable(positionDiff, edges) {
-      //TODO
+      edges.forEach(function( edge ){
+          var previousBendPointsPosition = bendPointUtilities.getSegmentPoints(edge);
+          var nextBendPointsPosition = [];
+          if (previousBendPointsPosition != undefined)
+          {
+              for (i=0; i<previousBendPointsPosition.length; i+=2)
+              {
+                  nextBendPointsPosition.push({x: previousBendPointsPosition[i]+positionDiff.x, y: previousBendPointsPosition[i+1]+positionDiff.y});
+              }
+              edge.data('bendPointPositions',nextBendPointsPosition);
+          }
+      });
+
+      bendPointUtilities.initBendPoints(params.bendPositionsFunction, edges);
+      // cy.trigger('bendPointMovement');
   }
 
   ur.action('changeBendPoints', changeBendPoints, changeBendPoints);

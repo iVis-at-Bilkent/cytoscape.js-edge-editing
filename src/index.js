@@ -29,10 +29,9 @@
       // title of remove bend point menu item (User may need to adjust width of menu items according to length of this option)
       removeBendMenuItemTitle: "Remove Bend Point",
 
-      //TODO
-      // moveSelectedBendPointsOnKeyEvents: function () {
-      //     return true;
-      // }
+      moveSelectedBendPointsOnKeyEvents: function () {
+          return false;
+      }
     };
     
     var options;
