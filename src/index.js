@@ -28,9 +28,9 @@
       addBendMenuItemTitle: "Add Bend Point",
       // title of remove bend point menu item (User may need to adjust width of menu items according to length of this option)
       removeBendMenuItemTitle: "Remove Bend Point",
-
+      // whether the bend point can be moved by arrows
       moveSelectedBendPointsOnKeyEvents: function () {
-          return false;
+          return true;
       }
     };
     
