@@ -295,6 +295,7 @@ module.exports = function (params, cy) {
 
           });
           bendPointUtilities.initBendPoints(options().bendPositionsFunction, edges);
+          cy.trigger('bendPointMovement');
       }
 
       {  

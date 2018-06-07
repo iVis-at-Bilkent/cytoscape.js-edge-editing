@@ -72,7 +72,6 @@ module.exports = function (cy, bendPointUtilities, params) {
       });
 
       bendPointUtilities.initBendPoints(params.bendPositionsFunction, edges);
-      // cy.trigger('bendPointMovement');
   }
 
   ur.action('changeBendPoints', changeBendPoints, changeBendPoints);
