@@ -8,7 +8,7 @@ module.exports = function (cy, bendPointUtilities, params) {
   });
 
   function changeBendPoints(param) {
-    var edge = param.edge;
+    var edge = cy.getElementById(param.edge.id());
     var result = {
       edge: edge,
       weights: param.set ? edge.data('cyedgebendeditingWeights') : param.weights,
@@ -59,6 +59,7 @@ module.exports = function (cy, bendPointUtilities, params) {
 
   function moveBendPointsUndoable(positionDiff, edges) {
       edges.forEach(function( edge ){
+          edge = cy.getElementById(param.edge.id());
           var previousBendPointsPosition = bendPointUtilities.getSegmentPoints(edge);
           var nextBendPointsPosition = [];
           if (previousBendPointsPosition != undefined)
