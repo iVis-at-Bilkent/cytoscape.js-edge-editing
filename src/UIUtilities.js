@@ -63,6 +63,9 @@ module.exports = function (params, cy) {
         refreshDraws();
       };
       
+      // function to validate edge source and target on reconnection
+      var validateEdge = opts.validateEdge; 
+
       var menuItems = [
         {
           id: addBendPointCxtMenuId,
@@ -173,6 +176,7 @@ module.exports = function (params, cy) {
         
         if( edgeToHighlightBends ) {
           renderBendShapes(edgeToHighlightBends);
+          renderEndPointShapes(edgeToHighlightBends);
         }
       }
       
@@ -185,7 +189,7 @@ module.exports = function (params, cy) {
         }
         
         var segpts = bendPointUtilities.getSegmentPoints(edge);//edge._private.rdata.segpts;
-        var length = getBendShapesLenght(edge);
+        var length = getBendShapesLength(edge);
         
         var srcPos = edge.source().position();
         var tgtPos = edge.target().position();
@@ -221,8 +225,77 @@ module.exports = function (params, cy) {
         ctx.closePath();
       }
       
+      // render the end points shapes of the given edge
+      function renderEndPointShapes(edge) {
+        if(!edge){
+          return;
+        }
+
+        var edge_pts = edge._private.rscratch.allpts;
+        if(!edge_pts)
+          return;
+
+        var src = {
+          x: edge_pts[0],
+          y: edge_pts[1]
+        }
+
+        var target = {
+          x: edge_pts[edge_pts.length-2],
+          y: edge_pts[edge_pts.length-1]
+        }
+
+        var length = getBendShapesLength(edge) * 1.25;
+
+        var oldStroke = ctx.strokeStyle;
+        var oldWidth = ctx.lineWidth;
+        var oldFill = ctx.fillStyle;
+
+        ctx.strokeStyle = edge.css('line-color');
+        ctx.fillStyle = "rgb(255, 255, 255)"; // white
+        ctx.lineWidth = edge.data('width') * cy.zoom();
+        
+        renderEachEndPointShape(src, target, length);
+        
+        ctx.strokeStyle = oldStroke;
+        ctx.fillStyle = oldFill;
+        ctx.lineWidth = oldWidth;
+      }
+
+      function renderEachEndPointShape(source, target, length) {
+        // get the top left coordinates of source and target
+        var sTopLeftX = source.x - length / 2;
+        var sTopLeftY = source.y - length / 2;
+
+        var tTopLeftX = target.x - length / 2;
+        var tTopLeftY = target.y - length / 2;
+
+        // convert to rendered parameters
+        var renderedSourcePos = convertToRenderedPosition({x: sTopLeftX, y: sTopLeftY});
+        var renderedTargetPos = convertToRenderedPosition({x: tTopLeftX, y: tTopLeftY});
+        length *= cy.zoom();
+
+        // render end point shape for source and target
+        drawDiamondShape(renderedSourcePos.x, renderedSourcePos.y, length);
+
+        drawDiamondShape(renderedTargetPos.x, renderedTargetPos.y, length);
+
+        function drawDiamondShape(topLeftX, topLeftY, length){
+          ctx.beginPath();
+
+          ctx.moveTo(topLeftX, topLeftY + length/2);
+          ctx.lineTo(topLeftX + length/2, topLeftY);
+          ctx.lineTo(topLeftX + length, topLeftY + length/2);
+          ctx.lineTo(topLeftX + length/2, topLeftY + length);
+
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+        }
+      }
+
       // get the length of bend points to be rendered
-      function getBendShapesLenght(edge) {
+      function getBendShapesLength(edge) {
         var factor = options().bendShapeSizeFactor;
         if (parseFloat(edge.css('width')) <= 2.5)
           return 2.5 * factor;
@@ -247,7 +320,7 @@ module.exports = function (params, cy) {
         }
 
         var segpts = bendPointUtilities.getSegmentPoints(edge);//edge._private.rdata.segpts;
-        var length = getBendShapesLenght(edge);
+        var length = getBendShapesLength(edge);
 
         for(var i = 0; segpts && i < segpts.length; i = i + 2){
           var bendX = segpts[i];
@@ -261,6 +334,29 @@ module.exports = function (params, cy) {
 
         return -1;
       };
+
+      function getContainingEndPoint(x, y, edge){
+        var length = getBendShapesLength(edge) * 1.25;
+        var allPts = edge._private.rscratch.allpts;
+        var src = {
+          x: allPts[0],
+          y: allPts[1]
+        }
+        var target = {
+          x: allPts[allPts.length-2],
+          y: allPts[allPts.length-1]
+        }
+        convertToRenderedPosition(src);
+        convertToRenderedPosition(target);
+        
+        // Source:0, Target:1, None:-1
+        if(checkIfInsideBendShape(x, y, length, src.x, src.y))
+          return 0;
+        else if(checkIfInsideBendShape(x, y, length, target.x, target.y))
+          return 1;
+        else
+          return -1;
+      }
       
       // store the current status of gestures and set them to false
       function disableGestures() {
@@ -454,10 +550,13 @@ module.exports = function (params, cy) {
         var movedBendEdge;
         var moveBendParam;
         var createBendOnDrag;
+        var movedEndPoint;
+        var dummyNode;
+        var detachedNode;
         
         cy.on('tapstart', 'edge', eTapStart = function (event) {
           var edge = this;
-          
+
           if (!edgeToHighlightBends || edgeToHighlightBends.id() !== edge.id()) {
             createBendOnDrag = false;
             return;
@@ -476,9 +575,39 @@ module.exports = function (params, cy) {
           var cyPosY = cyPos.y;
 
           var index = getContainingBendShapeIndex(cyPosX, cyPosY, edge);
-          if (index != -1) {
+          
+          // Get which end point has been clicked (Source:0, Target:1, None:-1)
+          var endPoint = getContainingEndPoint(cyPosX, cyPosY, edge);
+
+          if(endPoint == 0 || endPoint == 1){
+            movedEndPoint = endPoint;
+            detachedNode = (endPoint == 0) ? movedBendEdge.source() : movedBendEdge.target();
+            dummyNode = {
+              data: { 
+                id: 'nwt_reconnectEdge_dummy',
+                ports: [],
+              },
+              style: {
+                width: 1,
+                height: 1,
+                'visibility': 'hidden'
+              },
+              renderedPosition: event.renderedPosition
+            };
+            cy.add(dummyNode);
+            dummyNode = cy.nodes("#" + dummyNode.data.id);
+            
+            var loc = {};
+            if(endPoint == 0)
+              loc.source = dummyNode.id();
+            else
+              loc.target = dummyNode.id();
+            movedBendEdge = movedBendEdge.move(loc);
+            disableGestures();
+          }
+          else if (index != -1) {
             movedBendIndex = index;
-//            movedBendEdge = edge;
+            // movedBendEdge = edge;
             disableGestures();
           }
           else {
@@ -501,19 +630,27 @@ module.exports = function (params, cy) {
             disableGestures();
           }
           
-          if (movedBendEdge === undefined || movedBendIndex === undefined) {
+          if (movedBendEdge === undefined || (movedBendIndex === undefined && movedEndPoint === undefined)) {
             return;
           }
 
-          var weights = edge.data('cyedgebendeditingWeights');
-          var distances = edge.data('cyedgebendeditingDistances');
-
-          var relativeBendPosition = bendPointUtilities.convertToRelativeBendPosition(edge, event.position || event.cyPosition);
-          weights[movedBendIndex] = relativeBendPosition.weight;
-          distances[movedBendIndex] = relativeBendPosition.distance;
-
-          edge.data('cyedgebendeditingWeights', weights);
-          edge.data('cyedgebendeditingDistances', distances);
+          // Update end point location (Source:0, Target:1)
+          if(movedEndPoint != -1 && dummyNode){
+            var newPos = event.position || event.cyPosition;
+            dummyNode.position(newPos);
+          }
+          // Update bend point location
+          else if(movedBendIndex != undefined){ 
+            var weights = edge.data('cyedgebendeditingWeights');
+            var distances = edge.data('cyedgebendeditingDistances');
+            
+            var relativeBendPosition = bendPointUtilities.convertToRelativeBendPosition(edge, event.position || event.cyPosition);
+            weights[movedBendIndex] = relativeBendPosition.weight;
+            distances[movedBendIndex] = relativeBendPosition.distance;
+            
+            edge.data('cyedgebendeditingWeights', weights);
+            edge.data('cyedgebendeditingDistances', distances);
+          }
           
           refreshDraws();
         });
@@ -571,8 +708,8 @@ module.exports = function (params, cy) {
                 var dist = Math.sqrt( Math.pow( (point.x - currentIntersection.x), 2 ) 
                         + Math.pow( (point.y - currentIntersection.y), 2 ));
                 
-//                var length = Math.sqrt( Math.pow( (posPoint.x - prePoint.x), 2 ) 
-//                        + Math.pow( (posPoint.y - prePoint.y), 2 ));
+                // var length = Math.sqrt( Math.pow( (posPoint.x - prePoint.x), 2 ) 
+                //         + Math.pow( (posPoint.y - prePoint.y), 2 ));
                 
                 if( dist  < 8 ) {
                   nearToLine = true;
@@ -586,20 +723,64 @@ module.exports = function (params, cy) {
               }
               
             }
+            else if(dummyNode != undefined && (movedEndPoint == 0 || movedEndPoint == 1) ){
+              
+              var newNode;
+              var loc = {};
+              var oldLoc = {};
+
+              // Validate edge reconnection
+              if(event.target && event.target[0] && event.target.isNode()){
+                var newSource = (movedEndPoint == 0) ? event.target : movedBendEdge.source();
+                var newTarget = (movedEndPoint == 1) ? event.target : movedBendEdge.target();
+
+                var isValid = validateEdge ? validateEdge(movedBendEdge, newSource, newTarget) : 'valid';
+                newNode = isValid === 'valid' ? event.target : detachedNode;
+              }
+              else
+                newNode = detachedNode;
+              
+              if(movedEndPoint == 0){
+                loc.source = newNode.id();
+                oldLoc.source = detachedNode.id();
+              }
+              else{
+                loc.target = newNode.id();
+                oldLoc.target = detachedNode.id();
+              }
+              
+              if(options().undoable && newNode.id() !== detachedNode.id()) {
+                var param = {
+                  edge: edge,
+                  location: loc,
+                  oldLoc: oldLoc
+                };
+                cy.undoRedo().do('reconnectEdge', param);
+              }
+              else{
+                edge = edge.move(loc);
+              }
+
+              cy.remove(dummyNode);
+              movedBendEdge = edge;
+            }
           }
           
           if (edge !== undefined && moveBendParam !== undefined && edge.data('cyedgebendeditingWeights')
-                  && edge.data('cyedgebendeditingWeights').toString() != moveBendParam.weights.toString()) {
+          && edge.data('cyedgebendeditingWeights').toString() != moveBendParam.weights.toString()) {
             
             if(options().undoable) {
               cy.undoRedo().do('changeBendPoints', moveBendParam);
             }
           }
-
+          
           movedBendIndex = undefined;
           movedBendEdge = undefined;
           moveBendParam = undefined;
           createBendOnDrag = undefined;
+          movedEndPoint = undefined;
+          dummyNode = undefined;
+          detachedNode = undefined;
 
           resetGestures();
           refreshDraws();

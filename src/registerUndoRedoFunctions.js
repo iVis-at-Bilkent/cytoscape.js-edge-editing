@@ -75,6 +75,22 @@ module.exports = function (cy, bendPointUtilities, params) {
       bendPointUtilities.initBendPoints(params.bendPositionsFunction, edges);
   }
 
+  function reconnectEdge(param){
+    var edge      = param.edge;
+    var location  = param.location;
+    var oldLoc    = param.oldLoc;
+
+    edge = edge.move(location);
+
+    var result = {
+      edge:     edge,
+      location: oldLoc,
+      oldLoc:   location
+    }
+    return result;
+  }
+
   ur.action('changeBendPoints', changeBendPoints, changeBendPoints);
-  ur.action("moveBendPoints", moveDo, moveDo);
+  ur.action('moveBendPoints', moveDo, moveDo);
+  ur.action('reconnectEdge', reconnectEdge, reconnectEdge);
 };
