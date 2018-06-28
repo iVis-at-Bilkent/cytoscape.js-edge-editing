@@ -65,6 +65,8 @@ module.exports = function (params, cy) {
       
       // function to validate edge source and target on reconnection
       var validateEdge = opts.validateEdge; 
+      // function to be called on invalid edge reconnection
+      var actOnUnsuccessfulReconnection = opts.actOnUnsuccessfulReconnection;
 
       var menuItems = [
         {
@@ -728,13 +730,15 @@ module.exports = function (params, cy) {
               var newNode;
               var loc = {};
               var oldLoc = {};
+              var isValid = 'valid';
 
               // Validate edge reconnection
               if(event.target && event.target[0] && event.target.isNode()){
                 var newSource = (movedEndPoint == 0) ? event.target : movedBendEdge.source();
                 var newTarget = (movedEndPoint == 1) ? event.target : movedBendEdge.target();
 
-                var isValid = validateEdge ? validateEdge(movedBendEdge, newSource, newTarget) : 'valid';
+                isValid = typeof validateEdge === "function" ? 
+                  validateEdge(movedBendEdge, newSource, newTarget) : 'valid';
                 newNode = isValid === 'valid' ? event.target : detachedNode;
               }
               else
@@ -759,6 +763,9 @@ module.exports = function (params, cy) {
               }
               else{
                 edge = edge.move(loc);
+                if(isValid !== 'valid' && typeof actOnUnsuccessfulReconnection === 'function'){
+                  actOnUnsuccessfulReconnection();
+                }
               }
 
               cy.remove(dummyNode);
