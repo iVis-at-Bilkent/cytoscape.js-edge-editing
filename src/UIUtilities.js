@@ -254,8 +254,7 @@ module.exports = function (params, cy) {
         var oldFill = ctx.fillStyle;
 
         ctx.strokeStyle = edge.css('line-color');
-        ctx.fillStyle = "rgb(255, 255, 255)"; // white
-        ctx.lineWidth = edge.data('width') * cy.zoom();
+        ctx.lineWidth = edge.data('width') * cy.zoom() / 2;
         
         renderEachEndPointShape(src, target, length);
         
@@ -283,18 +282,64 @@ module.exports = function (params, cy) {
         drawDiamondShape(renderedTargetPos.x, renderedTargetPos.y, length);
 
         function drawDiamondShape(topLeftX, topLeftY, length){
+          var l = (length) / (3 * 6 + 2);
+
+          // Draw all corners
+          drawCorner(topLeftX, topLeftY + length/2, l, 'left');
+          drawCorner(topLeftX + length/2, topLeftY, l, 'top');
+          drawCorner(topLeftX + length/2, topLeftY + length, l, 'bottom');
+          drawCorner(topLeftX + length, topLeftY + length/2, l, 'right');
+
+          drawDashedLine(topLeftX, topLeftY + length/2, topLeftX + length/2, topLeftY, l);
+          drawDashedLine(topLeftX + length/2, topLeftY, topLeftX + length, topLeftY + length/2, l);
+          drawDashedLine(topLeftX + length, topLeftY + length/2, topLeftX + length/2, topLeftY + length, l);
+          drawDashedLine(topLeftX + length/2, topLeftY + length, topLeftX, topLeftY + length/2, l);
+        }
+
+        function drawCorner(x, y, l, corner){
           ctx.beginPath();
-
-          ctx.moveTo(topLeftX, topLeftY + length/2);
-          ctx.lineTo(topLeftX + length/2, topLeftY);
-          ctx.lineTo(topLeftX + length, topLeftY + length/2);
-          ctx.lineTo(topLeftX + length/2, topLeftY + length);
-
-          ctx.closePath();
-          ctx.fill();
+          ctx.moveTo(x, y);
+          switch(corner){
+            case 'left': {
+              ctx.lineTo(x + l, y - l);
+              ctx.lineTo(x, y);
+              ctx.lineTo(x + l, y + l);
+              break;
+            }
+            case 'top': {
+              ctx.lineTo(x - l, y + l);
+              ctx.lineTo(x, y);
+              ctx.lineTo(x + l, y + l);
+              break;
+            }
+            case 'right': {
+              ctx.lineTo(x - l, y - l);
+              ctx.lineTo(x, y);
+              ctx.lineTo(x - l, y + l);
+              break;
+            }
+            case 'bottom': {
+              ctx.lineTo(x + l, y - l);
+              ctx.lineTo(x, y);
+              ctx.lineTo(x - l, y - l);
+              break;
+            }
+            case 'default':
+              return;
+          }
           ctx.stroke();
         }
+
+        function drawDashedLine(x1, y1, x2, y2, l){
+          ctx.beginPath();
+          ctx.moveTo(x1, y1);
+          ctx.lineTo(x2, y2);
+          ctx.setLineDash([2*l,l]);
+          ctx.stroke();
+          ctx.setLineDash([]);
+        }
       }
+
 
       // get the length of bend points to be rendered
       function getBendShapesLength(edge) {
@@ -759,17 +804,19 @@ module.exports = function (params, cy) {
                   location: loc,
                   oldLoc: oldLoc
                 };
-                cy.undoRedo().do('reconnectEdge', param);
+                var result = cy.undoRedo().do('reconnectEdge', param);
+                edge = result.edge[0];
+                edge.unselect();
               }
               else{
-                edge = edge.move(loc);
+                edge = edge.move(loc)[0];
+                edge.unselect();
                 if(isValid !== 'valid' && typeof actOnUnsuccessfulReconnection === 'function'){
                   actOnUnsuccessfulReconnection();
                 }
               }
 
               cy.remove(dummyNode);
-              movedBendEdge = edge;
             }
           }
           
