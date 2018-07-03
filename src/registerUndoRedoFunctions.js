@@ -80,7 +80,7 @@ module.exports = function (cy, bendPointUtilities, params) {
     var location  = param.location;
     var oldLoc    = param.oldLoc;
 
-    edge = edge.move(location);
+    edge = edge.move(location)[0];
 
     var result = {
       edge:     edge,
@@ -90,7 +90,21 @@ module.exports = function (cy, bendPointUtilities, params) {
     return result;
   }
 
+  function removeReconnectedEdge(param){
+    var oldEdge = param.oldEdge;
+    var newEdge = param.newEdge;
+
+    newEdge = newEdge.restore();
+    oldEdge = oldEdge.remove()[0];
+
+    return {
+      oldEdge: newEdge,
+      newEdge: oldEdge
+    };
+  }
+
   ur.action('changeBendPoints', changeBendPoints, changeBendPoints);
   ur.action('moveBendPoints', moveDo, moveDo);
   ur.action('reconnectEdge', reconnectEdge, reconnectEdge);
+  ur.action('removeReconnectedEdge', removeReconnectedEdge, removeReconnectedEdge);
 };

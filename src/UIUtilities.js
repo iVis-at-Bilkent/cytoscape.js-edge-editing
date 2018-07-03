@@ -1,5 +1,6 @@
 var debounce = require('./debounce');
 var bendPointUtilities = require('./bendPointUtilities');
+var reconnectionUtilities = require('./reconnectionUtilities');
 var registerUndoRedoFunctions = require('./registerUndoRedoFunctions');
 
 module.exports = function (params, cy) {
@@ -63,11 +64,13 @@ module.exports = function (params, cy) {
         refreshDraws();
       };
       
+      // function to reconnect edge
+      var handleReconnectEdge = opts.handleReconnectEdge;
       // function to validate edge source and target on reconnection
       var validateEdge = opts.validateEdge; 
       // function to be called on invalid edge reconnection
       var actOnUnsuccessfulReconnection = opts.actOnUnsuccessfulReconnection;
-
+      
       var menuItems = [
         {
           id: addBendPointCxtMenuId,
@@ -629,27 +632,13 @@ module.exports = function (params, cy) {
           if(endPoint == 0 || endPoint == 1){
             movedEndPoint = endPoint;
             detachedNode = (endPoint == 0) ? movedBendEdge.source() : movedBendEdge.target();
-            dummyNode = {
-              data: { 
-                id: 'nwt_reconnectEdge_dummy',
-                ports: [],
-              },
-              style: {
-                width: 1,
-                height: 1,
-                'visibility': 'hidden'
-              },
-              renderedPosition: event.renderedPosition
-            };
-            cy.add(dummyNode);
-            dummyNode = cy.nodes("#" + dummyNode.data.id);
+
+            var disconnectedEnd = (endPoint == 0) ? 'source' : 'target';
+            var result = reconnectionUtilities.disconnectEdge(movedBendEdge, cy, event.renderedPosition, disconnectedEnd);
             
-            var loc = {};
-            if(endPoint == 0)
-              loc.source = dummyNode.id();
-            else
-              loc.target = dummyNode.id();
-            movedBendEdge = movedBendEdge.move(loc);
+            dummyNode = result.dummyNode;
+            movedBendEdge = result.edge;
+
             disableGestures();
           }
           else if (index != -1) {
@@ -772,50 +761,61 @@ module.exports = function (params, cy) {
             }
             else if(dummyNode != undefined && (movedEndPoint == 0 || movedEndPoint == 1) ){
               
-              var newNode;
-              var loc = {};
-              var oldLoc = {};
+              var newNode = detachedNode;
               var isValid = 'valid';
+              var location = (movedEndPoint == 0) ? 'source' : 'target';
 
-              // Validate edge reconnection
+              // validate edge reconnection
               if(event.target && event.target[0] && event.target.isNode()){
-                var newSource = (movedEndPoint == 0) ? event.target : movedBendEdge.source();
-                var newTarget = (movedEndPoint == 1) ? event.target : movedBendEdge.target();
+                var newSource = (movedEndPoint == 0) ? event.target : edge.source();
+                var newTarget = (movedEndPoint == 1) ? event.target : edge.target();
 
-                isValid = typeof validateEdge === "function" ? 
-                  validateEdge(movedBendEdge, newSource, newTarget) : 'valid';
-                newNode = isValid === 'valid' ? event.target : detachedNode;
+                if(typeof validateEdge === "function")
+                  isValid = validateEdge(edge, newSource, newTarget);
+                newNode = (isValid === 'valid') ? event.target : detachedNode;
               }
-              else
-                newNode = detachedNode;
-              
-              if(movedEndPoint == 0){
-                loc.source = newNode.id();
-                oldLoc.source = detachedNode.id();
+
+              var newSource = (movedEndPoint == 0) ? newNode : edge.source();
+              var newTarget = (movedEndPoint == 1) ? newNode : edge.target();
+              edge = reconnectionUtilities.connectEdge(edge, detachedNode, location);
+
+              // use given handleReconnectEdge function 
+              if(typeof handleReconnectEdge === 'function'){
+                var reconnectedEdge = handleReconnectEdge(newSource.id(), newTarget.id(), edge.data());
+
+                if(reconnectedEdge && options().undoable){
+                  var params = {
+                    newEdge: reconnectedEdge,
+                    oldEdge: edge
+                  };
+                  cy.undoRedo().do('removeReconnectedEdge', params);
+                  edge = reconnectedEdge;
+                }
+                else if(reconnectedEdge){
+                  cy.remove(edge);
+                  edge = reconnectedEdge;
+                }
               }
               else{
-                loc.target = newNode.id();
-                oldLoc.target = detachedNode.id();
-              }
-              
-              if(options().undoable && newNode.id() !== detachedNode.id()) {
-                var param = {
-                  edge: edge,
-                  location: loc,
-                  oldLoc: oldLoc
-                };
-                var result = cy.undoRedo().do('reconnectEdge', param);
-                edge = result.edge[0];
-                edge.unselect();
-              }
-              else{
-                edge = edge.move(loc)[0];
-                edge.unselect();
-                if(isValid !== 'valid' && typeof actOnUnsuccessfulReconnection === 'function'){
-                  actOnUnsuccessfulReconnection();
+                var loc = (movedEndPoint == 0) ? {source: newNode.id()} : {target: newNode.id()};
+                var oldLoc = (movedEndPoint == 0) ? {source: detachedNode.id()} : {target: detachedNode.id()};
+                
+                if(options().undoable && newNode.id() !== detachedNode.id()) {
+                  var param = {
+                    edge: edge,
+                    location: loc,
+                    oldLoc: oldLoc
+                  };
+                  var result = cy.undoRedo().do('reconnectEdge', param);
+                  edge = result.edge;
                 }
               }
 
+              // invalid edge reconnection callback
+              if(isValid !== 'valid' && typeof actOnUnsuccessfulReconnection === 'function'){
+                actOnUnsuccessfulReconnection();
+              }
+              edge.unselect();
               cy.remove(dummyNode);
             }
           }
