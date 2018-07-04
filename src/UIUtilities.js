@@ -795,7 +795,18 @@ module.exports = function (params, cy) {
               // use given handleReconnectEdge function 
               if(typeof handleReconnectEdge === 'function'){
                 var reconnectedEdge = handleReconnectEdge(newSource.id(), newTarget.id(), edge.data());
+                
+                if(edge.hasClass('edgebendediting-hasbendpoints') && reconnectedEdge){
+                  var bpDistances = edge.data('cyedgebendeditingDistances');
+                  var bpWeights = edge.data('cyedgebendeditingWeights');
 
+                  reconnectedEdge.data('cyedgebendeditingDistances', bpDistances);
+                  reconnectedEdge.data('cyedgebendeditingWeights', bpWeights);
+                  reconnectedEdge.addClass('edgebendediting-hasbendpoints');
+
+                  bendPointUtilities.initBendPoints(options().bendPositionsFunction, [reconnectedEdge]);
+                }
+                
                 if(reconnectedEdge && options().undoable){
                   var params = {
                     newEdge: reconnectedEdge,
