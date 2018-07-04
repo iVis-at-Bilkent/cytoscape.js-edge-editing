@@ -92,11 +92,24 @@ module.exports = function (cy, bendPointUtilities, params) {
 
   function removeReconnectedEdge(param){
     var oldEdge = param.oldEdge;
+    var tmp = cy.getElementById(oldEdge.data('id'));
+    if(tmp && tmp.length > 0)
+      oldEdge = tmp;
+
     var newEdge = param.newEdge;
+    var tmp = cy.getElementById(newEdge.data('id'));
+    if(tmp && tmp.length > 0)
+      newEdge = tmp;
 
-    newEdge = newEdge.restore();
-    oldEdge = oldEdge.remove()[0];
-
+    if(oldEdge.inside()){
+      oldEdge = oldEdge.remove()[0];
+    } 
+      
+    if(newEdge.removed()){
+      newEdge = newEdge.restore();
+      newEdge.unselect();
+    }
+    
     return {
       oldEdge: newEdge,
       newEdge: oldEdge

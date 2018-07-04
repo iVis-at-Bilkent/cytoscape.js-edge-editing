@@ -792,47 +792,49 @@ module.exports = function (params, cy) {
               var newTarget = (movedEndPoint == 1) ? newNode : edge.target();
               edge = reconnectionUtilities.connectEdge(edge, detachedNode, location);
 
-              // use given handleReconnectEdge function 
-              if(typeof handleReconnectEdge === 'function'){
-                var reconnectedEdge = handleReconnectEdge(newSource.id(), newTarget.id(), edge.data());
-                
-                if(edge.hasClass('edgebendediting-hasbendpoints') && reconnectedEdge){
-                  var bpDistances = edge.data('cyedgebendeditingDistances');
-                  var bpWeights = edge.data('cyedgebendeditingWeights');
+              if(detachedNode.id() !== newNode.id()){
+                // use given handleReconnectEdge function 
+                if(typeof handleReconnectEdge === 'function'){
+                  var reconnectedEdge = handleReconnectEdge(newSource.id(), newTarget.id(), edge.data());
+                  
+                  if(edge.hasClass('edgebendediting-hasbendpoints') && reconnectedEdge){
+                    var bpDistances = edge.data('cyedgebendeditingDistances');
+                    var bpWeights = edge.data('cyedgebendeditingWeights');
 
-                  reconnectedEdge.data('cyedgebendeditingDistances', bpDistances);
-                  reconnectedEdge.data('cyedgebendeditingWeights', bpWeights);
-                  reconnectedEdge.addClass('edgebendediting-hasbendpoints');
+                    reconnectedEdge.data('cyedgebendeditingDistances', bpDistances);
+                    reconnectedEdge.data('cyedgebendeditingWeights', bpWeights);
+                    reconnectedEdge.addClass('edgebendediting-hasbendpoints');
 
-                  bendPointUtilities.initBendPoints(options().bendPositionsFunction, [reconnectedEdge]);
+                    bendPointUtilities.initBendPoints(options().bendPositionsFunction, [reconnectedEdge]);
+                  }
+                  
+                  if(reconnectedEdge && options().undoable){
+                    var params = {
+                      newEdge: reconnectedEdge,
+                      oldEdge: edge
+                    };
+                    cy.undoRedo().do('removeReconnectedEdge', params);
+                    edge = reconnectedEdge;
+                  }
+                  else if(reconnectedEdge){
+                    cy.remove(edge);
+                    edge = reconnectedEdge;
+                  }
                 }
-                
-                if(reconnectedEdge && options().undoable){
-                  var params = {
-                    newEdge: reconnectedEdge,
-                    oldEdge: edge
-                  };
-                  cy.undoRedo().do('removeReconnectedEdge', params);
-                  edge = reconnectedEdge;
-                }
-                else if(reconnectedEdge){
-                  cy.remove(edge);
-                  edge = reconnectedEdge;
-                }
-              }
-              else{
-                var loc = (movedEndPoint == 0) ? {source: newNode.id()} : {target: newNode.id()};
-                var oldLoc = (movedEndPoint == 0) ? {source: detachedNode.id()} : {target: detachedNode.id()};
-                
-                if(options().undoable && newNode.id() !== detachedNode.id()) {
-                  var param = {
-                    edge: edge,
-                    location: loc,
-                    oldLoc: oldLoc
-                  };
-                  var result = cy.undoRedo().do('reconnectEdge', param);
-                  edge = result.edge;
-                }
+                else{
+                  var loc = (movedEndPoint == 0) ? {source: newNode.id()} : {target: newNode.id()};
+                  var oldLoc = (movedEndPoint == 0) ? {source: detachedNode.id()} : {target: detachedNode.id()};
+                  
+                  if(options().undoable && newNode.id() !== detachedNode.id()) {
+                    var param = {
+                      edge: edge,
+                      location: loc,
+                      oldLoc: oldLoc
+                    };
+                    var result = cy.undoRedo().do('reconnectEdge', param);
+                    edge = result.edge;
+                  }
+                }  
               }
 
               // invalid edge reconnection callback
