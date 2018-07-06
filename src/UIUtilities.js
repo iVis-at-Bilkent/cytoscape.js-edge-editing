@@ -185,7 +185,6 @@ module.exports = function (params, cy) {
         }
       }
       
-      
       // render the bend shapes of the given edge
       function renderBendShapes(edge) {
         
@@ -616,6 +615,7 @@ module.exports = function (params, cy) {
         var movedEndPoint;
         var dummyNode;
         var detachedNode;
+        var nodeToAttach;
         
         cy.on('tapstart', 'edge', eTapStart = function (event) {
           var edge = this;
@@ -669,7 +669,7 @@ module.exports = function (params, cy) {
           if(movedBendEdge !== undefined && bendPointUtilities.isIgnoredEdge(edge) ) {
             return;
           }
-          
+
           if(createBendOnDrag) {
             var cyPos = event.position || event.cyPosition;
             bendPointUtilities.addBendPoint(edge, cyPos);
@@ -701,6 +701,10 @@ module.exports = function (params, cy) {
             edge.data('cyedgebendeditingDistances', distances);
           }
           
+          if(event.target && event.target[0] && event.target.isNode()){
+            nodeToAttach = event.target;
+          }
+
           refreshDraws();
         });
         
@@ -779,13 +783,12 @@ module.exports = function (params, cy) {
               var location = (movedEndPoint == 0) ? 'source' : 'target';
 
               // validate edge reconnection
-              if(event.target && event.target[0] && event.target.isNode()){
-                var newSource = (movedEndPoint == 0) ? event.target : edge.source();
-                var newTarget = (movedEndPoint == 1) ? event.target : edge.target();
-
+              if(nodeToAttach){
+                var newSource = (movedEndPoint == 0) ? nodeToAttach : edge.source();
+                var newTarget = (movedEndPoint == 1) ? nodeToAttach : edge.target();
                 if(typeof validateEdge === "function")
                   isValid = validateEdge(edge, newSource, newTarget);
-                newNode = (isValid === 'valid') ? event.target : detachedNode;
+                newNode = (isValid === 'valid') ? nodeToAttach : detachedNode;
               }
 
               var newSource = (movedEndPoint == 0) ? newNode : edge.source();
@@ -861,6 +864,7 @@ module.exports = function (params, cy) {
           movedEndPoint = undefined;
           dummyNode = undefined;
           detachedNode = undefined;
+          nodeToAttach = undefined;
 
           resetGestures();
           refreshDraws();
