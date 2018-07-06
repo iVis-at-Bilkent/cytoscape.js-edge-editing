@@ -193,7 +193,7 @@ module.exports = function (params, cy) {
         }
         
         var segpts = bendPointUtilities.getSegmentPoints(edge);//edge._private.rdata.segpts;
-        var length = getBendShapesLength(edge);
+        var length = getBendShapesLength(edge) * 0.65;
         
         var srcPos = edge.source().position();
         var tgtPos = edge.target().position();
@@ -206,7 +206,7 @@ module.exports = function (params, cy) {
           var bendY = segpts[i + 1];
 
           var oldStyle = ctx.fillStyle;
-          ctx.fillStyle = shadeBlend(-0.25, edge.css('line-color'));
+          ctx.fillStyle = "#000"; // black
           renderBendShape(bendX, bendY, length);
           ctx.fillStyle = oldStyle;
         }
@@ -249,14 +249,13 @@ module.exports = function (params, cy) {
           y: edge_pts[edge_pts.length-1]
         }
 
-        var length = getBendShapesLength(edge) * 1.25;
+        var length = getBendShapesLength(edge) * 0.65;
 
         var oldStroke = ctx.strokeStyle;
         var oldWidth = ctx.lineWidth;
         var oldFill = ctx.fillStyle;
 
-        ctx.strokeStyle = shadeBlend(-0.25, edge.css('line-color'));
-        ctx.lineWidth = edge.data('width') * cy.zoom();
+        ctx.fillStyle = "#000"; // black
         
         renderEachEndPointShape(src, target, length);
         
@@ -276,12 +275,16 @@ module.exports = function (params, cy) {
         // convert to rendered parameters
         var renderedSourcePos = convertToRenderedPosition({x: sTopLeftX, y: sTopLeftY});
         var renderedTargetPos = convertToRenderedPosition({x: tTopLeftX, y: tTopLeftY});
-        length *= cy.zoom();
-
+        length = length * cy.zoom() / 2;
+        
         // render end point shape for source and target
-        drawDiamondShape(renderedSourcePos.x, renderedSourcePos.y, length);
-
-        drawDiamondShape(renderedTargetPos.x, renderedTargetPos.y, length);
+        ctx.beginPath();
+        ctx.arc(renderedSourcePos.x + length, renderedSourcePos.y + length, length, 0, 2*Math.PI, false);
+        ctx.arc(renderedTargetPos.x + length, renderedTargetPos.y + length, length, 0, 2*Math.PI, false);
+        ctx.fill();
+        
+        // drawDiamondShape(renderedSourcePos.x, renderedSourcePos.y, length);
+        // drawDiamondShape(renderedTargetPos.x, renderedTargetPos.y, length);
 
         function drawDiamondShape(topLeftX, topLeftY, length){
           var l = (length) / (3 * 6 + 2);
@@ -398,7 +401,7 @@ module.exports = function (params, cy) {
       };
 
       function getContainingEndPoint(x, y, edge){
-        var length = getBendShapesLength(edge) * 1.25;
+        var length = getBendShapesLength(edge);
         var allPts = edge._private.rscratch.allpts;
         var src = {
           x: allPts[0],
