@@ -67,7 +67,8 @@
 							style: {
 
 							}
-						}
+						},
+						
 					],
 
 					elements: {
@@ -78,7 +79,14 @@
 							{ data: { id: 'g', name: 'George' } }
 						],
 						edges: [
-							{ data: { source: 'j', target: 'e' } },
+							{ data: { 
+								source: 'j', 
+								target: 'e',
+								cyedgebendeditingWeights: [1],
+								cyedgebendeditingDistances: [175] 
+							  },
+							  classes: 'edgebendediting-hasbendpoints',
+						 	},
 							{ data: { source: 'j', target: 'k' } },
 							{ data: { source: 'j', target: 'g' } },
 //							{ data: { source: 'e', target: 'j' } },
@@ -90,12 +98,13 @@
 						]
 					},
 				});
-
+				
 				// demo your ext
 				cy.edgeBendEditing({
                                     undoable: true,
-                                  });
-
+				});
+				
+				cy.style().update();
 			});
                         
                         document.addEventListener('keydown', function (e){
