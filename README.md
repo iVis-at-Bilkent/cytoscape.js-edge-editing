@@ -14,7 +14,7 @@ A Cytoscape.js extension enabling interactive editing of edge bend points and re
  * To reconnect an edge, select the handle (source or target), drag and drop on the new (source or target) node.
 ## Demo
 
-Click [here](https://rawgit.com/iVis-at-Bilkent/cytoscape.js-edge-editing/master/demo.html) for demo
+Click [here](https://rawgit.com/iVis-at-Bilkent/cytoscape.js-edge-editing/unstable/demo.html) for demo
 
 ## Dependencies
 
