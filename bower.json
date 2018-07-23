@@ -1,13 +1,13 @@
 {
-  "name": "cytoscape-edge-bend-editing",
+  "name": "cytoscape-edge-editing",
   "description": "A Cytoscape.js extension enables editing edge bend points",
-  "main": "cytoscape-edge-bend-editing.js",
+  "main": "cytoscape-edge-editing.js",
   "dependencies": {
     "cytoscape": "^2.7.0"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/iVis-at-Bilkent/cytoscape.js-edge-bend-editing.git"
+    "url": "https://github.com/iVis-at-Bilkent/cytoscape.js-edge-editing.git"
   },
   "ignore": [
     "**/.*",

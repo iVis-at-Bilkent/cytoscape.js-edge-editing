@@ -52,7 +52,7 @@
       return obj;
     };
     
-    cytoscape( 'core', 'edgeBendEditing', function(opts){
+    cytoscape( 'core', 'edgeEditing', function(opts){
       var cy = this;
       
       if( opts === 'initialized' ) {
@@ -117,7 +117,7 @@
   }
 
   if( typeof define !== 'undefined' && define.amd ){ // expose as an amd/requirejs module
-    define('cytoscape-edge-bend-editing', function(){
+    define('cytoscape-edge-editing', function(){
       return register;
     });
   }

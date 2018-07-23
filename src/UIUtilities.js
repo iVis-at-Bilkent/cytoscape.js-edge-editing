@@ -1095,7 +1095,7 @@ module.exports = function (params, cy) {
   } else if (typeof fn == 'object' || !fn) {
     return functions.init.apply($(cy.container()), arguments);
   } else {
-    $.error('No such function `' + fn + '` for cytoscape.js-edge-bend-editing');
+    $.error('No such function `' + fn + '` for cytoscape.js-edge-editing');
   }
 
   return $(this);
