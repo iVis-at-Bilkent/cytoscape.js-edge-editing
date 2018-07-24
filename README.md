@@ -3,7 +3,7 @@ cytoscape-edge-editing
 
 ## Description
 
-A Cytoscape.js extension enabling interactive editing of edge bend points and reconnecting edges, distributed under [The MIT License](https://opensource.org/licenses/MIT). 
+A Cytoscape.js extension enabling interactive editing of edge bend points and reconnection of edges to other source/target nodes, distributed under [The MIT License](https://opensource.org/licenses/MIT). 
  * To highlight bend point positions of an edge you should select the edge and unselect any other edges. Note that in determining the edge to highlight bend point positions we assume that the unvisible edges are not selected.
  * To add a bend point select the edge and unselect any other edge, right click where you want to add the bend point and click 'Add Bend Point' on the context menu (requires 'cytoscape.js-context-menus' extension). 
  * To remove a bend point select the edge and unselect any other edge, right click on the bend point and click 'Remove Bend Point' on the context menu (requires 'cytoscape.js-context-menus' extension). 
@@ -12,6 +12,9 @@ A Cytoscape.js extension enabling interactive editing of edge bend points and re
     * You can click anywhere on the edge (if it is the only selected edge) to introduce and relocate a bend point by dragging.
     * A bend point is removed if it is dropped near the line segment between its two neighbours.
  * To reconnect an edge, select the handle (source or target), drag and drop on the new (source or target) node.
+ 
+<img src="img.png" width="250">
+
 ## Demo
 
 Click [here](https://rawgit.com/iVis-at-Bilkent/cytoscape.js-edge-editing/unstable/demo.html) for demo
