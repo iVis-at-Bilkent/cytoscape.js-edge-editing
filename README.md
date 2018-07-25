@@ -13,7 +13,7 @@ A Cytoscape.js extension enabling interactive editing of edge bend points and re
     * A bend point is removed if it is dropped near the line segment between its two neighbours.
  * To reconnect an edge, select the handle (source or target), drag and drop on the new (source or target) node.
  
-<img src="img.png" width="250">
+<img src="edge-editing-animated-demo.gif" width="340">
 
 ## Demo
 
