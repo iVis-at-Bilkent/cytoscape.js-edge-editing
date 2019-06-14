@@ -61,7 +61,7 @@ module.exports = function (params, cy) {
           cy.undoRedo().do('changeBendPoints', param);
         }
         
-        refreshDraws();
+        setTimeout(function(){refreshDraws()}, 50) ;
       };
       
       // function to reconnect edge
@@ -249,6 +249,14 @@ module.exports = function (params, cy) {
           y: edge_pts[edge_pts.length-1]
         }
 
+        var nextToSource = {
+          x: edge_pts[2],
+          y: edge_pts[3]
+        }
+        var nextToTarget = {
+          x: edge_pts[edge_pts.length-4],
+          y: edge_pts[edge_pts.length-3]
+        }
         var length = getBendShapesLength(edge) * 0.65;
 
         var oldStroke = ctx.strokeStyle;
@@ -257,14 +265,14 @@ module.exports = function (params, cy) {
 
         ctx.fillStyle = "#000"; // black
         
-        renderEachEndPointShape(src, target, length);
+        renderEachEndPointShape(src, target, length,nextToSource,nextToTarget);
         
         ctx.strokeStyle = oldStroke;
         ctx.fillStyle = oldFill;
         ctx.lineWidth = oldWidth;
       }
 
-      function renderEachEndPointShape(source, target, length) {
+      function renderEachEndPointShape(source, target, length,nextToSource,nextToTarget) {
         // get the top left coordinates of source and target
         var sTopLeftX = source.x - length / 2;
         var sTopLeftY = source.y - length / 2;
@@ -272,15 +280,37 @@ module.exports = function (params, cy) {
         var tTopLeftX = target.x - length / 2;
         var tTopLeftY = target.y - length / 2;
 
+        var nextToSourceX = nextToSource.x - length /2;
+        var nextToSourceY = nextToSource.y - length / 2;
+
+        var nextToTargetX = nextToTarget.x - length /2;
+        var nextToTargetY = nextToTarget.y - length /2;
+
+
         // convert to rendered parameters
         var renderedSourcePos = convertToRenderedPosition({x: sTopLeftX, y: sTopLeftY});
         var renderedTargetPos = convertToRenderedPosition({x: tTopLeftX, y: tTopLeftY});
         length = length * cy.zoom() / 2;
+
+        var renderedNextToSource = convertToRenderedPosition({x: nextToSourceX, y: nextToSourceY});
+        var renderedNextToTarget = convertToRenderedPosition({x: nextToTargetX, y: nextToTargetY});
         
+        //how far to go from the node along the edge
+        var distanceFromNode = length;
+
+        var distanceSource = Math.sqrt(Math.pow(renderedNextToSource.x - renderedSourcePos.x,2) + Math.pow(renderedNextToSource.y - renderedSourcePos.y,2));        
+        var sourceEndPointX = renderedSourcePos.x + ((distanceFromNode/ distanceSource)* (renderedNextToSource.x - renderedSourcePos.x));
+        var sourceEndPointY = renderedSourcePos.y + ((distanceFromNode/ distanceSource)* (renderedNextToSource.y - renderedSourcePos.y));
+
+
+        var distanceTarget = Math.sqrt(Math.pow(renderedNextToTarget.x - renderedTargetPos.x,2) + Math.pow(renderedNextToTarget.y - renderedTargetPos.y,2));        
+        var targetEndPointX = renderedTargetPos.x + ((distanceFromNode/ distanceTarget)* (renderedNextToTarget.x - renderedTargetPos.x));
+        var targetEndPointY = renderedTargetPos.y + ((distanceFromNode/ distanceTarget)* (renderedNextToTarget.y - renderedTargetPos.y)); 
+
         // render end point shape for source and target
         ctx.beginPath();
-        ctx.arc(renderedSourcePos.x + length, renderedSourcePos.y + length, length, 0, 2*Math.PI, false);
-        ctx.arc(renderedTargetPos.x + length, renderedTargetPos.y + length, length, 0, 2*Math.PI, false);
+        ctx.arc(sourceEndPointX + length, sourceEndPointY + length, length, 0, 2*Math.PI, false);
+        ctx.arc(targetEndPointX + length, targetEndPointY + length, length, 0, 2*Math.PI, false);
         ctx.fill();
         
         // drawDiamondShape(renderedSourcePos.x, renderedSourcePos.y, length);
@@ -708,7 +738,7 @@ module.exports = function (params, cy) {
             nodeToAttach = event.target;
           }
 
-          refreshDraws();
+         
         });
         
         cy.on('tapend', eTapEnd = function (event) {
@@ -864,7 +894,7 @@ module.exports = function (params, cy) {
           nodeToAttach = undefined;
 
           resetGestures();
-          refreshDraws();
+          setTimeout(function(){refreshDraws()}, 50);
         });
 
         //Variables used for starting and ending the movement of bend points with arrows
