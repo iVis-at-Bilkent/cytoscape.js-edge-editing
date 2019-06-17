@@ -110,7 +110,7 @@ module.exports = function (params, cy) {
             'position': 'absolute',
             'top': 0,
             'left': 0,
-            'z-index': '999'
+            'z-index': '900'
           })
         ;
 
@@ -591,6 +591,12 @@ module.exports = function (params, cy) {
         
         cy.on('select', 'edge', eSelect = function () {
           var edge = this;
+
+          if(edge.target().connectedEdges().length == 0 || edge.source().connectedEdges().length == 0){
+            return;
+          }
+
+         
           numberOfSelectedEdges = numberOfSelectedEdges + 1;
           
           cy.startBatch();
