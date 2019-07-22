@@ -100,7 +100,10 @@ cy.edgeEditing('initialized');
       bendShapeSizeFactor: 6,
       // whether to start the plugin in the enabled state
       enabled: true,
-       //An option that controls the distance within which a bend point is considered near the line segment between its two neighbors and will be automatically removed
+       /*An option that controls the distance (in pixels) within which a bend point is considered near the line segment between 
+         its two neighbors and will be automatically removed
+         min value = 0 , max value = 20 , values less than 0 are set to 0 and values greater than 20 are set to 20
+       */
       bendRemovalSensitivity : 8,
       // title of add bend point menu item (User may need to adjust width of menu items according to length of this option)
       addBendMenuItemTitle: "Add Bend Point",
