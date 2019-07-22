@@ -24,6 +24,8 @@
       bendShapeSizeFactor: 3,
       // whether to start the plugin in the enabled state
       enabled: true,
+      //An option that controls the distance within which a bend point is considered "near" the line segment between its two neighbors and will be automatically removed
+      bendRemovalSensitivity : 8,
       // title of add bend point menu item (User may need to adjust width of menu items according to length of this option)
       addBendMenuItemTitle: "Add Bend Point",
       // title of remove bend point menu item (User may need to adjust width of menu items according to length of this option)
@@ -46,7 +48,22 @@
       }
 
       for (var i in options) {
-        obj[i] = options[i];
+        if(i == "bendRemovalSensitivity"){
+          var value = options[i];
+           if(!isNaN(value))
+           {
+              if(value >= 0 && value <= 20){
+                obj[i] = options[i];
+              }else if(value < 0){
+                obj[i] = 0
+              }else{
+                obj[i] = 20
+              }
+           }
+        }else{
+          obj[i] = options[i];
+        }
+
       }
 
       return obj;

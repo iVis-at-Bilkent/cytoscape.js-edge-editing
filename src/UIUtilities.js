@@ -803,7 +803,7 @@ module.exports = function (params, cy) {
                 // var length = Math.sqrt( Math.pow( (posPoint.x - prePoint.x), 2 ) 
                 //         + Math.pow( (posPoint.y - prePoint.y), 2 ));
                 
-                if( dist  < 8 ) {
+                if( dist  < options().bendRemovalSensitivity ) {
                   nearToLine = true;
                 }
                 
