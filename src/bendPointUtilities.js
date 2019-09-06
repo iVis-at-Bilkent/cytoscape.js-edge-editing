@@ -28,6 +28,15 @@ var bendPointUtilities = {
   },
 
   isIgnoredEdge: function(edge) {
+
+    var startX = edge.source().position('x');
+    var startY = edge.source().position('y');
+    var endX = edge.target().position('x');
+    var endY = edge.target().position('y');
+   
+    if((startX == endX && startY == endY)  || (edge.source().id() == edge.target().id())){
+      return true;
+    }
     for(var i = 0; this.ignoredClasses && i <  this.ignoredClasses.length; i++){
       if(edge.hasClass(this.ignoredClasses[i]))
         return true;
@@ -283,14 +292,7 @@ var bendPointUtilities = {
     var relativeBendPosition = this.convertToRelativeBendPosition(edge, newBendPoint);
     var originalPointWeight = relativeBendPosition.weight;
     
-    var startX = edge.source().position('x');
-    var startY = edge.source().position('y');
-    var endX = edge.target().position('x');
-    var endY = edge.target().position('y');
-    
-    if(startX == endX && startY == endY){
-      return;
-    }
+
     var startWeight = this.convertToRelativeBendPosition(edge, {x: startX, y: startY}).weight;
     var endWeight = this.convertToRelativeBendPosition(edge, {x: endX, y: endY}).weight;
     var weightsWithTgtSrc = [startWeight].concat(edge.data('cyedgebendeditingWeights')?edge.data('cyedgebendeditingWeights'):[]).concat([endWeight]);
