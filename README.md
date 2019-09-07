@@ -97,7 +97,9 @@ cy.edgeEditing('initialized');
       // whether the bend editing operations are undoable (requires cytoscape-undo-redo.js)
       undoable: false,
       // the size of bend shape is obtained by multipling width of edge with this parameter
-      bendShapeSizeFactor: 6,
+      bendShapeSizeFactor: 3,
+      // z-index value of the canvas in which bend points are drawn
+      zIndex: 999,
       // whether to start the plugin in the enabled state
       enabled: true,
        /*An option that controls the distance (in pixels) within which a bend point is considered near the line segment between 

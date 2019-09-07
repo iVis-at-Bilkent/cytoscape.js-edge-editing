@@ -110,7 +110,7 @@ module.exports = function (params, cy) {
             'position': 'absolute',
             'top': 0,
             'left': 0,
-            'z-index': '900'
+            'z-index': options().zIndex
           })
         ;
 
