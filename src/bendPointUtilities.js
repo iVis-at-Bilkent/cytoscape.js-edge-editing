@@ -292,7 +292,10 @@ var bendPointUtilities = {
     var relativeBendPosition = this.convertToRelativeBendPosition(edge, newBendPoint);
     var originalPointWeight = relativeBendPosition.weight;
     
-
+    var startX = edge.source().position('x');
+    var startY = edge.source().position('y');
+    var endX = edge.target().position('x');
+    var endY = edge.target().position('y');
     var startWeight = this.convertToRelativeBendPosition(edge, {x: startX, y: startY}).weight;
     var endWeight = this.convertToRelativeBendPosition(edge, {x: endX, y: endY}).weight;
     var weightsWithTgtSrc = [startWeight].concat(edge.data('cyedgebendeditingWeights')?edge.data('cyedgebendeditingWeights'):[]).concat([endWeight]);
