@@ -524,6 +524,10 @@ module.exports = function (params, cy) {
         });
 
         cy.on('data', 'edge',  function () {
+          if ( !edgeToHighlightBends ) {
+            return;
+          }
+          
           refreshDraws();
         });
 
