@@ -1001,11 +1001,11 @@ module.exports = function (params, cy) {
         cy.on('cyedgebendediting.changeBendPoints', 'edge', function() {
           var edge = this;
           cy.startBatch();
-          cy.edges().unselect();  
-          edge.select();      
+          cy.edges().unselect();              
           cy.trigger('bendPointMovement');
           cy.endBatch();
           refreshDraws();
+          edge.select();   
           
         });
       }
