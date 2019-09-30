@@ -235,7 +235,18 @@ module.exports = function (params, cy) {
           return;
         }
 
-        var edge_pts = edge._private.rscratch.allpts;
+        var edge_pts = bendPointUtilities.getSegmentPoints(edge);
+        if(typeof edge_pts === 'undefined'){
+          edge_pts = [];
+        }       
+        var sourcePos = edge.sourceEndpoint();
+        var targetPos = edge.targetEndpoint();
+        edge_pts.unshift(sourcePos.y);
+        edge_pts.unshift(sourcePos.x);
+        edge_pts.push(targetPos.x);
+        edge_pts.push(targetPos.y); 
+
+       
         if(!edge_pts)
           return;
 
@@ -986,10 +997,12 @@ module.exports = function (params, cy) {
         cy.on('cyedgebendediting.changeBendPoints', 'edge', function() {
           var edge = this;
           cy.startBatch();
-          cy.edges().unselect();          
+          cy.edges().unselect();  
+          edge.select();      
           cy.trigger('bendPointMovement');
           cy.endBatch();
           refreshDraws();
+          
         });
       }
 
