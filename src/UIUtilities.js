@@ -531,18 +531,24 @@ module.exports = function (params, cy) {
           refreshDraws();
         });
 
-        cy.on('position', 'node', ePosition = function () {
+         cy.on('position', 'node', ePosition = function () {
           var node = this;
-          
+          node.connectedEdges().unselect()
           // If there is no edge to highlight bends or this node is not any end of that edge return directly
           if ( !edgeToHighlightBends || !( edgeToHighlightBends.data('source') === node.id() 
                   || edgeToHighlightBends.data('target') === node.id() ) ) {
             return;
           }
           
-          refreshDraws();
+          refreshDraws(); 
         });
-
+      /*   cy.on("afterUndo", function (event, actionName, args, res) {         
+    
+          if(actionName == "drag") {
+          res.nodes.connectedEdges().unselect();          
+          }
+         
+        }); */
         cy.on('style', 'edge.edgebendediting-hasbendpoints:selected', eStyle = function () {
           refreshDraws();
         });
