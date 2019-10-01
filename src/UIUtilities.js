@@ -533,11 +533,9 @@ module.exports = function (params, cy) {
 
          cy.on('position', 'node', ePosition = function () {
           var node = this;
-          var connectedSelectedEdges =  node.connectedEdges(":selected");
-          if(connectedSelectedEdges.length == 1){
-            connectedSelectedEdges.unselect();
-          }
-          
+          if(cy.edges(":selected").length  == 1){
+            cy.edges().unselect()
+          }        
           // If there is no edge to highlight bends or this node is not any end of that edge return directly
           if ( !edgeToHighlightBends || !( edgeToHighlightBends.data('source') === node.id() 
                   || edgeToHighlightBends.data('target') === node.id() ) ) {
