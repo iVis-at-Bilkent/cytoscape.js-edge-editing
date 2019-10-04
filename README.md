@@ -1,6 +1,8 @@
 cytoscape-edge-editing
 ================================================================================
 
+This package is deprecated in favour of the **cytoscape-edge-editing** package!
+
 ## Description
 
 A Cytoscape.js extension enabling interactive editing of edge bend points and reconnection of edges to other source/target nodes, distributed under [The MIT License](https://opensource.org/licenses/MIT). 
