@@ -17,7 +17,7 @@ A Cytoscape.js extension enabling interactive editing of edge bend points and re
 
 ## Demo
 
-Click [here](https://raw.githack.com/iVis-at-Bilkent/cytoscape.js-edge-editing/unstable/demo.html) for demo
+Click [here](https://ivis-at-bilkent.github.io/cytoscape.js-edge-editing/demo.html) for demo
 
 ## Dependencies
 
