@@ -3,7 +3,7 @@
 <html>
 
 	<head>
-		<title>cytoscape-edge-bend-editing.js demo</title>
+		<title>cytoscape-edge-editing.js demo</title>
 
 		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1">
                 
@@ -17,7 +17,7 @@
                 
                 <script src="https://cdn.rawgit.com/ivis-at-bilkent/cytoscape.js-context-menus/master/cytoscape-context-menus.js"></script>
 		<script src="https://cdn.rawgit.com/ivis-at-bilkent/cytoscape.js-undo-redo/master/cytoscape-undo-redo.js"></script>
-                <script src="cytoscape-edge-bend-editing.js"></script>
+                <script src="cytoscape-edge-editing.js"></script>
 
 		<style>
 			body {
@@ -58,7 +58,8 @@
 						{
 							selector: 'edge',
 							style: {
-								'target-arrow-shape': 'triangle'
+								'target-arrow-shape': 'triangle',
+								'curve-style': 'bezier'
 							}
 						},
 
@@ -67,8 +68,13 @@
 							style: {
 
 							}
-						}
+						},
+						
 					],
+					
+					layout: { name: 'grid', rows: 2, cols: 2},
+
+					wheelSensitivity: 0.1,
 
 					elements: {
 						nodes: [
@@ -78,7 +84,14 @@
 							{ data: { id: 'g', name: 'George' } }
 						],
 						edges: [
-							{ data: { source: 'j', target: 'e' } },
+							{ data: { 
+								source: 'j', 
+								target: 'e',
+								cyedgebendeditingWeights: [1],
+								cyedgebendeditingDistances: [175] 
+							  },
+							  classes: 'edgebendediting-hasbendpoints',
+						 	},
 							{ data: { source: 'j', target: 'k' } },
 							{ data: { source: 'j', target: 'g' } },
 //							{ data: { source: 'e', target: 'j' } },
@@ -90,12 +103,14 @@
 						]
 					},
 				});
-
+				
 				// demo your ext
-				cy.edgeBendEditing({
-                                    undoable: true,
-                                  });
-
+				cy.edgeEditing({
+									undoable: true,
+									bendRemovalSensitivity: 16
+				});
+				
+				cy.style().update();
 			});
                         
                         document.addEventListener('keydown', function (e){
@@ -110,7 +125,7 @@
 	</head>
 
 	<body>
-		<h1>cytoscape-edge-bend-editing demo</h1>
+		<h1>cytoscape-edge-editing demo</h1>
 
 		<div id="cy"></div>
 

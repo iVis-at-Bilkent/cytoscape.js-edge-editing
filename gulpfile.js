@@ -20,11 +20,11 @@ var version;
 var browserifyOpts = {
   entries: './src/index.js',
   debug: true,
-  standalone: 'cytoscape-edge-bend-editing'
+  standalone: 'cytoscape-edge-editing'
 };
 
 var logError = function( err ){
-  notifier.notify({ title: 'cytoscape-edge-bend-editing', message: 'Error: ' + err.message });
+  notifier.notify({ title: 'cytoscape-edge-editing', message: 'Error: ' + err.message });
   gutil.log( gutil.colors.red('Error in watch:'), gutil.colors.red(err) );
 };
 
@@ -32,7 +32,7 @@ gulp.task('build', function(){
   return browserify( browserifyOpts )
     .bundle()
     .on( 'error', logError )
-    .pipe( source('cytoscape-edge-bend-editing.js') )
+    .pipe( source('cytoscape-edge-editing.js') )
     .pipe( buffer() )
     .pipe( derequire() )
     .pipe( gulp.dest('.') )

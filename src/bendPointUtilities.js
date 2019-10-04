@@ -28,6 +28,15 @@ var bendPointUtilities = {
   },
 
   isIgnoredEdge: function(edge) {
+
+    var startX = edge.source().position('x');
+    var startY = edge.source().position('y');
+    var endX = edge.target().position('x');
+    var endY = edge.target().position('y');
+   
+    if((startX == endX && startY == endY)  || (edge.source().id() == edge.target().id())){
+      return true;
+    }
     for(var i = 0; this.ignoredClasses && i <  this.ignoredClasses.length; i++){
       if(edge.hasClass(this.ignoredClasses[i]))
         return true;
@@ -279,7 +288,7 @@ var bendPointUtilities = {
       edge = this.currentCtxEdge;
       newBendPoint = this.currentCtxPos;
     }
-    
+  
     var relativeBendPosition = this.convertToRelativeBendPosition(edge, newBendPoint);
     var originalPointWeight = relativeBendPosition.weight;
     
@@ -287,7 +296,6 @@ var bendPointUtilities = {
     var startY = edge.source().position('y');
     var endX = edge.target().position('x');
     var endY = edge.target().position('y');
-    
     var startWeight = this.convertToRelativeBendPosition(edge, {x: startX, y: startY}).weight;
     var endWeight = this.convertToRelativeBendPosition(edge, {x: endX, y: endY}).weight;
     var weightsWithTgtSrc = [startWeight].concat(edge.data('cyedgebendeditingWeights')?edge.data('cyedgebendeditingWeights'):[]).concat([endWeight]);
@@ -306,7 +314,11 @@ var bendPointUtilities = {
       var w2 = weightsWithTgtSrc[i + 1];
       
       //check if the weight is between w1 and w2
-      if((originalPointWeight <= w1 && originalPointWeight >= w2) || (originalPointWeight <= w2 && originalPointWeight >= w1)){
+      const b1 = this.compareWithPrecision(originalPointWeight, w1, true);
+      const b2 = this.compareWithPrecision(originalPointWeight, w2);
+      const b3 = this.compareWithPrecision(originalPointWeight, w2, true);
+      const b4 = this.compareWithPrecision(originalPointWeight, w1);
+      if( (b1 && b2) || (b3 && b4)){
         var startX = segptsWithTgtSrc[2 * i];
         var startY = segptsWithTgtSrc[2 * i + 1];
         var endX = segptsWithTgtSrc[2 * i + 2];
@@ -409,6 +421,18 @@ var bendPointUtilities = {
     
     var dist = Math.sqrt( Math.pow( diffX, 2 ) + Math.pow( diffY, 2 ) );
     return dist;
+  },
+  /** (Less than or equal to) and (greater then equal to) comparisons with floating point numbers */
+  compareWithPrecision: function (n1, n2, isLessThenOrEqual = false, precision = 0.01) {
+    const diff = n1 - n2;
+    if (Math.abs(diff) <= precision) {
+      return true;
+    }
+    if (isLessThenOrEqual) {
+      return n1 < n2;
+    } else {
+      return n1 > n2;
+    }
   }
 };
 

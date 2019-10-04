@@ -75,6 +75,49 @@ module.exports = function (cy, bendPointUtilities, params) {
       bendPointUtilities.initBendPoints(params.bendPositionsFunction, edges);
   }
 
+  function reconnectEdge(param){
+    var edge      = param.edge;
+    var location  = param.location;
+    var oldLoc    = param.oldLoc;
+
+    edge = edge.move(location)[0];
+
+    var result = {
+      edge:     edge,
+      location: oldLoc,
+      oldLoc:   location
+    }
+    return result;
+  }
+
+  function removeReconnectedEdge(param){
+    var oldEdge = param.oldEdge;
+    var tmp = cy.getElementById(oldEdge.data('id'));
+    if(tmp && tmp.length > 0)
+      oldEdge = tmp;
+
+    var newEdge = param.newEdge;
+    var tmp = cy.getElementById(newEdge.data('id'));
+    if(tmp && tmp.length > 0)
+      newEdge = tmp;
+
+    if(oldEdge.inside()){
+      oldEdge = oldEdge.remove()[0];
+    } 
+      
+    if(newEdge.removed()){
+      newEdge = newEdge.restore();
+      newEdge.unselect();
+    }
+    
+    return {
+      oldEdge: newEdge,
+      newEdge: oldEdge
+    };
+  }
+
   ur.action('changeBendPoints', changeBendPoints, changeBendPoints);
-  ur.action("moveBendPoints", moveDo, moveDo);
+  ur.action('moveBendPoints', moveDo, moveDo);
+  ur.action('reconnectEdge', reconnectEdge, reconnectEdge);
+  ur.action('removeReconnectedEdge', removeReconnectedEdge, removeReconnectedEdge);
 };

@@ -1,17 +1,17 @@
 {
-  "name": "cytoscape-edge-bend-editing",
+  "name": "cytoscape-edge-editing",
   "version": "1.6.1",
   "description": "A Cytoscape.js extension enables editing edge bend points",
-  "main": "cytoscape-edge-bend-editing.js",
+  "main": "cytoscape-edge-editing.js",
   "spm": {
-    "main": "cytoscape-edge-bend-editing.js"
+    "main": "cytoscape-edge-editing.js"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/iVis-at-Bilkent/cytoscape.js-edge-bend-editing.git"
+    "url": "https://github.com/iVis-at-Bilkent/cytoscape.js-edge-editing.git"
   },
   "keywords": [
     "cytoscape",
@@ -19,9 +19,9 @@
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/iVis-at-Bilkent/cytoscape.js-edge-bend-editing/issues"
+    "url": "https://github.com/iVis-at-Bilkent/cytoscape.js-edge-editing/issues"
   },
-  "homepage": "https://github.com/iVis-at-Bilkent/cytoscape.js-edge-bend-editing",
+  "homepage": "https://github.com/iVis-at-Bilkent/cytoscape.js-edge-editing",
   "devDependencies": {
     "browserify": "^11.2.0",
     "gulp": "^3.9.1",
@@ -38,7 +38,10 @@
     "vinyl-source-stream": "^1.1.0"
   },
   "peerDependencies": {
-    "cytoscape": "^2.7.0 || ^3.0.0",
+    "cytoscape": "^3.3.0",
     "jquery": "^1.7.0 || ^2.0.0 || ^3.0.0"
+  },
+  "dependencies": {
+    "build-debug": "0.0.3"
   }
 }
