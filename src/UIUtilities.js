@@ -531,7 +531,7 @@ module.exports = function (params, cy) {
           refreshDraws();
         });
 
-         cy.on('position', 'node', ePosition = function () {
+        /*  cy.on('position', 'node', ePosition = function () {
           var node = this;
           if(cy.edges(":selected").length  == 1){
             cy.edges().unselect()
@@ -543,7 +543,7 @@ module.exports = function (params, cy) {
           }
           
           refreshDraws(); 
-        });
+        }); */
       /*   cy.on("afterUndo", function (event, actionName, args, res) {         
     
           if(actionName == "drag") {
@@ -726,6 +726,13 @@ module.exports = function (params, cy) {
           }
         });
         
+        cy.on('drag', 'node', eTapStart = function (event) {
+          var node = this;
+          cy.edges().unselect();
+          if(!node.selected()){
+            cy.nodes().unselect();
+          }         
+        });
         cy.on('tapdrag', eTapDrag = function (event) {
           var edge = movedBendEdge;
           if(movedBendEdge !== undefined && bendPointUtilities.isIgnoredEdge(edge) ) {
@@ -1009,11 +1016,12 @@ module.exports = function (params, cy) {
         cy.on('cyedgebendediting.changeBendPoints', 'edge', function() {
           var edge = this;
           cy.startBatch();
-          cy.edges().unselect();              
-          cy.trigger('bendPointMovement');
-          cy.endBatch();
+          cy.edges().unselect(); 
+          edge.select();              
+          cy.trigger('bendPointMovement');        
+          cy.endBatch();          
           refreshDraws();
-          edge.select();   
+        
           
         });
       }
