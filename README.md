@@ -21,7 +21,7 @@ Click [here](https://raw.githack.com/iVis-at-Bilkent/cytoscape.js-edge-editing/u
 
 ## Dependencies
 
- * Cytoscape.js >=1.7.0
+ * Cytoscape.js ^3.3.0
  * jQuery ^1.7.0 || ^2.0.0 || ^3.0.0
  * cytoscape-undo-redo.js(optional) ^1.0.1
  * cytoscape-context-menus.js(optional) ^2.0.0
