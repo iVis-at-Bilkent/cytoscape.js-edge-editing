@@ -1017,7 +1017,7 @@ module.exports = function (params, cy) {
           var edge = this;
           cy.startBatch();
           cy.edges().unselect(); 
-          edge.select();              
+          //edge.select();              
           cy.trigger('bendPointMovement');        
           cy.endBatch();          
           refreshDraws();
