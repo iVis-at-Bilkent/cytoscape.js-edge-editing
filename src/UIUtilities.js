@@ -688,7 +688,7 @@ module.exports = function (params, cy) {
           }
           
           movedBendEdge = edge;
-          
+          edge.unselect();
           moveBendParam = {
             edge: edge,
             weights: edge.data('cyedgebendeditingWeights') ? [].concat(edge.data('cyedgebendeditingWeights')) : [],
