@@ -901,7 +901,7 @@ module.exports = function (params, cy) {
                     };
                     var result = cy.undoRedo().do('reconnectEdge', param);
                     edge = result.edge;
-                    edge.select();
+                    //edge.select();
                   }
                 }  
               }
@@ -910,7 +910,7 @@ module.exports = function (params, cy) {
               if(isValid !== 'valid' && typeof actOnUnsuccessfulReconnection === 'function'){
                 actOnUnsuccessfulReconnection();
               }
-             // edge.unselect();
+             edge.select();
               cy.remove(dummyNode);
             }
           }
