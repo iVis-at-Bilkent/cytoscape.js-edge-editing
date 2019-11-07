@@ -44,6 +44,7 @@ module.exports = function (params, cy) {
         }
         
         refreshDraws();
+        edge.select();
       };
 
       var cxtRemoveBendPointFcn = function (event) {
@@ -61,7 +62,8 @@ module.exports = function (params, cy) {
           cy.undoRedo().do('changeBendPoints', param);
         }
         
-        setTimeout(function(){refreshDraws()}, 50) ;
+        setTimeout(function(){refreshDraws();edge.select();}, 50) ;
+
       };
       
       // function to reconnect edge
@@ -899,6 +901,7 @@ module.exports = function (params, cy) {
                     };
                     var result = cy.undoRedo().do('reconnectEdge', param);
                     edge = result.edge;
+                    edge.select();
                   }
                 }  
               }
@@ -907,7 +910,7 @@ module.exports = function (params, cy) {
               if(isValid !== 'valid' && typeof actOnUnsuccessfulReconnection === 'function'){
                 actOnUnsuccessfulReconnection();
               }
-              edge.unselect();
+             // edge.unselect();
               cy.remove(dummyNode);
             }
           }
