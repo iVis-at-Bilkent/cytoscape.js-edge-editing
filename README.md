@@ -40,7 +40,7 @@ CommonJS:
 ```js
 var cytoscape = require('cytoscape');
 var jquery = require('jquery');
-var edgeBendEditing = require('cytoscape-edge-editing');
+var edgeEditing = require('cytoscape-edge-editing');
 
 edgeEditing( cytoscape, jquery ); // register extension
 ```
