@@ -8,7 +8,7 @@ module.exports = function (params, cy) {
 
   var addBendPointCxtMenuId = 'cy-edge-bend-editing-cxt-add-bend-point';
   var removeBendPointCxtMenuId = 'cy-edge-bend-editing-cxt-remove-bend-point';
-  var ePosition, eStyle, eRemove, eAdd, eZoom, eSelect, eUnselect, eTapStart, eTapDrag, eTapEnd, eCxtTap;
+  var eStyle, eRemove, eAdd, eZoom, eSelect, eUnselect, eTapStart, eTapDrag, eTapEnd, eCxtTap, eDrag;
   // last status of gestures
   var lastPanningEnabled, lastZoomingEnabled, lastBoxSelectionEnabled;
   // status of edge to highlight bends and selected edges
@@ -44,6 +44,7 @@ module.exports = function (params, cy) {
         }
         
         refreshDraws();
+        edge.select();
       };
 
       var cxtRemoveBendPointFcn = function (event) {
@@ -61,7 +62,8 @@ module.exports = function (params, cy) {
           cy.undoRedo().do('changeBendPoints', param);
         }
         
-        setTimeout(function(){refreshDraws()}, 50) ;
+        setTimeout(function(){refreshDraws();edge.select();}, 50) ;
+
       };
       
       // function to reconnect edge
@@ -531,7 +533,7 @@ module.exports = function (params, cy) {
           refreshDraws();
         });
 
-         cy.on('position', 'node', ePosition = function () {
+        /*  cy.on('position', 'node', ePosition = function () {
           var node = this;
           if(cy.edges(":selected").length  == 1){
             cy.edges().unselect()
@@ -543,7 +545,7 @@ module.exports = function (params, cy) {
           }
           
           refreshDraws(); 
-        });
+        }); */
       /*   cy.on("afterUndo", function (event, actionName, args, res) {         
     
           if(actionName == "drag") {
@@ -688,7 +690,7 @@ module.exports = function (params, cy) {
           }
           
           movedBendEdge = edge;
-          
+          edge.unselect();
           moveBendParam = {
             edge: edge,
             weights: edge.data('cyedgebendeditingWeights') ? [].concat(edge.data('cyedgebendeditingWeights')) : [],
@@ -726,6 +728,13 @@ module.exports = function (params, cy) {
           }
         });
         
+        cy.on('drag', 'node', eDrag = function (event) {
+          var node = this;
+          cy.edges().unselect();
+          if(!node.selected()){
+            cy.nodes().unselect();
+          }         
+        });
         cy.on('tapdrag', eTapDrag = function (event) {
           var edge = movedBendEdge;
           if(movedBendEdge !== undefined && bendPointUtilities.isIgnoredEdge(edge) ) {
@@ -892,6 +901,7 @@ module.exports = function (params, cy) {
                     };
                     var result = cy.undoRedo().do('reconnectEdge', param);
                     edge = result.edge;
+                    //edge.select();
                   }
                 }  
               }
@@ -900,7 +910,7 @@ module.exports = function (params, cy) {
               if(isValid !== 'valid' && typeof actOnUnsuccessfulReconnection === 'function'){
                 actOnUnsuccessfulReconnection();
               }
-              edge.unselect();
+             edge.select();
               cy.remove(dummyNode);
             }
           }
@@ -1009,11 +1019,12 @@ module.exports = function (params, cy) {
         cy.on('cyedgebendediting.changeBendPoints', 'edge', function() {
           var edge = this;
           cy.startBatch();
-          cy.edges().unselect();              
-          cy.trigger('bendPointMovement');
-          cy.endBatch();
+          cy.edges().unselect(); 
+          //edge.select();              
+          cy.trigger('bendPointMovement');        
+          cy.endBatch();          
           refreshDraws();
-          edge.select();   
+        
           
         });
       }
@@ -1135,8 +1146,7 @@ module.exports = function (params, cy) {
       $container.data('cyedgebendediting', data);
     },
     unbind: function () {
-        cy.off('position', 'node', ePosition)
-          .off('remove', 'node', eRemove)
+        cy.off('remove', 'node', eRemove)
           .off('add', 'node', eAdd)
           .off('style', 'edge.edgebendediting-hasbendpoints:selected', eStyle)
           .off('select', 'edge', eSelect)
@@ -1144,7 +1154,8 @@ module.exports = function (params, cy) {
           .off('tapstart', 'edge', eTapStart)
           .off('tapdrag', eTapDrag)
           .off('tapend', eTapEnd)
-          .off('cxttap', eCxtTap);
+          .off('cxttap', eCxtTap)
+          .off('drag', 'node',eDrag);
 
         cy.unbind("zoom pan", eZoom);
     }

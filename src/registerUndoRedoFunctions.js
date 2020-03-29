@@ -87,6 +87,7 @@ module.exports = function (cy, bendPointUtilities, params) {
       location: oldLoc,
       oldLoc:   location
     }
+    edge.unselect();
     return result;
   }
 
