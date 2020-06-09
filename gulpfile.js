@@ -38,18 +38,12 @@ gulp.task('build', function(){
     .pipe( gulp.dest('.') )
 });
 
-gulp.task('default', ['build'], function( next ){
+gulp.task('default', gulp.series('build'), function( next ){
   next();
 });
 
-gulp.task('publish', [], function( next ){
+gulp.task('publish', function( next ){
   runSequence('confver', /*'lint',*/ 'pkgver', 'push', 'tag', 'npm', next);
-});
-
-gulp.task('confver', ['version'], function(){
-  return gulp.src('.')
-    .pipe( prompt.confirm({ message: 'Are you sure version `' + version + '` is OK to publish?' }) )
-  ;
 });
 
 gulp.task('version', function( next ){
@@ -74,7 +68,14 @@ gulp.task('version', function( next ){
 
 });
 
-gulp.task('pkgver', ['version'], function(){
+gulp.task('confver', gulp.series('version'), function(){
+  return gulp.src('.')
+    .pipe( prompt.confirm({ message: 'Are you sure version `' + version + '` is OK to publish?' }) )
+  ;
+});
+
+
+gulp.task('pkgver', gulp.series('version'), function(){
   return gulp.src([
     'package.json',
     'bower.json'
