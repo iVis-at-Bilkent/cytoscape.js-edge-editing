@@ -71,7 +71,7 @@
       return obj;
     };
     
-    cytoscape( 'core', 'edgeEditing', function(opts){
+    cytoscape('core', 'edgeEditing', function(opts){
       var cy = this;
       
       if( opts === 'initialized' ) {
@@ -85,11 +85,16 @@
 
         // define edgebendediting-hasbendpoints css class
         cy.style().selector('.edgebendediting-hasbendpoints').css({
-          'curve-style': 'segments',
           'segment-distances': function (ele) {
             return bendPointUtilities.getSegmentDistancesString(ele);
           },
+          'control-point-distances': function (ele) {
+            return bendPointUtilities.getSegmentDistancesString(ele);
+          },
           'segment-weights': function (ele) {
+            return bendPointUtilities.getSegmentWeightsString(ele);
+          },
+          'control-point-weights': function (ele) {
             return bendPointUtilities.getSegmentWeightsString(ele);
           },
           'edge-distances': 'node-position'

@@ -129,10 +129,6 @@ var bendPointUtilities = {
   },
   getSegmentPoints: function(edge) {
     
-    if( edge.css('curve-style') !== 'segments' ) {
-      return undefined;
-    }
-    
     var segpts = [];
 
     var segmentWs = edge.pstyle( 'segment-weights' ).pfValue;

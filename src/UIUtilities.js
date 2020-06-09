@@ -194,41 +194,30 @@ module.exports = function (params, cy) {
           return;
         }
         
-        var segpts = bendPointUtilities.getSegmentPoints(edge);//edge._private.rdata.segpts;
-        var length = getBendShapesLength(edge) * 0.65;
-        
-        var srcPos = edge.source().position();
-        var tgtPos = edge.target().position();
-        
-        var weights = edge.data('cyedgebendeditingWeights');
-        var distances = edge.data('cyedgebendeditingDistances');
-
-        for(var i = 0; segpts && i < segpts.length; i = i + 2){
-          var bendX = segpts[i];
-          var bendY = segpts[i + 1];
-
-          var oldStyle = ctx.fillStyle;
-          ctx.fillStyle = "#000"; // black
-          renderBendShape(bendX, bendY, length);
-          ctx.fillStyle = oldStyle;
+        const segpts = bendPointUtilities.getSegmentPoints(edge);
+        if (!segpts) {
+          return;
         }
-      }
-      
-      // render a bend shape with the given parameters
-      function renderBendShape(bendX, bendY, length) {
-        // get the top left coordinates
-        var topLeftX = bendX - length / 2;
-        var topLeftY = bendY - length / 2;
-        
-        // convert to rendered parameters
-        var renderedTopLeftPos = convertToRenderedPosition({x: topLeftX, y: topLeftY});
-        length *= cy.zoom();
-        
-        // render bend shape
-        ctx.beginPath();
-        ctx.rect(renderedTopLeftPos.x, renderedTopLeftPos.y, length, length);
-        ctx.fill();
-        ctx.closePath();
+
+        const anchors = cy.data('cyedgebendeditingAnchors') || []
+        for(let i = 0; segpts && i < segpts.length / 2; ++i) {
+          if (anchors.length > i) {
+            const anchor = anchors[i]
+            anchor.restore()
+            anchor.position({ x: segpts[i*2], y: segpts[i*2 + 1] })
+          } else {
+            anchors.push(cy.add({
+              group: 'nodes',
+              classes: ['anchor'],
+              position: { x: segpts[i*2], y: segpts[i*2 + 1] },
+              selectable: false
+            }))
+          }
+        }
+        anchors.slice(segpts.length / 2).forEach(anchor => {
+          anchor.remove()
+        })
+        cy.data('cyedgebendeditingAnchors', anchors)
       }
       
       // render the end points shapes of the given edge
@@ -644,8 +633,12 @@ module.exports = function (params, cy) {
         
         cy.on('unselect', 'edge', eUnselect = function () {
           numberOfSelectedEdges = numberOfSelectedEdges - 1;
+          const anchors = cy.data('cyedgebendeditingAnchors') || []
             
           cy.startBatch();
+          anchors.forEach(anchor => {
+            anchor.remove()
+          })
             
           if (edgeToHighlightBends) {
             edgeToHighlightBends.removeClass('cy-edge-bend-editing-highlight-bends');
@@ -681,60 +674,74 @@ module.exports = function (params, cy) {
         var detachedNode;
         var nodeToAttach;
         
-        cy.on('tapstart', 'edge', eTapStart = function (event) {
-          var edge = this;
+        cy.on('tapstart', 'edge, .anchor', eTapStart = function (event) {
 
-          if (!edgeToHighlightBends || edgeToHighlightBends.id() !== edge.id()) {
-            createBendOnDrag = false;
-            return;
-          }
-          
-          movedBendEdge = edge;
-          edge.unselect();
-          moveBendParam = {
-            edge: edge,
-            weights: edge.data('cyedgebendeditingWeights') ? [].concat(edge.data('cyedgebendeditingWeights')) : [],
-            distances: edge.data('cyedgebendeditingDistances') ? [].concat(edge.data('cyedgebendeditingDistances')) : []
-          };
-          
-          var cyPos = event.position || event.cyPosition;
-          var cyPosX = cyPos.x;
-          var cyPosY = cyPos.y;
+          let index = -1;
+          let endPoint;
 
-          var index = getContainingBendShapeIndex(cyPosX, cyPosY, edge);
-          
-          // Get which end point has been clicked (Source:0, Target:1, None:-1)
-          var endPoint = getContainingEndPoint(cyPosX, cyPosY, edge);
+          if (this.isNode()) {
+            index = cy.data('cyedgebendeditingAnchors').findIndex(elem => elem.id() == this.id())
+            movedBendEdge = edgeToHighlightBends;
+          } else {
+            const edge = this;
 
-          if(endPoint == 0 || endPoint == 1){
-            movedEndPoint = endPoint;
-            detachedNode = (endPoint == 0) ? movedBendEdge.source() : movedBendEdge.target();
-
-            var disconnectedEnd = (endPoint == 0) ? 'source' : 'target';
-            var result = reconnectionUtilities.disconnectEdge(movedBendEdge, cy, event.renderedPosition, disconnectedEnd);
+            if (!edgeToHighlightBends || edgeToHighlightBends.id() !== edge.id()) {
+              createBendOnDrag = false;
+              return;
+            }
             
-            dummyNode = result.dummyNode;
-            movedBendEdge = result.edge;
+            movedBendEdge = edge;
+            edge.unselect();
+            moveBendParam = {
+              edge: edge,
+              weights: edge.data('cyedgebendeditingWeights') ? [].concat(edge.data('cyedgebendeditingWeights')) : [],
+              distances: edge.data('cyedgebendeditingDistances') ? [].concat(edge.data('cyedgebendeditingDistances')) : []
+            };
+            
+            var cyPos = event.position || event.cyPosition;
+            var cyPosX = cyPos.x;
+            var cyPosY = cyPos.y;
 
-            disableGestures();
+            // Get which end point has been clicked (Source:0, Target:1, None:-1)
+            endPoint = getContainingEndPoint(cyPosX, cyPosY, edge);
+
+            if(endPoint == 0 || endPoint == 1){
+              movedEndPoint = endPoint;
+              detachedNode = (endPoint == 0) ? movedBendEdge.source() : movedBendEdge.target();
+  
+              var disconnectedEnd = (endPoint == 0) ? 'source' : 'target';
+              var result = reconnectionUtilities.disconnectEdge(movedBendEdge, cy, event.renderedPosition, disconnectedEnd);
+              
+              dummyNode = result.dummyNode;
+              movedBendEdge = result.edge;
+              index = -1;
+  
+              disableGestures();
+              return;
+            } else {
+              index = getContainingBendShapeIndex(cyPosX, cyPosY, edge);
+            }
           }
-          else if (index != -1) {
+          
+          if (index != -1) {
             movedBendIndex = index;
-            // movedBendEdge = edge;
             disableGestures();
-          }
-          else {
+          } else {
             createBendOnDrag = true;
           }
         });
         
         cy.on('drag', 'node', eDrag = function (event) {
+          if (this.hasClass('anchor')) {
+            return
+          }
           var node = this;
           cy.edges().unselect();
           if(!node.selected()){
             cy.nodes().unselect();
           }         
         });
+
         cy.on('tapdrag', eTapDrag = function (event) {
           var edge = movedBendEdge;
           if(movedBendEdge !== undefined && bendPointUtilities.isIgnoredEdge(edge) ) {
@@ -781,7 +788,7 @@ module.exports = function (params, cy) {
         
         cy.on('tapend', eTapEnd = function (event) {
           var edge = movedBendEdge;
-          
+
           if( edge !== undefined ) {
             if( movedBendIndex != undefined ) {
               var startX = edge.source().position('x');
@@ -910,9 +917,10 @@ module.exports = function (params, cy) {
               if(isValid !== 'valid' && typeof actOnUnsuccessfulReconnection === 'function'){
                 actOnUnsuccessfulReconnection();
               }
-             edge.select();
+              edge.select();
               cy.remove(dummyNode);
             }
+            movedBendEdge.select()
           }
           
           if (edge !== undefined && moveBendParam !== undefined && edge.data('cyedgebendeditingWeights')
@@ -1018,9 +1026,7 @@ module.exports = function (params, cy) {
         
         cy.on('cyedgebendediting.changeBendPoints', 'edge', function() {
           var edge = this;
-          cy.startBatch();
-          cy.edges().unselect(); 
-          //edge.select();              
+          cy.startBatch();            
           cy.trigger('bendPointMovement');        
           cy.endBatch();          
           refreshDraws();
