@@ -7,17 +7,18 @@
 
 		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1">
                 
-                <link href="https://cdn.rawgit.com/ivis-at-bilkent/cytoscape.js-context-menus/master/cytoscape-context-menus.css" rel="stylesheet" type="text/css" />
+        <link href="https://cdn.rawgit.com/ivis-at-bilkent/cytoscape.js-context-menus/master/cytoscape-context-menus.css" rel="stylesheet" type="text/css" />
                 
-                <script src="https://code.jquery.com/jquery-3.0.0.js"></script>
+        <script src="https://code.jquery.com/jquery-3.0.0.js"></script>
 		<script src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
+		<script src="https://unpkg.com/konva@7.0.3/konva.min.js"></script>
 
 		<!-- for testing with local version of cytoscape.js -->
 		<!--<script src="../cytoscape.js/build/cytoscape.js"></script>-->
                 
-                <script src="https://cdn.rawgit.com/ivis-at-bilkent/cytoscape.js-context-menus/master/cytoscape-context-menus.js"></script>
+    	<script src="https://cdn.rawgit.com/ivis-at-bilkent/cytoscape.js-context-menus/master/cytoscape-context-menus.js"></script>
 		<script src="https://cdn.rawgit.com/ivis-at-bilkent/cytoscape.js-undo-redo/unstable/cytoscape-undo-redo.js"></script>
-                <script src="cytoscape-edge-editing.js"></script>
+        <script src="cytoscape-edge-editing.js"></script>
 
 		<style>
 			body {
@@ -92,7 +93,14 @@
 							  },
 							  classes: 'edgebendediting-hasbendpoints',
 						 	},
-							{ data: { source: 'j', target: 'k' } },
+							{ data: { 
+								source: 'j', 
+								target: 'k',
+								cyedgecontroleditingWeights: [0.5],
+								cyedgecontroleditingDistances: [50] 
+							  },
+							  classes: 'edgecontrolediting-hascontrolpoints',
+							},
 							{ data: { source: 'j', target: 'g' } },
 //							{ data: { source: 'e', target: 'j' } },
 //							{ data: { source: 'e', target: 'k' } },
