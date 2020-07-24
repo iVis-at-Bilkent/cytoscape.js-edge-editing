@@ -1194,12 +1194,31 @@ module.exports = function (params, cy) {
         });
 
         cy.on('cxttap', eCxtTap = function (event) {
-          var edge = anchorManager.edge;          
-          var type = anchorManager.edgeType;
+          console.log('cxttap');
+          var target = event.target || event.cyTarget;
+          var targetIsEdge = false;
+
+          try{
+            targetIsEdge = target.isEdge();
+          }
+          catch(err){
+            // this is here just to suppress the error
+          }
+
+          var edge, type;
+          if(targetIsEdge){
+            edge = target;
+            type = anchorPointUtilities.getEdgeType(edge);
+          }
+          else{
+            edge = anchorManager.edge;          
+            type = anchorManager.edgeType;
+          }
 
           var menus = cy.contextMenus('get'); // get context menus instance
           
-          if(!edgeToHighlight || edgeToHighlight.id() != edge.id() || anchorPointUtilities.isIgnoredEdge(edge)) {
+          if(!edgeToHighlight || edgeToHighlight.id() != edge.id() || anchorPointUtilities.isIgnoredEdge(edge) ||
+              edgeToHighlight !== edge) {
             menus.hideMenuItem(removeBendPointCxtMenuId);
             menus.hideMenuItem(addBendPointCxtMenuId);
             menus.hideMenuItem(removeControlPointCxtMenuId);
@@ -1213,6 +1232,7 @@ module.exports = function (params, cy) {
             menus.hideMenuItem(removeBendPointCxtMenuId);
             menus.hideMenuItem(removeControlPointCxtMenuId);
             if(type === 'control'){
+              console.log('showMenuItem(addControlPointCxtMenuId) called');
               menus.showMenuItem(addControlPointCxtMenuId);
               menus.hideMenuItem(addBendPointCxtMenuId);
             }

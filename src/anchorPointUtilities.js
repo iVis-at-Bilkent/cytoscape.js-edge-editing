@@ -191,8 +191,10 @@ var anchorPointUtilities = {
     
     var anchorList = [];
 
-    var weights = edge.pstyle( this.syntax[type]['weightCss'] ).pfValue;
-    var distances = edge.pstyle( this.syntax[type]['distanceCss'] ).pfValue;
+    var weights = edge.pstyle( this.syntax[type]['weightCss'] ) ? 
+                  edge.pstyle( this.syntax[type]['weightCss'] ).pfValue : [];
+    var distances = edge.pstyle( this.syntax[type]['distanceCss'] ) ? 
+                  edge.pstyle( this.syntax[type]['distanceCss'] ).pfValue : [];
     var minLengths = Math.min( weights.length, distances.length );
     
     var srcPos = edge.source().position();
