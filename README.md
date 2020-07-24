@@ -7,6 +7,7 @@ A Cytoscape.js extension enabling interactive editing of edge bend and control p
  * The term 'anchor' will be used here and in the code to refer to bend and control points collectively.
  * To highlight anchor positions of an edge you should select the edge and unselect any other edges. Note that in determining the edge to highlight the anchor positions we assume that the unvisible edges are not selected.
  * To add an anchor select the edge and unselect any other edge, right click where you want to add the anchor and click 'Add Bend Point' or 'Add Control Point' on the context menu (requires 'cytoscape.js-context-menus' extension). The context menu will distiguish between the edges and it will not be possible to a bend point on an unbundled bezier edge and vice versa.
+ * Anchors cannot be added to edges which are not of type segments or unbundled bezier, but an anchor can be added to an edge which had anchors before (the edge doesn't have to be segments or unbundled bezier anymore). Bend points can be added to edges which were segments and control points to edges which were unbundled bezier. 
  * To remove an anchor select the edge and unselect any other edge, right click on the anchor and click 'Remove Bend Point' or 'Remove Control Point' on the context menu (requires 'cytoscape.js-context-menus' extension). 
  * To move an anchor drag and drop it when the edge is the only selected edge.
  * Alternatively, 

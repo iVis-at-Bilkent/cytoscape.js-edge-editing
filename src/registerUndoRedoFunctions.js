@@ -9,8 +9,8 @@ module.exports = function (cy, anchorPointUtilities, params) {
 
   function changeAnchorPoints(param) {
     var edge = cy.getElementById(param.edge.id());
-    var type = anchorPointUtilities.getEdgeType(edge);
-
+    var type = param.type || anchorPointUtilities.getEdgeType(edge);
+    
     if(type === 'inconclusive'){
       type = 'bend';
     }
@@ -19,6 +19,7 @@ module.exports = function (cy, anchorPointUtilities, params) {
     var distanceStr = anchorPointUtilities.syntax[type]['distance'];
     var result = {
       edge: edge,
+      type: type,
       weights: param.set ? edge.data(weightStr) : param.weights,
       distances: param.set ? edge.data(distanceStr) : param.distances,
       set: true//As the result will not be used for the first function call params should be used to set the data

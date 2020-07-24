@@ -81,6 +81,7 @@ module.exports = function (params, cy) {
           var edge = anchorManager.edge;
           moveAnchorParam = {
             edge: edge,
+            type: anchorManager.edgeType,
             weights: edge.data(weightStr) ? [].concat(edge.data(weightStr)) : [],
             distances: edge.data(distanceStr) ? [].concat(edge.data(distanceStr)) : []
           };
@@ -893,6 +894,7 @@ module.exports = function (params, cy) {
 
             moveAnchorParam = {
               edge: edge,
+              type: type,
               weights: edge.data(weightStr) ? [].concat(edge.data(weightStr)) : [],
               distances: edge.data(distanceStr) ? [].concat(edge.data(distanceStr)) : []
             };
@@ -1107,8 +1109,8 @@ module.exports = function (params, cy) {
           }
 
           var weightStr = anchorPointUtilities.syntax[type]['weight'];
-          if (edge !== undefined && moveAnchorParam !== undefined && edge.data(weightStr)
-          && edge.data(weightStr).toString() != moveAnchorParam.weights.toString()) {
+          if (edge !== undefined && moveAnchorParam !== undefined && 
+            (edge.data(weightStr) ? edge.data(weightStr).toString() : null) != moveAnchorParam.weights.toString()) {
             
             // anchor created from drag
             if(anchorCreatedByDrag){
@@ -1194,7 +1196,6 @@ module.exports = function (params, cy) {
         });
 
         cy.on('cxttap', eCxtTap = function (event) {
-          console.log('cxttap');
           var target = event.target || event.cyTarget;
           var targetIsEdge = false;
 
@@ -1232,7 +1233,6 @@ module.exports = function (params, cy) {
             menus.hideMenuItem(removeBendPointCxtMenuId);
             menus.hideMenuItem(removeControlPointCxtMenuId);
             if(type === 'control'){
-              console.log('showMenuItem(addControlPointCxtMenuId) called');
               menus.showMenuItem(addControlPointCxtMenuId);
               menus.hideMenuItem(addBendPointCxtMenuId);
             }

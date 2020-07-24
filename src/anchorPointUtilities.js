@@ -32,18 +32,23 @@ var anchorPointUtilities = {
   getEdgeType: function(edge){
     if(!edge)
       return 'inconclusive';
-    else if(edge.hasClass(this.syntax['bend']['class']) || 
-            edge.hasClass(this.syntax['bend']['was']) ||
-            edge.data(this.syntax['bend']['pointPos']) ||
-            edge.css('curve-style') === this.syntax['bend']['edge'])
+    else if(edge.hasClass(this.syntax['bend']['class']))
       return 'bend';
-    else if(edge.hasClass(this.syntax['control']['class']) || 
-            edge.hasClass(this.syntax['control']['was']) ||
-            edge.data(this.syntax['control']['pointPos']) ||
-            edge.css('curve-style') === this.syntax['control']['edge'])
+    else if(edge.hasClass(this.syntax['control']['class']))
       return 'control';
-    else
-      return 'inconclusive';
+    else if(edge.css('curve-style') === this.syntax['bend']['edge'])
+      return 'bend';
+    else if(edge.css('curve-style') === this.syntax['control']['edge'])
+      return 'control';
+    else if(edge.hasClass(this.syntax['bend']['was']))
+      return 'bend';
+    else if(edge.hasClass(this.syntax['control']['was']))
+      return 'control';
+    else if(edge.data(this.syntax['bend']['pointPos']))
+      return 'bend';
+    else if(edge.data(this.syntax['control']['pointPos']))
+      return 'control';
+    return 'inconclusive';
   },
   // initilize anchor points based on bendPositionsFcn and controlPositionFcn
   initAnchorPoints: function(bendPositionsFcn, controlPositionsFcn, edges) {
