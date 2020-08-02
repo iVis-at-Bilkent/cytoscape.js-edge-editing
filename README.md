@@ -30,7 +30,7 @@ Click [here](https://raw.githack.com/iVis-at-Bilkent/cytoscape.js-edge-editing/u
 
  * Cytoscape.js ^3.3.0
  * jQuery ^1.7.0 || ^2.0.0 || ^3.0.0
- * Konva ^2.1.3
+ * Konva ^7.0.3
  * cytoscape-undo-redo.js(optional) ^1.0.1
  * cytoscape-context-menus.js(optional) ^2.0.0
 
