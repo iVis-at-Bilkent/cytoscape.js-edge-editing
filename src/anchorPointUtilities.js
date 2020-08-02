@@ -15,7 +15,6 @@ var anchorPointUtilities = {
       weightCss: "segment-weights",
       distanceCss: "segment-distances",
       pointPos: "bendPointPositions",
-      was: "cyedgeeditingWasSegments" // special class to remember edges which were segments
     },
     control: {
       edge: "unbundled-bezier",
@@ -25,10 +24,11 @@ var anchorPointUtilities = {
       weightCss: "control-point-weights",
       distanceCss: "control-point-distances",
       pointPos: "controlPointPositions",
-      was: "cyedgeeditingWasUnbundledBezier"
     }
   },
   // gets edge type as 'bend' or 'control'
+  // the interchanging if-s are necessary to set the priority of the tags
+  // example: an edge with type segment and a class 'hascontrolpoints' will be classified as unbundled bezier
   getEdgeType: function(edge){
     if(!edge)
       return 'inconclusive';
@@ -39,10 +39,6 @@ var anchorPointUtilities = {
     else if(edge.css('curve-style') === this.syntax['bend']['edge'])
       return 'bend';
     else if(edge.css('curve-style') === this.syntax['control']['edge'])
-      return 'control';
-    else if(edge.hasClass(this.syntax['bend']['was']))
-      return 'bend';
-    else if(edge.hasClass(this.syntax['control']['was']))
       return 'control';
     else if(edge.data(this.syntax['bend']['pointPos']))
       return 'bend';
@@ -336,17 +332,14 @@ var anchorPointUtilities = {
     
     return str;
   },
-  addAnchorPoint: function(edge, newAnchorPoint) {
+  addAnchorPoint: function(edge, newAnchorPoint, type = undefined) {
     if(edge === undefined || newAnchorPoint === undefined){
       edge = this.currentCtxEdge;
       newAnchorPoint = this.currentCtxPos;
     }
   
-    var type = this.getEdgeType(edge);
-
-    if(type === 'inconclusive'){
-      return;
-    }
+    if(type === undefined)
+      type = this.getEdgeType(edge);
 
     var weightStr = this.syntax[type]['weight'];
     var distanceStr = this.syntax[type]['distance'];
@@ -450,7 +443,6 @@ var anchorPointUtilities = {
     edge.data(distanceStr, distances);
     
     edge.addClass(this.syntax[type]['class']);
-    edge.removeClass(this.syntax[type]['was']);
     
     return newAnchorIndex;
   },
@@ -478,7 +470,6 @@ var anchorPointUtilities = {
     // no more anchor points on edge
     if(distances.length == 0 || weights.length == 0){
       edge.removeClass(this.syntax[type]['class']);
-      edge.addClass(this.syntax[type]['was']);
       edge.data(distanceStr, []);
       edge.data(weightStr, []);
     }

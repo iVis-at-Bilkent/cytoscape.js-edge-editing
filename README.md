@@ -7,12 +7,13 @@ A Cytoscape.js extension enabling interactive editing of edge bend and control p
  * The term 'anchor' will be used here and in the code to refer to bend and control points collectively.
  * To highlight anchor positions of an edge you should select the edge and unselect any other edges. Note that in determining the edge to highlight the anchor positions we assume that the unvisible edges are not selected.
  * To add an anchor select the edge and unselect any other edge, right click where you want to add the anchor and click 'Add Bend Point' or 'Add Control Point' on the context menu (requires 'cytoscape.js-context-menus' extension). The context menu will distiguish between the edges and it will not be possible to a bend point on an unbundled bezier edge and vice versa.
- * Anchors cannot be added to edges which are not of type segments or unbundled bezier, but an anchor can be added to an edge which had anchors before (the edge doesn't have to be segments or unbundled bezier anymore). Bend points can be added to edges which were segments and control points to edges which were unbundled bezier. 
+ * Bend points or control points can be added to edges which are not of type segments or unbundled bezier. The edge will then become segemetns or unbundled bezier accordingly.
  * To remove an anchor select the edge and unselect any other edge, right click on the anchor and click 'Remove Bend Point' or 'Remove Control Point' on the context menu (requires 'cytoscape.js-context-menus' extension). 
  * To move an anchor drag and drop it when the edge is the only selected edge.
  * Alternatively, 
     * You can click anywhere on the edge (if it is the only selected edge) to introduce and relocate an anchor by dragging.
     * A bend point is removed if it is dropped near the line segment between its two neighbours.
+ * Drag and drop can also be used to quickly create and drag an anchor on a highlighted edge. The anchor type will be decided based on the edge type. This will not work with edges which are not segments or unbundled bezier.
  * To reconnect an edge, select the handle (source or target), drag and drop on the new (source or target) node.
  
 <img src="edge-editing-animated-demo.gif" width="340">

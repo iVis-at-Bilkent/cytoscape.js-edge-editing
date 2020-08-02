@@ -207,26 +207,42 @@ module.exports = function (params, cy) {
         }
       };
 
-      var cxtAddAnchorFcn = function (event) {
+      var cxtAddBendFcn = function(event){
+        cxtAddAnchorFcn(event, 'bend');
+      }
+
+      var cxtAddControlFcn = function(event) {
+        cxtAddAnchorFcn(event, 'control');
+      }
+
+      var cxtAddAnchorFcn = function (event, anchorType) {
         var edge = event.target || event.cyTarget;
         if(!anchorPointUtilities.isIgnoredEdge(edge)) {
 
           var type = anchorPointUtilities.getEdgeType(edge);
+          var weights, distances, weightStr, distanceStr;
 
-          if(anchorPointUtilities.edgeTypeInconclusiveShouldntHappen(type, "UiUtilities.js, cxtAddAnchorFcn")){
-            return;
+          if(type === 'inconclusive'){
+            weights = [];
+            distances = [];
           }
+          else{
+            weightStr = anchorPointUtilities.syntax[type]['weight'];
+            distanceStr = anchorPointUtilities.syntax[type]['distance'];
 
-          var weightStr = anchorPointUtilities.syntax[type]['weight'];
-          var distanceStr = anchorPointUtilities.syntax[type]['distance'];
+            weights = edge.data(weightStr) ? [].concat(edge.data(weightStr)) : edge.data(weightStr);
+            distances = edge.data(distanceStr) ? [].concat(edge.data(distanceStr)) : edge.data(distanceStr);
+          }
 
           var param = {
             edge: edge,
-            weights: edge.data(weightStr) ? [].concat(edge.data(weightStr)) : edge.data(weightStr),
-            distances: edge.data(distanceStr) ? [].concat(edge.data(distanceStr)) : edge.data(distanceStr)
+            type: type,
+            weights: weights,
+            distances: distances
           };
 
-          anchorPointUtilities.addAnchorPoint();
+          // the undefined go for edge and newAnchorPoint parameters
+          anchorPointUtilities.addAnchorPoint(undefined, undefined, anchorType);
 
           if (options().undoable) {
             cy.undoRedo().do('changeAnchorPoints', param);
@@ -247,6 +263,7 @@ module.exports = function (params, cy) {
 
         var param = {
           edge: edge,
+          type: type,
           weights: [].concat(edge.data(anchorPointUtilities.syntax[type]['weight'])),
           distances: [].concat(edge.data(anchorPointUtilities.syntax[type]['distance']))
         };
@@ -274,7 +291,7 @@ module.exports = function (params, cy) {
           title: opts.addBendMenuItemTitle,
           content: 'Add Bend Point',
           selector: 'edge',
-          onClickFunction: cxtAddAnchorFcn
+          onClickFunction: cxtAddBendFcn
         },
         {
           id: removeBendPointCxtMenuId,
@@ -289,7 +306,7 @@ module.exports = function (params, cy) {
           content: 'Add Control Point',
           selector: 'edge',
           coreAsWell: true,
-          onClickFunction: cxtAddAnchorFcn
+          onClickFunction: cxtAddControlFcn
         },
         {
           id: removeControlPointCxtMenuId,
@@ -1241,8 +1258,8 @@ module.exports = function (params, cy) {
               menus.hideMenuItem(addControlPointCxtMenuId);
             }
             else{
-              menus.hideMenuItem(addBendPointCxtMenuId);
-              menus.hideMenuItem(addControlPointCxtMenuId);
+              menus.showMenuItem(addBendPointCxtMenuId);
+              menus.showMenuItem(addControlPointCxtMenuId);
             }
             anchorPointUtilities.currentCtxPos = cyPos;
           }

@@ -9,37 +9,44 @@ module.exports = function (cy, anchorPointUtilities, params) {
 
   function changeAnchorPoints(param) {
     var edge = cy.getElementById(param.edge.id());
-    var type = param.type || anchorPointUtilities.getEdgeType(edge);
+    var type = param.type !== 'inconclusive' ? param.type : anchorPointUtilities.getEdgeType(edge);
     
-    if(type === 'inconclusive'){
-      type = 'bend';
+    var weights, distances, weightStr, distanceStr;
+
+    if(param.type === 'inconclusive' && !param.set){
+      weights = [];
+      distances = [];
+    }
+    else {
+      weightStr = anchorPointUtilities.syntax[type]['weight'];
+      distanceStr = anchorPointUtilities.syntax[type]['distance'];
+
+      weights = param.set ? edge.data(weightStr) : param.weights;
+      distances = param.set ? edge.data(distanceStr) : param.distances;
     }
 
-    var weightStr = anchorPointUtilities.syntax[type]['weight'];
-    var distanceStr = anchorPointUtilities.syntax[type]['distance'];
     var result = {
       edge: edge,
       type: type,
-      weights: param.set ? edge.data(weightStr) : param.weights,
-      distances: param.set ? edge.data(distanceStr) : param.distances,
-      set: true//As the result will not be used for the first function call params should be used to set the data
+      weights: weights,
+      distances: distances,
+      //As the result will not be used for the first function call params should be used to set the data
+      set: true
     };
-
-    var hasAnchorPoint = param.weights && param.weights.length > 0;
 
     //Check if we need to set the weights and distances by the param values
     if (param.set) {
-      hasAnchorPoint ? edge.data(weightStr, param.weights) : edge.removeData(weightStr);
-      hasAnchorPoint ? edge.data(distanceStr, param.distances) : edge.removeData(distanceStr);
+      var hadAnchorPoint = param.weights && param.weights.length > 0;
+
+      hadAnchorPoint ? edge.data(weightStr, param.weights) : edge.removeData(weightStr);
+      hadAnchorPoint ? edge.data(distanceStr, param.distances) : edge.removeData(distanceStr);
 
       //refresh the curve style as the number of anchor point would be changed by the previous operation
-      if (hasAnchorPoint) {
+      if (hadAnchorPoint) {
         edge.addClass(anchorPointUtilities.syntax[type]['class']);
-        edge.removeClass(anchorPointUtilities.syntax[type]['was']);
       }
       else {
-        edge.removeClass(anchorPointUtilities.syntax[type]['class']);
-        edge.addClass(anchorPointUtilities.syntax[type]['was']);
+          edge.removeClass(anchorPointUtilities.syntax[type]['class']);
       }
     }
     
