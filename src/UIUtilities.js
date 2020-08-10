@@ -8,6 +8,7 @@ module.exports = function (params, cy) {
 
   var addBendPointCxtMenuId = 'cy-edge-bend-editing-cxt-add-bend-point';
   var removeBendPointCxtMenuId = 'cy-edge-bend-editing-cxt-remove-bend-point';
+  var removeBendPointsCtxMenuId = 'cy-edge-bend-editing-cxt-remove-multiple-bend-point';
   var eStyle, eRemove, eAdd, eZoom, eSelect, eUnselect, eTapStart, eTapDrag, eTapEnd, eCxtTap, eDrag;
   // last status of gestures
   var lastPanningEnabled, lastZoomingEnabled, lastBoxSelectionEnabled;
@@ -61,9 +62,27 @@ module.exports = function (params, cy) {
         if(options().undoable) {
           cy.undoRedo().do('changeBendPoints', param);
         }
-        
-        setTimeout(function(){refreshDraws();edge.select();}, 50) ;
 
+        setTimeout(function(){refreshDraws();edge.select();}, 50);
+      };
+
+      //remove all bend points on the edge where the
+      //context menu was used
+      var cxtRemoveAllBendPointsFcn = function (event) {
+        var edge = event.target || event.cyTarget;
+        var param = {
+          edge: edge,
+          weights: [].concat(edge.data('cyedgebendeditingWeights')),
+          distances: [].concat(edge.data('cyedgebendeditingDistances'))
+        };
+
+        bendPointUtilities.removeAllBendPoints();
+
+        if (options().undoable) {
+          cy.undoRedo().do('changeBendPoints', param);
+        }
+
+        setTimeout(function(){refreshDraws();edge.select();}, 50);
       };
       
       // function to reconnect edge
@@ -87,7 +106,14 @@ module.exports = function (params, cy) {
           content: 'Remove Bend Point',
           selector: 'edge',
           onClickFunction: cxtRemoveBendPointFcn
-        }
+        },
+        {
+          id: removeBendPointsCtxMenuId,
+          title: opts.removeBendsMenuItemTitle,
+          content: 'Remove All Bend Points',
+          selector: '.edgebendediting-hasmultiplebendpoints',
+          onClickFunction: cxtRemoveAllBendPointsFcn
+        },
       ];
       
       if(cy.contextMenus) {

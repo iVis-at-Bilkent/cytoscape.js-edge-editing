@@ -17,6 +17,7 @@ module.exports = function (cy, bendPointUtilities, params) {
     };
 
     var hasBend = param.weights && param.weights.length > 0;
+    var hasMultiBend = hasBend && param.weights.length > 1;
 
     //Check if we need to set the weights and distances by the param values
     if (param.set) {
@@ -26,6 +27,12 @@ module.exports = function (cy, bendPointUtilities, params) {
       //refresh the curve style as the number of bend point would be changed by the previous operation
       if (hasBend) {
         edge.addClass('edgebendediting-hasbendpoints');
+        if (hasMultiBend) {
+          edge.addClass('edgebendediting-hasmultiplebendpoints');
+        } 
+        else if (edge.hasClass('edgebendediting-hasmultiplebendpoints')){
+            edge.removeClass('edgebendediting-hasmultiplebendpoints');
+        }
       }
       else {
         edge.removeClass('edgebendediting-hasbendpoints');

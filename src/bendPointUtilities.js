@@ -22,6 +22,11 @@ var bendPointUtilities = {
           edge.data('cyedgebendeditingWeights', result.weights);
           edge.data('cyedgebendeditingDistances', result.distances);
           edge.addClass('edgebendediting-hasbendpoints');
+          //if there are more than 1 bend points set has multiple bend points class
+          //for menu selector
+          if (result.distances.length > 1) {
+            edge.addClass('edgebendediting-hasmultiplebendpoints');
+          }
         }
       }
     }
@@ -387,8 +392,13 @@ var bendPointUtilities = {
    
     edge.data('cyedgebendeditingWeights', weights);
     edge.data('cyedgebendeditingDistances', distances);
-    
     edge.addClass('edgebendediting-hasbendpoints');
+
+    //add multiple bend points class if there are multiple 
+    //bend points
+    if (weights.length > 1) {
+      edge.addClass('edgebendediting-hasmultiplebendpoints');
+    }
     
     return relativeBendPosition;
   },
@@ -403,17 +413,37 @@ var bendPointUtilities = {
     
     distances.splice(bendPointIndex, 1);
     weights.splice(bendPointIndex, 1);
-    
-    
+
     if(distances.length == 0 || weights.length == 0){
       edge.removeClass('edgebendediting-hasbendpoints');
-        edge.data('cyedgebendeditingDistances', []);
-        edge.data('cyedgebendeditingWeights', []);
+      edge.data('cyedgebendeditingDistances', []);
+      edge.data('cyedgebendeditingWeights', []);
     }
     else {
       edge.data('cyedgebendeditingDistances', distances);
       edge.data('cyedgebendeditingWeights', weights);
+      //if we are down to 1 bend point as a result of removal,
+      //also remove the multiple bend point class
+      if (distances.length == 1 || weights.length == 1) {
+        edge.removeClass('edgebendediting-hasmultiplebendpoints');
+      }
     }
+  },
+  removeAllBendPoints: function(edge) {
+    if (edge === undefined) {
+      edge = this.currentCtxEdge;
+    }
+
+    //remove classes from the edge
+    if (edge.hasClass('edgebendediting-hasbendpoints')) {
+      edge.removeClass('edgebendediting-hasbendpoints');
+      if (edge.hasClass('edgebendediting-hasmultiplebendpoints')) {
+        edge.removeClass('edgebendediting-hasmultiplebendpoints');
+      }
+    }
+    //remove the edge bend point data
+    edge.data('cyedgebendeditingDistances', []);
+    edge.data('cyedgebendeditingWeights', []);
   },
   calculateDistance: function(pt1, pt2) {
     var diffX = pt1.x - pt2.x;
