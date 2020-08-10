@@ -59,7 +59,6 @@ module.exports = function (cy, bendPointUtilities, params) {
 
   function moveBendPointsUndoable(positionDiff, edges) {
       edges.forEach(function( edge ){
-          edge = cy.getElementById(param.edge.id());
           var previousBendPointsPosition = bendPointUtilities.getSegmentPoints(edge);
           var nextBendPointsPosition = [];
           if (previousBendPointsPosition != undefined)
