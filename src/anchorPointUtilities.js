@@ -1,27 +1,79 @@
-var bendPointUtilities = {
+var anchorPointUtilities = {
   currentCtxEdge: undefined,
   currentCtxPos: undefined,
-  currentBendIndex: undefined,
+  currentAnchorIndex: undefined,
   ignoredClasses: undefined,
   setIgnoredClasses: function(_ignoredClasses) {
     this.ignoredClasses = _ignoredClasses;
   },
-  // initilize bend points based on bendPositionsFcn
-  initBendPoints: function(bendPositionsFcn, edges) {
+  syntax: {
+    bend: {
+      edge: "segments",
+      class: "edgebendediting-hasbendpoints",
+      weight: "cyedgebendeditingWeights",
+      distance: "cyedgebendeditingDistances",
+      weightCss: "segment-weights",
+      distanceCss: "segment-distances",
+      pointPos: "bendPointPositions",
+    },
+    control: {
+      edge: "unbundled-bezier",
+      class: "edgecontrolediting-hascontrolpoints",
+      weight: "cyedgecontroleditingWeights",
+      distance: "cyedgecontroleditingDistances",
+      weightCss: "control-point-weights",
+      distanceCss: "control-point-distances",
+      pointPos: "controlPointPositions",
+    }
+  },
+  // gets edge type as 'bend' or 'control'
+  // the interchanging if-s are necessary to set the priority of the tags
+  // example: an edge with type segment and a class 'hascontrolpoints' will be classified as unbundled bezier
+  getEdgeType: function(edge){
+    if(!edge)
+      return 'inconclusive';
+    else if(edge.hasClass(this.syntax['bend']['class']))
+      return 'bend';
+    else if(edge.hasClass(this.syntax['control']['class']))
+      return 'control';
+    else if(edge.css('curve-style') === this.syntax['bend']['edge'])
+      return 'bend';
+    else if(edge.css('curve-style') === this.syntax['control']['edge'])
+      return 'control';
+    else if(edge.data(this.syntax['bend']['pointPos']))
+      return 'bend';
+    else if(edge.data(this.syntax['control']['pointPos']))
+      return 'control';
+    return 'inconclusive';
+  },
+  // initilize anchor points based on bendPositionsFcn and controlPositionFcn
+  initAnchorPoints: function(bendPositionsFcn, controlPositionsFcn, edges) {
     for (var i = 0; i < edges.length; i++) {
       var edge = edges[i];
+      var type = this.getEdgeType(edge);
+      
+      if (type === 'inconclusive') { 
+        continue; 
+      }
+
       if(!this.isIgnoredEdge(edge)) {
 
-        // get the bend positions by applying the function for this edge
-        var bendPositions = bendPositionsFcn.apply(this, edge);
-        // calculate relative bend positions
-        var result = this.convertToRelativeBendPositions(edge, bendPositions);
+        var anchorPositions;
 
-        // if there are bend points set weights and distances accordingly and add class to enable style changes
+        // get the anchor positions by applying the functions for this edge
+        if(type === 'bend')
+          anchorPositions = bendPositionsFcn.apply(this, edge);
+        else if(type === 'control')
+          anchorPositions = controlPositionsFcn.apply(this, edge);
+
+        // calculate relative anchor positions
+        var result = this.convertToRelativePositions(edge, anchorPositions);
+
+        // if there are anchors set weights and distances accordingly and add class to enable style changes
         if (result.distances.length > 0) {
-          edge.data('cyedgebendeditingWeights', result.weights);
-          edge.data('cyedgebendeditingDistances', result.distances);
-          edge.addClass('edgebendediting-hasbendpoints');
+          edge.data(this.syntax[type]['weight'], result.weights);
+          edge.data(this.syntax[type]['distance'], result.distances);
+          edge.addClass(this.syntax[type]['class']);
         }
       }
     }
@@ -119,7 +171,7 @@ var bendPointUtilities = {
     }
 
     //Intersection point is the intersection of the lines passing through the nodes and
-    //passing through the bend point and perpendicular to the other line
+    //passing through the bend or control point and perpendicular to the other line
     var intersectionPoint = {
       x: intersectX,
       y: intersectY
@@ -127,17 +179,24 @@ var bendPointUtilities = {
     
     return intersectionPoint;
   },
-  getSegmentPoints: function(edge) {
-    
-    if( edge.css('curve-style') !== 'segments' ) {
+  getAnchorsAsArray: function(edge) {
+    var type = this.getEdgeType(edge);
+
+    if(type === 'inconclusive'){
       return undefined;
     }
     
-    var segpts = [];
+    if( edge.css('curve-style') !== this.syntax[type]['edge'] ) {
+      return undefined;
+    }
+    
+    var anchorList = [];
 
-    var segmentWs = edge.pstyle( 'segment-weights' ).pfValue;
-    var segmentDs = edge.pstyle( 'segment-distances' ).pfValue;
-    var segmentsN = Math.min( segmentWs.length, segmentDs.length );
+    var weights = edge.pstyle( this.syntax[type]['weightCss'] ) ? 
+                  edge.pstyle( this.syntax[type]['weightCss'] ).pfValue : [];
+    var distances = edge.pstyle( this.syntax[type]['distanceCss'] ) ? 
+                  edge.pstyle( this.syntax[type]['distanceCss'] ).pfValue : [];
+    var minLengths = Math.min( weights.length, distances.length );
     
     var srcPos = edge.source().position();
     var tgtPos = edge.target().position();
@@ -162,16 +221,9 @@ var bendPointUtilities = {
       y: vectorNorm.x
     };
 
-    for( var s = 0; s < segmentsN; s++ ){
-      var w = segmentWs[ s ];
-      var d = segmentDs[ s ];
-
-      // d = swappedDirection ? -d : d;
-      //
-      // d = Math.abs(d);
-
-      // var w1 = !swappedDirection ? (1 - w) : w;
-      // var w2 = !swappedDirection ? w : (1 - w);
+    for( var s = 0; s < minLengths; s++ ){
+      var w = weights[ s ];
+      var d = distances[ s ];
 
       var w1 = (1 - w);
       var w2 = w;
@@ -185,27 +237,25 @@ var bendPointUtilities = {
 
       var midptPts = posPts;
       
-      
-
       var adjustedMidpt = {
         x: midptPts.x1 * w1 + midptPts.x2 * w2,
         y: midptPts.y1 * w1 + midptPts.y2 * w2
       };
 
-      segpts.push(
+      anchorList.push(
         adjustedMidpt.x + vectorNormInverse.x * d,
         adjustedMidpt.y + vectorNormInverse.y * d
       );
     }
     
-    return segpts;
+    return anchorList;
   },
-  convertToRelativeBendPosition: function (edge, bendPoint, srcTgtPointsAndTangents) {
+  convertToRelativePosition: function (edge, point, srcTgtPointsAndTangents) {
     if (srcTgtPointsAndTangents === undefined) {
       srcTgtPointsAndTangents = this.getSrcTgtPointsAndTangents(edge);
     }
     
-    var intersectionPoint = this.getIntersection(edge, bendPoint, srcTgtPointsAndTangents);
+    var intersectionPoint = this.getIntersection(edge, point, srcTgtPointsAndTangents);
     var intersectX = intersectionPoint.x;
     var intersectY = intersectionPoint.y;
     
@@ -224,13 +274,13 @@ var bendPointUtilities = {
       weight = 0;
     }
     
-    var distance = Math.sqrt(Math.pow((intersectY - bendPoint.y), 2)
-        + Math.pow((intersectX - bendPoint.x), 2));
+    var distance = Math.sqrt(Math.pow((intersectY - point.y), 2)
+        + Math.pow((intersectX - point.x), 2));
     
     //Get the direction of the line form source point to target point
     var direction1 = this.getLineDirection(srcPoint, tgtPoint);
-    //Get the direction of the line from intesection point to bend point
-    var direction2 = this.getLineDirection(intersectionPoint, bendPoint);
+    //Get the direction of the line from intesection point to the point
+    var direction2 = this.getLineDirection(intersectionPoint, point);
     
     //If the difference is not -2 and not 6 then the direction of the distance is negative
     if(direction1 - direction2 != -2 && direction1 - direction2 != 6){
@@ -243,19 +293,18 @@ var bendPointUtilities = {
       distance: distance
     };
   },
-  convertToRelativeBendPositions: function (edge, bendPoints) {
+  convertToRelativePositions: function (edge, anchorPoints) {
     var srcTgtPointsAndTangents = this.getSrcTgtPointsAndTangents(edge);
-//    var bendPoints = edge.data('bendPointPositions');
-    //output variables
+
     var weights = [];
     var distances = [];
 
-    for (var i = 0; bendPoints && i < bendPoints.length; i++) {
-      var bendPoint = bendPoints[i];
-      var relativeBendPosition = this.convertToRelativeBendPosition(edge, bendPoint, srcTgtPointsAndTangents);
+    for (var i = 0; anchorPoints && i < anchorPoints.length; i++) {
+      var anchor = anchorPoints[i];
+      var relativeAnchorPosition = this.convertToRelativePosition(edge, anchor, srcTgtPointsAndTangents);
 
-      weights.push(relativeBendPosition.weight);
-      distances.push(relativeBendPosition.distance);
+      weights.push(relativeAnchorPosition.weight);
+      distances.push(relativeAnchorPosition.distance);
     }
 
     return {
@@ -263,66 +312,72 @@ var bendPointUtilities = {
       distances: distances
     };
   },
-  getSegmentDistancesString: function (edge) {
+  getDistancesString: function (edge, type) {
     var str = "";
 
-    var distances = edge.data('cyedgebendeditingDistances');
+    var distances = edge.data(this.syntax[type]['distance']);
     for (var i = 0; distances && i < distances.length; i++) {
       str = str + " " + distances[i];
     }
     
     return str;
   },
-  getSegmentWeightsString: function (edge) {
+  getWeightsString: function (edge, type) {
     var str = "";
 
-    var weights = edge.data('cyedgebendeditingWeights');
+    var weights = edge.data(this.syntax[type]['weight']);
     for (var i = 0; weights && i < weights.length; i++) {
       str = str + " " + weights[i];
     }
     
     return str;
   },
-  addBendPoint: function(edge, newBendPoint) {
-    if(edge === undefined || newBendPoint === undefined){
+  addAnchorPoint: function(edge, newAnchorPoint, type = undefined) {
+    if(edge === undefined || newAnchorPoint === undefined){
       edge = this.currentCtxEdge;
-      newBendPoint = this.currentCtxPos;
+      newAnchorPoint = this.currentCtxPos;
     }
   
-    var relativeBendPosition = this.convertToRelativeBendPosition(edge, newBendPoint);
-    var originalPointWeight = relativeBendPosition.weight;
+    if(type === undefined)
+      type = this.getEdgeType(edge);
+
+    var weightStr = this.syntax[type]['weight'];
+    var distanceStr = this.syntax[type]['distance'];
+
+    var relativePosition = this.convertToRelativePosition(edge, newAnchorPoint);
+    var originalAnchorWeight = relativePosition.weight;
     
     var startX = edge.source().position('x');
     var startY = edge.source().position('y');
     var endX = edge.target().position('x');
     var endY = edge.target().position('y');
-    var startWeight = this.convertToRelativeBendPosition(edge, {x: startX, y: startY}).weight;
-    var endWeight = this.convertToRelativeBendPosition(edge, {x: endX, y: endY}).weight;
-    var weightsWithTgtSrc = [startWeight].concat(edge.data('cyedgebendeditingWeights')?edge.data('cyedgebendeditingWeights'):[]).concat([endWeight]);
+    var startWeight = this.convertToRelativePosition(edge, {x: startX, y: startY}).weight;
+    var endWeight = this.convertToRelativePosition(edge, {x: endX, y: endY}).weight;
+    var weightsWithTgtSrc = [startWeight].concat(edge.data(weightStr)?edge.data(weightStr):[]).concat([endWeight]);
     
-    var segPts = this.getSegmentPoints(edge);
+    var anchorsList = this.getAnchorsAsArray(edge);
     
     var minDist = Infinity;
     var intersection;
-    var segptsWithTgtSrc = [startX, startY]
-            .concat(segPts?segPts:[])
+    var ptsWithTgtSrc = [startX, startY]
+            .concat(anchorsList?anchorsList:[])
             .concat([endX, endY]);
-    var newBendIndex = -1;
+    var newAnchorIndex = -1;
     
     for(var i = 0; i < weightsWithTgtSrc.length - 1; i++){
       var w1 = weightsWithTgtSrc[i];
       var w2 = weightsWithTgtSrc[i + 1];
       
       //check if the weight is between w1 and w2
-      const b1 = this.compareWithPrecision(originalPointWeight, w1, true);
-      const b2 = this.compareWithPrecision(originalPointWeight, w2);
-      const b3 = this.compareWithPrecision(originalPointWeight, w2, true);
-      const b4 = this.compareWithPrecision(originalPointWeight, w1);
+      const b1 = this.compareWithPrecision(originalAnchorWeight, w1, true);
+      const b2 = this.compareWithPrecision(originalAnchorWeight, w2);
+      const b3 = this.compareWithPrecision(originalAnchorWeight, w2, true);
+      const b4 = this.compareWithPrecision(originalAnchorWeight, w1);
       if( (b1 && b2) || (b3 && b4)){
-        var startX = segptsWithTgtSrc[2 * i];
-        var startY = segptsWithTgtSrc[2 * i + 1];
-        var endX = segptsWithTgtSrc[2 * i + 2];
-        var endY = segptsWithTgtSrc[2 * i + 3];
+        var startX = ptsWithTgtSrc[2 * i];
+        var startY = ptsWithTgtSrc[2 * i + 1];
+        var endX = ptsWithTgtSrc[2 * i + 2];
+        var endY = ptsWithTgtSrc[2 * i + 3];
         
         var start = {
           x: startX,
@@ -344,75 +399,83 @@ var bendPointUtilities = {
           m2: m2
         };
         
-        //get the intersection of the current segment with the new bend point
-        var currentIntersection = this.getIntersection(edge, newBendPoint, srcTgtPointsAndTangents);
-        var dist = Math.sqrt( Math.pow( (newBendPoint.x - currentIntersection.x), 2 ) 
-                + Math.pow( (newBendPoint.y - currentIntersection.y), 2 ));
+        var currentIntersection = this.getIntersection(edge, newAnchorPoint, srcTgtPointsAndTangents);
+        var dist = Math.sqrt( Math.pow( (newAnchorPoint.x - currentIntersection.x), 2 ) 
+                + Math.pow( (newAnchorPoint.y - currentIntersection.y), 2 ));
         
         //Update the minimum distance
         if(dist < minDist){
           minDist = dist;
           intersection = currentIntersection;
-          newBendIndex = i;
+          newAnchorIndex = i;
         }
       }
     }
     
     if(intersection !== undefined){
-      newBendPoint = intersection;
+      newAnchorPoint = intersection;
     }
     
-    relativeBendPosition = this.convertToRelativeBendPosition(edge, newBendPoint);
+    relativePosition = this.convertToRelativePosition(edge, newAnchorPoint);
     
     if(intersection === undefined){
-      relativeBendPosition.distance = 0;
+      relativePosition.distance = 0;
     }
 
-    var weights = edge.data('cyedgebendeditingWeights');
-    var distances = edge.data('cyedgebendeditingDistances');
+    var weights = edge.data(weightStr);
+    var distances = edge.data(distanceStr);
     
     weights = weights?weights:[];
     distances = distances?distances:[];
     
     if(weights.length === 0) {
-      newBendIndex = 0;
+      newAnchorIndex = 0;
     }
     
 //    weights.push(relativeBendPosition.weight);
 //    distances.push(relativeBendPosition.distance);
-    if(newBendIndex != -1){
-      weights.splice(newBendIndex, 0, relativeBendPosition.weight);
-      distances.splice(newBendIndex, 0, relativeBendPosition.distance);
+    if(newAnchorIndex != -1){
+      weights.splice(newAnchorIndex, 0, relativePosition.weight);
+      distances.splice(newAnchorIndex, 0, relativePosition.distance);
     }
    
-    edge.data('cyedgebendeditingWeights', weights);
-    edge.data('cyedgebendeditingDistances', distances);
+    edge.data(weightStr, weights);
+    edge.data(distanceStr, distances);
     
-    edge.addClass('edgebendediting-hasbendpoints');
+    edge.addClass(this.syntax[type]['class']);
     
-    return relativeBendPosition;
+    return newAnchorIndex;
   },
-  removeBendPoint: function(edge, bendPointIndex){
-    if(edge === undefined || bendPointIndex === undefined){
+  removeAnchor: function(edge, anchorIndex){
+    if(edge === undefined || anchorIndex === undefined){
       edge = this.currentCtxEdge;
-      bendPointIndex = this.currentBendIndex;
+      anchorIndex = this.currentAnchorIndex;
     }
     
-    var distances = edge.data('cyedgebendeditingDistances');
-    var weights = edge.data('cyedgebendeditingWeights');
+    var type = this.getEdgeType(edge);
+
+    if(this.edgeTypeInconclusiveShouldntHappen(type, "anchorPointUtilities.js, removeAnchor")){
+      return;
+    }
+
+    var distanceStr = this.syntax[type]['weight'];
+    var weightStr = this.syntax[type]['distance'];
+
+    var distances = edge.data(distanceStr);
+    var weights = edge.data(weightStr);
     
-    distances.splice(bendPointIndex, 1);
-    weights.splice(bendPointIndex, 1);
+    distances.splice(anchorIndex, 1);
+    weights.splice(anchorIndex, 1);
     
-    
+    // no more anchor points on edge
     if(distances.length == 0 || weights.length == 0){
-      edge.removeClass('edgebendediting-hasbendpoints');
-        edge.data('cyedgebendeditingDistances', []);
-        edge.data('cyedgebendeditingWeights', []);
+      edge.removeClass(this.syntax[type]['class']);
+      edge.data(distanceStr, []);
+      edge.data(weightStr, []);
     }
     else {
-      edge.data('cyedgebendeditingDistances', distances);
-      edge.data('cyedgebendeditingWeights', weights);
+      edge.data(distanceStr, distances);
+      edge.data(weightStr, weights);
     }
   },
   calculateDistance: function(pt1, pt2) {
@@ -433,7 +496,14 @@ var bendPointUtilities = {
     } else {
       return n1 > n2;
     }
+  },
+  edgeTypeInconclusiveShouldntHappen: function(type, place){
+    if(type === 'inconclusive') {
+      console.log(`In ${place}: edge type inconclusive should never happen here!!`);
+      return true;
+    }
+    return false;
   }
 };
 
-module.exports = bendPointUtilities;
+module.exports = anchorPointUtilities;

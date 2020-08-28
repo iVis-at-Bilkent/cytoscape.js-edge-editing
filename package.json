@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/iVis-at-Bilkent/cytoscape.js-edge-editing.git"
+    "url": "git+https://github.com/iVis-at-Bilkent/cytoscape.js-edge-editing.git"
   },
   "keywords": [
     "cytoscape",
@@ -39,7 +39,8 @@
   },
   "peerDependencies": {
     "cytoscape": "^3.3.0",
-    "jquery": "^1.7.0 || ^2.0.0 || ^3.0.0"
+    "jquery": "^1.7.0 || ^2.0.0 || ^3.0.0",
+    "konva": "^7.0.3"
   },
   "dependencies": {
     "build-debug": "0.0.3"

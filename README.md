@@ -3,14 +3,17 @@ cytoscape-edge-editing
 
 ## Description
 
-A Cytoscape.js extension enabling interactive editing of edge bend points and reconnection of edges to other source/target nodes, distributed under [The MIT License](https://opensource.org/licenses/MIT). 
- * To highlight bend point positions of an edge you should select the edge and unselect any other edges. Note that in determining the edge to highlight bend point positions we assume that the unvisible edges are not selected.
- * To add a bend point select the edge and unselect any other edge, right click where you want to add the bend point and click 'Add Bend Point' on the context menu (requires 'cytoscape.js-context-menus' extension). 
- * To remove a bend point select the edge and unselect any other edge, right click on the bend point and click 'Remove Bend Point' on the context menu (requires 'cytoscape.js-context-menus' extension). 
- * To move a bend point drag and drop it when the edge is the only selected edge.
+A Cytoscape.js extension enabling interactive editing of edge bend and control points for segment and unbundled bezier edges, respectively. It also allows for reconnection of edges to other source/target nodes. The extension is distributed under [The MIT License](https://opensource.org/licenses/MIT). 
+ * The term 'anchor' will be used here and in the code to refer to bend and control points collectively.
+ * To highlight anchor positions of an edge you should select the edge and unselect any other edges. Note that in determining the edge to highlight the anchor positions we assume that the unvisible edges are not selected.
+ * To add an anchor select the edge and unselect any other edge, right click where you want to add the anchor and click 'Add Bend Point' or 'Add Control Point' on the context menu (requires 'cytoscape.js-context-menus' extension). The context menu will distiguish between the edges and it will not be possible to a bend point on an unbundled bezier edge and vice versa.
+ * Bend points or control points can be added to edges which are not of type segments or unbundled bezier. The edge will then become segemetns or unbundled bezier accordingly.
+ * To remove an anchor select the edge and unselect any other edge, right click on the anchor and click 'Remove Bend Point' or 'Remove Control Point' on the context menu (requires 'cytoscape.js-context-menus' extension). 
+ * To move an anchor drag and drop it when the edge is the only selected edge.
  * Alternatively, 
-    * You can click anywhere on the edge (if it is the only selected edge) to introduce and relocate a bend point by dragging.
+    * You can click anywhere on the edge (if it is the only selected edge) to introduce and relocate an anchor by dragging.
     * A bend point is removed if it is dropped near the line segment between its two neighbours.
+ * Drag and drop can also be used to quickly create and drag an anchor on a highlighted edge. The anchor type will be decided based on the edge type. This will not work with edges which are not segments or unbundled bezier.
  * To reconnect an edge, select the handle (source or target), drag and drop on the new (source or target) node.
  
 <img src="edge-editing-animated-demo.gif" width="340">
@@ -27,6 +30,7 @@ Click [here](https://raw.githack.com/iVis-at-Bilkent/cytoscape.js-edge-editing/u
 
  * Cytoscape.js ^3.3.0
  * jQuery ^1.7.0 || ^2.0.0 || ^3.0.0
+ * Konva ^7.0.3
  * cytoscape-undo-redo.js(optional) ^1.0.1
  * cytoscape-context-menus.js(optional) ^2.0.0
 
@@ -44,15 +48,16 @@ CommonJS:
 ```js
 var cytoscape = require('cytoscape');
 var jquery = require('jquery');
+var konva = require('konva');
 var edgeEditing = require('cytoscape-edge-editing');
 
-edgeEditing( cytoscape, jquery ); // register extension
+edgeEditing( cytoscape, jquery, konva ); // register extension
 ```
 
 AMD:
 ```js
-require(['cytoscape', 'cytoscape-edge-editing'], function( cytoscape, edge-editing ){
-  edge-editing( cytoscape ); // register extension
+require(['cytoscape', 'cytoscape-edge-editing', 'jquerry', 'konva'], function( cytoscape, edge-editing, jquerry, konva ){
+  edge-editing( cytoscape, jquery, konva ); // register extension
 });
 ```
 
@@ -69,13 +74,15 @@ An instance has a number of functions available:
 
 ```js
 /*
-* Get segment points of the given edge in an array A,
+* Get anchors of the given edge in an array A,
 * A[2 * i] is the x coordinate and A[2 * i + 1] is the y coordinate
-* of the ith bend point. (Returns undefined if the curve style is not segments)
+* of the ith anchor. (Returns undefined if the curve style is not segments nor unbundled bezier)
 */
-instance.getSegmentPoints(ele);
-// Initilize bend points for the given edges using 'options.bendPositionsFunction'
-instance.initBendPoints(eles)
+instance.getAnchorsAsArray(ele);
+// Initilize anchors for the given edges using 'options.bendPositionsFunction' and 'options.controlPositionsFunction'
+instance.initAnchorPoints(eles);
+// Removes anchor with some index from an edge
+instance.deleteSelectedAnchor(ele, index);
 ```
 
 You can also get an existing instance:
@@ -93,15 +100,23 @@ cy.edgeEditing('initialized');
 ```js
     var options = {
       // this function specifies the positions of bend points
+      // strictly name the property 'bendPointPositions' for the edge to be detected for bend point edititng
       bendPositionsFunction: function(ele) {
         return ele.data('bendPointPositions');
       },
-      // whether to initilize bend points on creation of this extension automatically
-      initBendPointsAutomatically: true,
+      // this function specifies the poitions of control points
+      // strictly name the property 'controlPointPositions' for the edge to be detected for control point edititng
+      controlPositionsFunction: function(ele) {
+        return ele.data('controlPointPositions');
+      },
+      // whether to initilize bend and control points on creation of this extension automatically
+      initAnchorsAutomatically: true,
+      // the classes of those edges that should be ignored
+      ignoredClasses: [],
       // whether the bend editing operations are undoable (requires cytoscape-undo-redo.js)
       undoable: false,
-      // the size of bend shape is obtained by multipling width of edge with this parameter
-      bendShapeSizeFactor: 3,
+      // the size of bend and control point shape is obtained by multipling width of edge with this parameter
+      anchorShapeSizeFactor: 3,
       // z-index value of the canvas in which bend points are drawn
       zIndex: 999,
       // whether to start the plugin in the enabled state
@@ -115,9 +130,13 @@ cy.edgeEditing('initialized');
       addBendMenuItemTitle: "Add Bend Point",
       // title of remove bend point menu item (User may need to adjust width of menu items according to length of this option)
       removeBendMenuItemTitle: "Remove Bend Point",
-      // whether the bend point can be moved by arrow keys
-      moveSelectedBendPointsOnKeyEvents: function () {
-        return true;
+      // title of add control point menu item (User may need to adjust width of menu items according to length of this option)
+      addControlMenuItemTitle: "Add Control Point",
+      // title of remove control point menu item (User may need to adjust width of menu items according to length of this option)
+      removeControlMenuItemTitle: "Remove Control Point",
+      // whether the bend and control points can be moved by arrows
+      moveSelectedAnchorsOnKeyEvents: function () {
+          return true;
       }
       // this function handles reconnection of the edge, if undefined simply connect edge to its new source/target 
       // handleReconnectEdge (newSource.id(), newTarget.id(), edge.data())
@@ -128,7 +147,6 @@ cy.edgeEditing('initialized');
       },
       // this function is called if reconnected edge is not valid according to validateEdge function
       actOnUnsuccessfulReconnection: undefined,
-      
     };
 ```
 
