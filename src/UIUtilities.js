@@ -31,23 +31,52 @@ module.exports = function (params, cy) {
       
       var self = this;
       var opts = params;
-      var $container = $(this);
-      
-      var canvasElementId = 'cy-edge-editing-stage';
-      var $canvasElement = $('<div id="' + canvasElementId + '"></div>');
-      $container.append($canvasElement);
 
-      var stage = new Konva.Stage({
+      /*
+        Make sure we don't append an element that already exists.
+        This extension canvas uses the same html element as edge-editing.
+        It makes sense since it also uses the same Konva stage.
+        Without the below logic, an empty canvasElement would be created
+        for one of these extensions for no reason.
+      */
+      var $container = $(this);
+      var canvasElementId = 'cy-node-edge-editing-stage';
+      var $canvasElement = $('<div id="' + canvasElementId + '"></div>');
+
+      if ($container.find('#' + canvasElementId).length < 1) {
+        $container.append($canvasElement);
+      }
+
+      /* 
+        Maintain a single Konva.stage object throughout the application that uses this extension
+        such as Newt. This is important since having different stages causes weird behavior
+        on other extensions that also use Konva, like not listening to mouse clicks and such.
+        If you are someone that is creating an extension that uses Konva in the future, you need to
+        be careful about how events register. If you use a different stage almost certainly one
+        or both of the extensions that use the stage created below will break.
+      */ 
+      var stage;
+      if (Konva.stages.length < 1) {
+        stage = new Konva.Stage({
+          id: 'node-edge-editing-stage',
           container: canvasElementId,   // id of container <div>
           width: $container.width(),
           height: $container.height()
-      });
-
-      // then create layer
-      var canvas = new Konva.Layer();
-      // add the layer to the stage
-      stage.add(canvas);
-
+        });
+      }
+      else {
+        stage = Konva.stages[0];
+      }
+      
+      var canvas;
+      if (stage.getChildren().length < 1) {
+        canvas = new Konva.Layer();
+        stage.add(canvas);
+      }
+      else {
+        canvas = stage.getChildren()[0];
+      }  
+      
       var anchorManager = {
         edge: undefined,
         edgeType: 'inconclusive',
