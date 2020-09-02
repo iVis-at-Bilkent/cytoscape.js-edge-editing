@@ -38,14 +38,20 @@
       addBendMenuItemTitle: "Add Bend Point",
       // title of remove bend point menu item (User may need to adjust width of menu items according to length of this option)
       removeBendMenuItemTitle: "Remove Bend Point",
+      // title of remove all bend points menu item
+      removeAllBendMenuItemTitle: "Remove All Bend Points",
       // title of add control point menu item (User may need to adjust width of menu items according to length of this option)
       addControlMenuItemTitle: "Add Control Point",
       // title of remove control point menu item (User may need to adjust width of menu items according to length of this option)
       removeControlMenuItemTitle: "Remove Control Point",
+      // title of remove all control points menu item
+      removeAllControlMenuItemTitle: "Remove All Control Points",
       // whether the bend and control points can be moved by arrows
       moveSelectedAnchorsOnKeyEvents: function () {
           return true;
-      }
+      },
+      // whether 'Remove all bend points' and 'Remove all control points' options should be presented
+      enableMultipleAnchorRemovalOption: false
     };
     
     var options;

@@ -10,6 +10,7 @@ var anchorPointUtilities = {
     bend: {
       edge: "segments",
       class: "edgebendediting-hasbendpoints",
+      multiClass: "edgebendediting-hasmultiplebendpoints",
       weight: "cyedgebendeditingWeights",
       distance: "cyedgebendeditingDistances",
       weightCss: "segment-weights",
@@ -19,6 +20,7 @@ var anchorPointUtilities = {
     control: {
       edge: "unbundled-bezier",
       class: "edgecontrolediting-hascontrolpoints",
+      multiClass: "edgecontrolediting-hasmultiplecontrolpoints",
       weight: "cyedgecontroleditingWeights",
       distance: "cyedgecontroleditingDistances",
       weightCss: "control-point-weights",
@@ -74,6 +76,9 @@ var anchorPointUtilities = {
           edge.data(this.syntax[type]['weight'], result.weights);
           edge.data(this.syntax[type]['distance'], result.distances);
           edge.addClass(this.syntax[type]['class']);
+          if (result.distances.length > 1) {
+            edge.addClass(this.syntax[type]['multiClass']);
+          }
         }
       }
     }
@@ -443,6 +448,9 @@ var anchorPointUtilities = {
     edge.data(distanceStr, distances);
     
     edge.addClass(this.syntax[type]['class']);
+    if (weights.length > 1 || distances.length > 1) {
+      edge.addClass(this.syntax[type]['multiClass']);
+    }
     
     return newAnchorIndex;
   },
@@ -467,8 +475,12 @@ var anchorPointUtilities = {
     distances.splice(anchorIndex, 1);
     weights.splice(anchorIndex, 1);
     
+    // only one anchor point left on edge
+    if (distances.length == 1 || weights.length == 1) {
+      edge.removeClass(this.syntax[type]['multiClass'])
+    }
     // no more anchor points on edge
-    if(distances.length == 0 || weights.length == 0){
+    else if(distances.length == 0 || weights.length == 0){
       edge.removeClass(this.syntax[type]['class']);
       edge.data(distanceStr, []);
       edge.data(weightStr, []);
@@ -477,6 +489,27 @@ var anchorPointUtilities = {
       edge.data(distanceStr, distances);
       edge.data(weightStr, weights);
     }
+  },
+  removeAllAnchors: function(edge) {
+    if (edge === undefined) {
+      edge = this.currentCtxEdge;
+    }
+    var type = this.getEdgeType(edge);
+    
+    if(this.edgeTypeInconclusiveShouldntHappen(type, "anchorPointUtilities.js, removeAllAnchors")){
+      return;
+    }
+
+    // Remove classes from edge
+    edge.removeClass(this.syntax[type]['class']);
+    edge.removeClass(this.syntax[type]['multiClass']);
+
+    // Remove all anchor point data from edge
+    var distanceStr = this.syntax[type]['weight'];
+    var weightStr = this.syntax[type]['distance'];
+    edge.data(distanceStr, []);
+    edge.data(weightStr, []);
+
   },
   calculateDistance: function(pt1, pt2) {
     var diffX = pt1.x - pt2.x;

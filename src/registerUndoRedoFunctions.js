@@ -37,13 +37,21 @@ module.exports = function (cy, anchorPointUtilities, params) {
     //Check if we need to set the weights and distances by the param values
     if (param.set) {
       var hadAnchorPoint = param.weights && param.weights.length > 0;
+      var hadMultipleAnchorPoints = hadAnchorPoint && param.weights.length > 1;
 
       hadAnchorPoint ? edge.data(weightStr, param.weights) : edge.removeData(weightStr);
       hadAnchorPoint ? edge.data(distanceStr, param.distances) : edge.removeData(distanceStr);
 
       //refresh the curve style as the number of anchor point would be changed by the previous operation
+      if (hadMultipleAnchorPoints) {
+          edge.addClass(anchorPointUtilities.syntax[type]['multiClass']);
+      }
+      else {
+          edge.removeClass(anchorPointUtilities.syntax[type]['multiClass']);
+      }
+
       if (hadAnchorPoint) {
-        edge.addClass(anchorPointUtilities.syntax[type]['class']);
+          edge.addClass(anchorPointUtilities.syntax[type]['class']);
       }
       else {
           edge.removeClass(anchorPointUtilities.syntax[type]['class']);

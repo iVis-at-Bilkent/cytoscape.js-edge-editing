@@ -8,8 +8,10 @@ module.exports = function (params, cy) {
 
   var addBendPointCxtMenuId = 'cy-edge-bend-editing-cxt-add-bend-point';
   var removeBendPointCxtMenuId = 'cy-edge-bend-editing-cxt-remove-bend-point';
+  var removeAllBendPointCtxMenuId = 'cy-edge-bend-editing-cxt-remove-multiple-bend-point';
   var addControlPointCxtMenuId = 'cy-edge-control-editing-cxt-add-control-point';
   var removeControlPointCxtMenuId = 'cy-edge-control-editing-cxt-remove-control-point';
+  var removeAllControlPointCtxMenuId = 'cy-edge-bend-editing-cxt-remove-multiple-control-point';
   var eStyle, eRemove, eAdd, eZoom, eSelect, eUnselect, eTapStart, eTapStartOnEdge, eTapDrag, eTapEnd, eCxtTap, eDrag;
   // last status of gestures
   var lastPanningEnabled, lastZoomingEnabled, lastBoxSelectionEnabled;
@@ -306,6 +308,24 @@ module.exports = function (params, cy) {
         setTimeout(function(){refreshDraws();edge.select();}, 50) ;
 
       };
+
+      var cxtRemoveAllAnchorsFcn = function (event) {
+        var edge = anchorManager.edge;
+        var type = anchorPointUtilities.getEdgeType(edge);
+        var param = {
+          edge: edge,
+          type: type,
+          weights: [].concat(edge.data(anchorPointUtilities.syntax[type]['weight'])),
+          distances: [].concat(edge.data(anchorPointUtilities.syntax[type]['distance']))
+        };
+        
+        anchorPointUtilities.removeAllAnchors();
+
+        if (options().undoable) {
+          cy.undoRedo().do('changeAnchorPoints', param);
+        }
+        setTimeout(function(){refreshDraws();edge.select();}, 50);
+      }
       
       // function to reconnect edge
       var handleReconnectEdge = opts.handleReconnectEdge;
@@ -328,6 +348,13 @@ module.exports = function (params, cy) {
           content: 'Remove Bend Point',
           selector: 'edge',
           onClickFunction: cxtRemoveAnchorFcn
+        }, 
+        {
+          id: removeAllBendPointCtxMenuId,
+          title: opts.removeAllBendMenuItemTitle,
+          content: 'Remove All Bend Points',
+          selector: opts.enableMultipleAnchorRemovalOption && '.edgebendediting-hasmultiplebendpoints',
+          onClickFunction: cxtRemoveAllAnchorsFcn
         },
         {
           id: addControlPointCxtMenuId,
@@ -344,7 +371,14 @@ module.exports = function (params, cy) {
           selector: 'edge',
           coreAsWell: true,
           onClickFunction: cxtRemoveAnchorFcn
-        }
+        }, 
+        {
+          id: removeAllControlPointCtxMenuId,
+          title: opts.removeAllControlMenuItemTitle,
+          content: 'Remove All Control Points',
+          selector: opts.enableMultipleAnchorRemovalOption && '.edgecontrolediting-hasmultiplecontrolpoints',
+          onClickFunction: cxtRemoveAllAnchorsFcn
+        },
       ];
       
       if(cy.contextMenus) {

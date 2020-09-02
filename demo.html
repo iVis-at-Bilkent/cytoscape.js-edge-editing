@@ -115,7 +115,8 @@
 				// demo your ext
 				cy.edgeEditing({
 									undoable: true,
-									bendRemovalSensitivity: 16
+                  bendRemovalSensitivity: 16,
+                  enableMultipleAnchorRemovalOption: true
 				});
 				
 				cy.style().update();

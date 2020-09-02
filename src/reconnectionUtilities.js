@@ -76,6 +76,12 @@ var reconnectionUtilities = {
             newEdge.data('cyedgecontroleditingWeights', bpWeights);
             newEdge.addClass('edgecontrolediting-hascontrolpoints');
         }
+        if (oldEdge.hasClass('edgebendediting-hasmultiplebendpoints')) {
+            newEdge.addClass('edgebendediting-hasmultiplebendpoints');
+        }
+        else if (oldEdge.hasClass('edgecontrolediting-hasmultiplecontrolpoints')) {
+            newEdge.addClass('edgecontrolediting-hasmultiplecontrolpoints');
+        }
     },
 };
   
