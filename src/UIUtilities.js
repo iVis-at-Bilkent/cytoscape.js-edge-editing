@@ -1309,23 +1309,29 @@ module.exports = function (params, cy) {
 
           var cyPos = event.position || event.cyPosition;
           var selectedIndex = getContainingShapeIndex(cyPos.x, cyPos.y, edge);
+          // not clicked on an anchor
           if (selectedIndex == -1) {
             menus.hideMenuItem(removeBendPointCxtMenuId);
             menus.hideMenuItem(removeControlPointCxtMenuId);
-            if(type === 'control'){
+            if(type === 'control' && targetIsEdge){
               menus.showMenuItem(addControlPointCxtMenuId);
               menus.hideMenuItem(addBendPointCxtMenuId);
             }
-            else if(type === 'bend'){
+            else if(type === 'bend' && targetIsEdge){
               menus.showMenuItem(addBendPointCxtMenuId);
               menus.hideMenuItem(addControlPointCxtMenuId);
             }
-            else{
+            else if (targetIsEdge){
               menus.showMenuItem(addBendPointCxtMenuId);
               menus.showMenuItem(addControlPointCxtMenuId);
             }
+            else {
+              menus.hideMenuItem(addBendPointCxtMenuId);
+              menus.hideMenuItem(addControlPointCxtMenuId);
+            }
             anchorPointUtilities.currentCtxPos = cyPos;
           }
+          // clicked on an anchor
           else {
             menus.hideMenuItem(addBendPointCxtMenuId);
             menus.hideMenuItem(addControlPointCxtMenuId);
