@@ -42,9 +42,11 @@ var anchorPointUtilities = {
       return 'bend';
     else if(edge.css('curve-style') === this.syntax['control']['edge'])
       return 'control';
-    else if(edge.data(this.syntax['bend']['pointPos']))
+    else if(edge.data(this.syntax['bend']['pointPos']) && 
+            edge.data(this.syntax['bend']['pointPos']).length > 0)
       return 'bend';
-    else if(edge.data(this.syntax['control']['pointPos']))
+    else if(edge.data(this.syntax['control']['pointPos']) && 
+            edge.data(this.syntax['control']['pointPos']).length > 0)
       return 'control';
     return 'inconclusive';
   },
