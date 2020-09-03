@@ -46,7 +46,7 @@ module.exports = function (cy, anchorPointUtilities, params) {
       if (hadMultipleAnchorPoints) {
           edge.addClass(anchorPointUtilities.syntax[type]['multiClass']);
       }
-      else {
+      else if (edge.hasClass(anchorPointUtilities.syntax[type]['multiClass'])) {
           edge.removeClass(anchorPointUtilities.syntax[type]['multiClass']);
       }
 
