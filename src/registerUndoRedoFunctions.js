@@ -42,19 +42,23 @@ module.exports = function (cy, anchorPointUtilities, params) {
       hadAnchorPoint ? edge.data(weightStr, param.weights) : edge.removeData(weightStr);
       hadAnchorPoint ? edge.data(distanceStr, param.distances) : edge.removeData(distanceStr);
 
-      //refresh the curve style as the number of anchor point would be changed by the previous operation
-      if (hadMultipleAnchorPoints) {
-          edge.addClass(anchorPointUtilities.syntax[type]['multiClass']);
-      }
-      else if (edge.hasClass(anchorPointUtilities.syntax[type]['multiClass'])) {
-          edge.removeClass(anchorPointUtilities.syntax[type]['multiClass']);
-      }
+      var singleClassName = anchorPointUtilities.syntax[type]['class'];
+      var multiClassName = anchorPointUtilities.syntax[type]['multiClass'];
 
-      if (hadAnchorPoint) {
-          edge.addClass(anchorPointUtilities.syntax[type]['class']);
+      // Refresh the curve style as the number of anchor point would be changed by the previous operation
+      // Adding or removing multi classes at once can cause errors. If multiple classes are to be added,
+      // just add them together in space delimeted class names format.
+      if (!hadAnchorPoint && !hadMultipleAnchorPoints) {
+        // Remove multiple classes from edge with space delimeted string of class names 
+        edge.removeClass(singleClassName + " " + multiClassName);
+      }
+      else if (hadAnchorPoint && !hadMultipleAnchorPoints) { // Had single anchor
+        edge.addClass(singleClassName);
+        edge.removeClass(multiClassName);   
       }
       else {
-          edge.removeClass(anchorPointUtilities.syntax[type]['class']);
+        // Had multiple anchors. Add multiple classes with space delimeted string of class names
+        edge.addClass(singleClassName + " " + multiClassName);
       }
     }
     
