@@ -43,8 +43,8 @@ module.exports = function (params, cy) {
         for one of these extensions for no reason.
       */
       var $container = $(this);
+      var canvasElementId = 'cy-node-edge-editing-stage' + stageId;
       stageId++;
-      var canvasElementId = 'cy-node-edge-editing-stage';
       var $canvasElement = $('<div id="' + canvasElementId + '"></div>');
 
       if ($container.find('#' + canvasElementId).length < 1) {
@@ -355,7 +355,7 @@ module.exports = function (params, cy) {
           id: removeAllBendPointCtxMenuId,
           title: opts.removeAllBendMenuItemTitle,
           content: 'Remove All Bend Points',
-          selector: opts.enableMultipleAnchorRemovalOption && '.edgebendediting-hasmultiplebendpoints',
+          selector: opts.enableMultipleAnchorRemovalOption && ':selected.edgebendediting-hasmultiplebendpoints',
           onClickFunction: cxtRemoveAllAnchorsFcn
         },
         {
@@ -378,7 +378,7 @@ module.exports = function (params, cy) {
           id: removeAllControlPointCtxMenuId,
           title: opts.removeAllControlMenuItemTitle,
           content: 'Remove All Control Points',
-          selector: opts.enableMultipleAnchorRemovalOption && '.edgecontrolediting-hasmultiplecontrolpoints',
+          selector: opts.enableMultipleAnchorRemovalOption && ':selected.edgecontrolediting-hasmultiplecontrolpoints',
           onClickFunction: cxtRemoveAllAnchorsFcn
         },
       ];
