@@ -7,12 +7,12 @@ var stageId = 0;
 module.exports = function (params, cy) {
   var fn = params;
 
-  var addBendPointCxtMenuId = 'cy-edge-bend-editing-cxt-add-bend-point';
-  var removeBendPointCxtMenuId = 'cy-edge-bend-editing-cxt-remove-bend-point';
-  var removeAllBendPointCtxMenuId = 'cy-edge-bend-editing-cxt-remove-multiple-bend-point';
-  var addControlPointCxtMenuId = 'cy-edge-control-editing-cxt-add-control-point';
-  var removeControlPointCxtMenuId = 'cy-edge-control-editing-cxt-remove-control-point';
-  var removeAllControlPointCtxMenuId = 'cy-edge-bend-editing-cxt-remove-multiple-control-point';
+  var addBendPointCxtMenuId = 'cy-edge-bend-editing-cxt-add-bend-point' + stageId;
+  var removeBendPointCxtMenuId = 'cy-edge-bend-editing-cxt-remove-bend-point' + stageId;
+  var removeAllBendPointCtxMenuId = 'cy-edge-bend-editing-cxt-remove-multiple-bend-point' + stageId;
+  var addControlPointCxtMenuId = 'cy-edge-control-editing-cxt-add-control-point' + stageId;
+  var removeControlPointCxtMenuId = 'cy-edge-control-editing-cxt-remove-control-point' + stageId;
+  var removeAllControlPointCtxMenuId = 'cy-edge-bend-editing-cxt-remove-multiple-control-point' + stageId;
   var eStyle, eRemove, eAdd, eZoom, eSelect, eUnselect, eTapStart, eTapStartOnEdge, eTapDrag, eTapEnd, eCxtTap, eDrag;
   // last status of gestures
   var lastPanningEnabled, lastZoomingEnabled, lastBoxSelectionEnabled;
