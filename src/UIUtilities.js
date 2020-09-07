@@ -1374,6 +1374,16 @@ module.exports = function (params, cy) {
       var selectedEdges;
       var anchorsMoving = false;
 
+      // track arrow key presses, default false
+      // event.keyCode normally returns number
+      // but JS will convert to string anyway
+      var keys = {
+        '37': false,
+        '38': false,
+        '39': false,
+        '40': false
+      };
+
       function keyDown(e) {
         cy.autounselectify(false);
 
@@ -1393,11 +1403,10 @@ module.exports = function (params, cy) {
                   case 32: e.preventDefault(); break; // Space
                   default: break; // do not block other keys
               }
-
-
               if (e.keyCode < '37' || e.keyCode > '40') {
                   return;
               }
+              keys[e.keyCode] = true;
 
               //Checks if only edges are selected (not any node) and if only 1 edge is selected
               //If the second checking is removed the anchors of multiple edges would move
@@ -1405,64 +1414,39 @@ module.exports = function (params, cy) {
               {
                 return;
               }
-
               if (!anchorsMoving)
               {
                   selectedEdges = cy.edges(':selected');
                   cy.trigger("edgeediting.movestart", [selectedEdges]);
                   anchorsMoving = true;
               }
-              if (e.altKey && e.which == '38') {
-                  // up arrow and alt
-                  moveAnchorPoints ({x:0, y:-1},selectedEdges);
+              var moveSpeed = 3;
+                    
+              // doesn't make sense if alt and shift both pressed
+              if(e.altKey && e.shiftKey) {
+                return;
               }
-              else if (e.altKey && e.which == '40') {
-                  // down arrow and alt
-                  moveAnchorPoints ({x:0, y:1},selectedEdges);
+              else if (e.altKey) {
+                moveSpeed = 1;
               }
-              else if (e.altKey && e.which == '37') {
-                  // left arrow and alt
-                  moveAnchorPoints ({x:-1, y:0},selectedEdges);
-              }
-              else if (e.altKey && e.which == '39') {
-                  // right arrow and alt
-                  moveAnchorPoints ({x:1, y:0},selectedEdges);
+              else if (e.shiftKey) {
+                moveSpeed = 10;
               }
 
-              else if (e.shiftKey && e.which == '38') {
-                  // up arrow and shift
-                  moveAnchorPoints ({x:0, y:-10},selectedEdges);
-              }
-              else if (e.shiftKey && e.which == '40') {
-                  // down arrow and shift
-                  moveAnchorPoints ({x:0, y:10},selectedEdges);
-              }
-              else if (e.shiftKey && e.which == '37') {
-                  // left arrow and shift
-                  moveAnchorPoints ({x:-10, y:0},selectedEdges);
+              var upArrowCode = 38;
+              var downArrowCode = 40;
+              var leftArrowCode = 37;
+              var rightArrowCode = 39;
 
-              }
-              else if (e.shiftKey && e.which == '39' ) {
-                  // right arrow and shift
-                  moveAnchorPoints ({x:10, y:0},selectedEdges);
-              }
-              else if (e.keyCode == '38') {
-                  // up arrow
-                  moveAnchorPoints({x: 0, y: -3}, selectedEdges);
-              }
+              var dx = 0;
+              var dy = 0;
 
-              else if (e.keyCode == '40') {
-                  // down arrow
-                  moveAnchorPoints ({x:0, y:3},selectedEdges);
-              }
-              else if (e.keyCode == '37') {
-                  // left arrow
-                  moveAnchorPoints ({x:-3, y:0},selectedEdges);
-              }
-              else if (e.keyCode == '39') {
-                  //right arrow
-                  moveAnchorPoints ({x:3, y:0},selectedEdges);
-              }
+              dx += keys[rightArrowCode] ? moveSpeed : 0;
+              dx -= keys[leftArrowCode] ? moveSpeed : 0;
+              dy += keys[downArrowCode] ? moveSpeed : 0;
+              dy -= keys[upArrowCode] ? moveSpeed : 0;
+
+              moveAnchorPoints({x:dx, y:dy}, selectedEdges);
           }
       }
       function keyUp(e) {
@@ -1470,7 +1454,8 @@ module.exports = function (params, cy) {
           if (e.keyCode < '37' || e.keyCode > '40') {
               return;
           }
-
+          e.preventDefault();
+          keys[e.keyCode] = false;
           var shouldMove = typeof options().moveSelectedAnchorsOnKeyEvents === 'function'
               ? options().moveSelectedAnchorsOnKeyEvents() : options().moveSelectedAnchorsOnKeyEvents;
 

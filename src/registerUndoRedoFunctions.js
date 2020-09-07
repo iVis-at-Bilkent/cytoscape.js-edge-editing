@@ -89,7 +89,7 @@ module.exports = function (cy, anchorPointUtilities, params) {
 
   function moveAnchorsUndoable(positionDiff, edges) {
       edges.forEach(function( edge ){
-          edge = cy.getElementById(param.edge.id());
+          var type = anchorPointUtilities.getEdgeType(edge);
           var previousAnchorsPosition = anchorPointUtilities.getAnchorsAsArray(edge);
           var nextAnchorsPosition = [];
           if (previousAnchorsPosition != undefined)
