@@ -470,13 +470,16 @@ var anchorPointUtilities = {
 
     var distanceStr = this.syntax[type]['weight'];
     var weightStr = this.syntax[type]['distance'];
+    var positionDataStr = this.syntax[type]['pointPos'];
 
     var distances = edge.data(distanceStr);
     var weights = edge.data(weightStr);
-    
+    var positions = edge.data(positionDataStr);
+
     distances.splice(anchorIndex, 1);
     weights.splice(anchorIndex, 1);
-    
+    positions.splice(anchorIndex, 1);
+
     // only one anchor point left on edge
     if (distances.length == 1 || weights.length == 1) {
       edge.removeClass(this.syntax[type]['multiClass'])
@@ -509,9 +512,10 @@ var anchorPointUtilities = {
     // Remove all anchor point data from edge
     var distanceStr = this.syntax[type]['weight'];
     var weightStr = this.syntax[type]['distance'];
+    var positionDataStr = this.syntax[type]['pointPos'];
     edge.data(distanceStr, []);
     edge.data(weightStr, []);
-
+    edge.data(positionDataStr, []);
   },
   calculateDistance: function(pt1, pt2) {
     var diffX = pt1.x - pt2.x;

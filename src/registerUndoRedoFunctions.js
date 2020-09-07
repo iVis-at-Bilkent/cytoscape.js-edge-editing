@@ -98,7 +98,7 @@ module.exports = function (cy, anchorPointUtilities, params) {
               {
                   nextAnchorsPosition.push({x: previousAnchorsPosition[i]+positionDiff.x, y: previousAnchorsPosition[i+1]+positionDiff.y});
               }
-              edge.data(anchorPointUtilities.syntax[type]['pointPos'],nextAnchorsPosition);
+              edge.data(anchorPointUtilities.syntax[type]['pointPos'], nextAnchorsPosition);
           }
       });
 
