@@ -1391,7 +1391,6 @@ module.exports = function (params, cy) {
       };
 
       function keyDown(e) {
-        cy.autounselectify(false);
 
           var shouldMove = typeof options().moveSelectedAnchorsOnKeyEvents === 'function'
               ? options().moveSelectedAnchorsOnKeyEvents() : options().moveSelectedAnchorsOnKeyEvents;
