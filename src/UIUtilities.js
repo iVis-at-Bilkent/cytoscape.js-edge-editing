@@ -907,7 +907,6 @@ module.exports = function (params, cy) {
         var anchorCreatedByDrag = false;
 
         cy.on('tapstart', eTapStart = function(event) {
-          cy.autounselectify(false);
           tapStartPos = event.position || event.cyPosition;
         });
 
@@ -960,7 +959,14 @@ module.exports = function (params, cy) {
           }         
         });
         cy.on('tapdrag', eTapDrag = function (event) {
-          cy.autounselectify(false);
+          /** 
+           * if there is a selected edge set autounselectify false
+           * fixes the node-editing problem where nodes would get
+           * unselected after resize drag
+          */
+          if (cy.edges(':selected').length > 0) {
+            cy.autounselectify(false);
+          }
           var edge = movedEdge;
 
           if(movedEdge !== undefined && anchorPointUtilities.isIgnoredEdge(edge) ) {

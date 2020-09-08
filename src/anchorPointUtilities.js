@@ -478,7 +478,10 @@ var anchorPointUtilities = {
 
     distances.splice(anchorIndex, 1);
     weights.splice(anchorIndex, 1);
-    positions.splice(anchorIndex, 1);
+    // position data is not given in demo so it throws error here
+    // but it should be from the beginning
+    if (positions)
+      positions.splice(anchorIndex, 1);
 
     // only one anchor point left on edge
     if (distances.length == 1 || weights.length == 1) {
@@ -515,7 +518,11 @@ var anchorPointUtilities = {
     var positionDataStr = this.syntax[type]['pointPos'];
     edge.data(distanceStr, []);
     edge.data(weightStr, []);
-    edge.data(positionDataStr, []);
+    // position data is not given in demo so it throws error here
+    // but it should be from the beginning
+    if (edge.data(positionDataStr)) {
+      edge.data(positionDataStr, []);
+    }
   },
   calculateDistance: function(pt1, pt2) {
     var diffX = pt1.x - pt2.x;
