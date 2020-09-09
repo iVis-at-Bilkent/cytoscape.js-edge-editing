@@ -1346,6 +1346,9 @@ module.exports = function (params, cy) {
             if(type === 'control'){
               menus.showMenuItem(removeControlPointCxtMenuId);
               menus.hideMenuItem(removeBendPointCxtMenuId);
+              if (edge.hasClass('edgecontrolediting-hasmultiplecontrolpoints')) {
+                menus.showMenuItem(removeAllControlPointCtxMenuId);
+              }
             }
             else if(type === 'bend'){
               menus.showMenuItem(removeBendPointCxtMenuId);
@@ -1354,6 +1357,7 @@ module.exports = function (params, cy) {
             else{
               menus.hideMenuItem(removeBendPointCxtMenuId);
               menus.hideMenuItem(removeControlPointCxtMenuId);
+              menus.hideMenuItem(removeAllControlPointCtxMenuId);
             }
             anchorPointUtilities.currentAnchorIndex = selectedIndex;
           }
