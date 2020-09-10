@@ -47,7 +47,7 @@ var reconnectionUtilities = {
     },
 
     copyEdge: function (oldEdge, newEdge) {
-        this.copyBendPoints(oldEdge, newEdge);
+        this.copyAnchors(oldEdge, newEdge);
         this.copyStyle(oldEdge, newEdge);
     },
 
@@ -59,7 +59,7 @@ var reconnectionUtilities = {
         }
     },
 
-    copyBendPoints: function (oldEdge, newEdge) {
+    copyAnchors: function (oldEdge, newEdge) {
         if(oldEdge.hasClass('edgebendediting-hasbendpoints')){
             var bpDistances = oldEdge.data('cyedgebendeditingDistances');
             var bpWeights = oldEdge.data('cyedgebendeditingWeights');
@@ -67,6 +67,20 @@ var reconnectionUtilities = {
             newEdge.data('cyedgebendeditingDistances', bpDistances);
             newEdge.data('cyedgebendeditingWeights', bpWeights);
             newEdge.addClass('edgebendediting-hasbendpoints');
+        }
+        else if(oldEdge.hasClass('edgecontrolediting-hascontrolpoints')){
+            var bpDistances = oldEdge.data('cyedgecontroleditingDistances');
+            var bpWeights = oldEdge.data('cyedgecontroleditingWeights');
+            
+            newEdge.data('cyedgecontroleditingDistances', bpDistances);
+            newEdge.data('cyedgecontroleditingWeights', bpWeights);
+            newEdge.addClass('edgecontrolediting-hascontrolpoints');
+        }
+        if (oldEdge.hasClass('edgebendediting-hasmultiplebendpoints')) {
+            newEdge.addClass('edgebendediting-hasmultiplebendpoints');
+        }
+        else if (oldEdge.hasClass('edgecontrolediting-hasmultiplecontrolpoints')) {
+            newEdge.addClass('edgecontrolediting-hasmultiplecontrolpoints');
         }
     },
 };

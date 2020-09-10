@@ -1,4 +1,4 @@
-module.exports = function (cy, bendPointUtilities, params) {
+module.exports = function (cy, anchorPointUtilities, params) {
   if (cy.undoRedo == null)
     return;
 
@@ -7,32 +7,62 @@ module.exports = function (cy, bendPointUtilities, params) {
     isDebug: true
   });
 
-  function changeBendPoints(param) {
+  function changeAnchorPoints(param) {
     var edge = cy.getElementById(param.edge.id());
+    var type = param.type !== 'inconclusive' ? param.type : anchorPointUtilities.getEdgeType(edge);
+    
+    var weights, distances, weightStr, distanceStr;
+
+    if(param.type === 'inconclusive' && !param.set){
+      weights = [];
+      distances = [];
+    }
+    else {
+      weightStr = anchorPointUtilities.syntax[type]['weight'];
+      distanceStr = anchorPointUtilities.syntax[type]['distance'];
+
+      weights = param.set ? edge.data(weightStr) : param.weights;
+      distances = param.set ? edge.data(distanceStr) : param.distances;
+    }
+
     var result = {
       edge: edge,
-      weights: param.set ? edge.data('cyedgebendeditingWeights') : param.weights,
-      distances: param.set ? edge.data('cyedgebendeditingDistances') : param.distances,
-      set: true//As the result will not be used for the first function call params should be used to set the data
+      type: type,
+      weights: weights,
+      distances: distances,
+      //As the result will not be used for the first function call params should be used to set the data
+      set: true
     };
-
-    var hasBend = param.weights && param.weights.length > 0;
 
     //Check if we need to set the weights and distances by the param values
     if (param.set) {
-      hasBend ? edge.data('cyedgebendeditingWeights', param.weights) : edge.removeData('cyedgebendeditingWeights');
-      hasBend ? edge.data('cyedgebendeditingDistances', param.distances) : edge.removeData('cyedgebendeditingDistances');
+      var hadAnchorPoint = param.weights && param.weights.length > 0;
+      var hadMultipleAnchorPoints = hadAnchorPoint && param.weights.length > 1;
 
-      //refresh the curve style as the number of bend point would be changed by the previous operation
-      if (hasBend) {
-        edge.addClass('edgebendediting-hasbendpoints');
+      hadAnchorPoint ? edge.data(weightStr, param.weights) : edge.removeData(weightStr);
+      hadAnchorPoint ? edge.data(distanceStr, param.distances) : edge.removeData(distanceStr);
+
+      var singleClassName = anchorPointUtilities.syntax[type]['class'];
+      var multiClassName = anchorPointUtilities.syntax[type]['multiClass'];
+
+      // Refresh the curve style as the number of anchor point would be changed by the previous operation
+      // Adding or removing multi classes at once can cause errors. If multiple classes are to be added,
+      // just add them together in space delimeted class names format.
+      if (!hadAnchorPoint && !hadMultipleAnchorPoints) {
+        // Remove multiple classes from edge with space delimeted string of class names 
+        edge.removeClass(singleClassName + " " + multiClassName);
+      }
+      else if (hadAnchorPoint && !hadMultipleAnchorPoints) { // Had single anchor
+        edge.addClass(singleClassName);
+        edge.removeClass(multiClassName);   
       }
       else {
-        edge.removeClass('edgebendediting-hasbendpoints');
+        // Had multiple anchors. Add multiple classes with space delimeted string of class names
+        edge.addClass(singleClassName + " " + multiClassName);
       }
     }
     
-    edge.trigger('cyedgebendediting.changeBendPoints');
+    edge.trigger('cyedgeediting.changeAnchorPoints');
 
     return result;
   }
@@ -52,27 +82,27 @@ module.exports = function (cy, bendPointUtilities, params) {
               y: -positionDiff.y
           }
       };
-      moveBendPointsUndoable(positionDiff, edges);
+      moveAnchorsUndoable(positionDiff, edges);
 
       return result;
   }
 
-  function moveBendPointsUndoable(positionDiff, edges) {
+  function moveAnchorsUndoable(positionDiff, edges) {
       edges.forEach(function( edge ){
-          edge = cy.getElementById(param.edge.id());
-          var previousBendPointsPosition = bendPointUtilities.getSegmentPoints(edge);
-          var nextBendPointsPosition = [];
-          if (previousBendPointsPosition != undefined)
+          var type = anchorPointUtilities.getEdgeType(edge);
+          var previousAnchorsPosition = anchorPointUtilities.getAnchorsAsArray(edge);
+          var nextAnchorsPosition = [];
+          if (previousAnchorsPosition != undefined)
           {
-              for (i=0; i<previousBendPointsPosition.length; i+=2)
+              for (i=0; i<previousAnchorsPosition.length; i+=2)
               {
-                  nextBendPointsPosition.push({x: previousBendPointsPosition[i]+positionDiff.x, y: previousBendPointsPosition[i+1]+positionDiff.y});
+                  nextAnchorsPosition.push({x: previousAnchorsPosition[i]+positionDiff.x, y: previousAnchorsPosition[i+1]+positionDiff.y});
               }
-              edge.data('bendPointPositions',nextBendPointsPosition);
+              edge.data(anchorPointUtilities.syntax[type]['pointPos'], nextAnchorsPosition);
           }
       });
 
-      bendPointUtilities.initBendPoints(params.bendPositionsFunction, edges);
+      anchorPointUtilities.initAnchorPoints(params.bendPositionsFunction, params.controlPositionsFunction, edges);
   }
 
   function reconnectEdge(param){
@@ -117,8 +147,8 @@ module.exports = function (cy, bendPointUtilities, params) {
     };
   }
 
-  ur.action('changeBendPoints', changeBendPoints, changeBendPoints);
-  ur.action('moveBendPoints', moveDo, moveDo);
+  ur.action('changeAnchorPoints', changeAnchorPoints, changeAnchorPoints);
+  ur.action('moveAnchorPoints', moveDo, moveDo);
   ur.action('reconnectEdge', reconnectEdge, reconnectEdge);
   ur.action('removeReconnectedEdge', removeReconnectedEdge, removeReconnectedEdge);
 };

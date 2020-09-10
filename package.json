@@ -1,17 +1,19 @@
 {
   "name": "cytoscape-edge-editing",
-  "version": "2.0.1",
-  "description": "A Cytoscape.js extension enables editing edge bend points",
+  "version": "3.0.0",
+  "description": "A Cytoscape.js extension that enables editing edges by adding and modifying anchor points",
   "main": "cytoscape-edge-editing.js",
   "spm": {
     "main": "cytoscape-edge-editing.js"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "cross-env NODE_ENV=production webpack",
+    "build:dev": "cross-env NODE_ENV=development webpack"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/iVis-at-Bilkent/cytoscape.js-edge-editing.git"
+    "url": "git+https://github.com/iVis-at-Bilkent/cytoscape.js-edge-editing.git"
   },
   "keywords": [
     "cytoscape",
@@ -23,22 +25,17 @@
   },
   "homepage": "https://github.com/iVis-at-Bilkent/cytoscape.js-edge-editing",
   "devDependencies": {
-    "browserify": "^11.2.0",
-    "gulp": "^3.9.1",
-    "gulp-derequire": "^2.1.0",
-    "gulp-jshint": "^1.11.2",
-    "gulp-prompt": "^0.1.2",
-    "gulp-replace": "^0.5.4",
-    "gulp-shell": "^0.5.0",
-    "gulp-util": "^3.0.6",
-    "jshint-stylish": "^2.0.1",
-    "node-notifier": "^4.3.1",
-    "run-sequence": "^1.1.4",
-    "vinyl-buffer": "^1.0.0",
-    "vinyl-source-stream": "^1.1.0"
+    "babel-core": "^6.26.3",
+    "babel-loader": "^7.1.5",
+    "babel-preset-env": "^1.7.0",
+    "camelcase": "^6.0.0",
+    "cross-env": "^7.0.2",
+    "webpack": "^4.44.1",
+    "webpack-cli": "^3.3.12"
   },
   "peerDependencies": {
     "cytoscape": "^3.3.0",
-    "jquery": "^1.7.0 || ^2.0.0 || ^3.0.0"
+    "jquery": "^1.7.0 || ^2.0.0 || ^3.0.0",
+    "konva": "^7.0.3"
   }
 }
