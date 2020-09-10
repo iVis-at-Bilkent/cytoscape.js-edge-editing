@@ -16,7 +16,7 @@ A Cytoscape.js extension enabling interactive editing of edge bend and control p
  * Drag and drop can also be used to quickly create and drag an anchor on a highlighted edge. The anchor type will be decided based on the edge type. This will not work with edges which are not segments or unbundled bezier.
  * To reconnect an edge, select the handle (source or target), drag and drop on the new (source or target) node.
  
-<img src="edge-editing-animated-demo.gif" width="340">
+<img src="edge-editing-animated-demo.gif" width="600">
 
 Please cite the following paper when using this extension:
 
@@ -174,4 +174,4 @@ This project is set up to automatically be published to npm and bower.  To publi
 
 ## Team
 
-  * [Metin Can Siper](https://github.com/metincansiper), [Ahmet Candiroglu](https://github.com/ahmetcandiroglu), [Ugur Dogrusoz](https://github.com/ugurdogrusoz) of [i-Vis at Bilkent University](http://www.cs.bilkent.edu.tr/~ivis)
+  * [Metin Can Siper](https://github.com/metincansiper), [Muhammed Salih Altun](https://github.com/msalihaltun), [Ahmet Candiroglu](https://github.com/ahmetcandiroglu), [Ugur Dogrusoz](https://github.com/ugurdogrusoz) of [i-Vis at Bilkent University](http://www.cs.bilkent.edu.tr/~ivis)
