@@ -339,45 +339,39 @@ module.exports = function (params, cy) {
       var menuItems = [
         {
           id: addBendPointCxtMenuId,
-          title: opts.addBendMenuItemTitle,
-          content: 'Add Bend Point',
+          content: opts.addBendMenuItemTitle,
           selector: 'edge',
           onClickFunction: cxtAddBendFcn
         },
         {
           id: removeBendPointCxtMenuId,
-          title: opts.removeBendMenuItemTitle,
-          content: 'Remove Bend Point',
+          content: opts.removeBendMenuItemTitle,
           selector: 'edge',
           onClickFunction: cxtRemoveAnchorFcn
         }, 
         {
           id: removeAllBendPointCtxMenuId,
-          title: opts.removeAllBendMenuItemTitle,
-          content: 'Remove All Bend Points',
+          content: opts.removeAllBendMenuItemTitle,
           selector: opts.enableMultipleAnchorRemovalOption && ':selected.edgebendediting-hasmultiplebendpoints',
           onClickFunction: cxtRemoveAllAnchorsFcn
         },
         {
           id: addControlPointCxtMenuId,
-          title: opts.addControlMenuItemTitle,
-          content: 'Add Control Point',
+          content: opts.addControlMenuItemTitle,
           selector: 'edge',
           coreAsWell: true,
           onClickFunction: cxtAddControlFcn
         },
         {
           id: removeControlPointCxtMenuId,
-          title: opts.removeControlMenuItemTitle,
-          content: 'Remove Control Point',
+          content: opts.removeControlMenuItemTitle,
           selector: 'edge',
           coreAsWell: true,
           onClickFunction: cxtRemoveAnchorFcn
         }, 
         {
           id: removeAllControlPointCtxMenuId,
-          title: opts.removeAllControlMenuItemTitle,
-          content: 'Remove All Control Points',
+          content: opts.removeAllControlMenuItemTitle,
           selector: opts.enableMultipleAnchorRemovalOption && ':selected.edgecontrolediting-hasmultiplecontrolpoints',
           onClickFunction: cxtRemoveAllAnchorsFcn
         },
