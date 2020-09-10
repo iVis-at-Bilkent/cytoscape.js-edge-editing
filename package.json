@@ -1,6 +1,6 @@
 {
   "name": "cytoscape-edge-editing",
-  "version": "2.0.1",
+  "version": "3.0.0",
   "description": "A Cytoscape.js extension that enables editing edges by adding and modifying anchor points",
   "main": "cytoscape-edge-editing.js",
   "spm": {
@@ -37,6 +37,5 @@
     "cytoscape": "^3.3.0",
     "jquery": "^1.7.0 || ^2.0.0 || ^3.0.0",
     "konva": "^7.0.3"
-  },
-  "dependencies": {}
+  }
 }
