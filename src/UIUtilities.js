@@ -1340,7 +1340,8 @@ module.exports = function (params, cy) {
             if(type === 'control'){
               menus.showMenuItem(removeControlPointCxtMenuId);
               menus.hideMenuItem(removeBendPointCxtMenuId);
-              if (edge.hasClass('edgecontrolediting-hasmultiplecontrolpoints')) {
+              if (opts.enableMultipleAnchorRemovalOption && 
+                  edge.hasClass('edgecontrolediting-hasmultiplecontrolpoints')) {
                 menus.showMenuItem(removeAllControlPointCtxMenuId);
               }
             }
