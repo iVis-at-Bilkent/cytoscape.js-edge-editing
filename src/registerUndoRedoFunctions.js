@@ -94,7 +94,7 @@ module.exports = function (cy, anchorPointUtilities, params) {
           var nextAnchorsPosition = [];
           if (previousAnchorsPosition != undefined)
           {
-              for (i=0; i<previousAnchorsPosition.length; i+=2)
+              for (var i=0; i<previousAnchorsPosition.length; i+=2)
               {
                   nextAnchorsPosition.push({x: previousAnchorsPosition[i]+positionDiff.x, y: previousAnchorsPosition[i+1]+positionDiff.y});
               }
