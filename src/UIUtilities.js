@@ -647,9 +647,9 @@ module.exports = function (params, cy) {
         convertToRenderedPosition(target);
         
         // Source:0, Target:1, None:-1
-        if(checkIfInsideShape(x, y, length, src.x, src.y))
+        if(checkIfInsideShape(x, y, 2 * length, src.x, src.y))
           return 0;
-        else if(checkIfInsideShape(x, y, length, target.x, target.y))
+        else if(checkIfInsideShape(x, y, 2 * length, target.x, target.y))
           return 1;
         else
           return -1;
