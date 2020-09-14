@@ -174,4 +174,8 @@ This project is set up to automatically be published to npm and bower.  To publi
 
 ## Team
 
-  * [Metin Can Siper](https://github.com/metincansiper), [Muhammed Salih Altun](https://github.com/msalihaltun), [Ahmet Candiroglu](https://github.com/ahmetcandiroglu), [Ugur Dogrusoz](https://github.com/ugurdogrusoz) of [i-Vis at Bilkent University](http://www.cs.bilkent.edu.tr/~ivis)
+  * [Metin Can Siper](https://github.com/metincansiper), [Muhammed Salih Altun](https://github.com/msalihaltun), [Gledis Zeneli](https://github.com/gledis69), [Ugur Dogrusoz](https://github.com/ugurdogrusoz) of [i-Vis at Bilkent University](http://www.cs.bilkent.edu.tr/~ivis)
+
+### Alumni
+
+  * [Ahmet Candiroglu](https://github.com/ahmetcandiroglu)
