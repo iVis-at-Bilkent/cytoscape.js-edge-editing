@@ -564,19 +564,25 @@ module.exports = function (params, cy) {
         var targetEndPointY = renderedTargetPos.y + ((distanceFromNode/ distanceTarget)* (renderedNextToTarget.y - renderedTargetPos.y)); 
 
         // render end point shape for source and target
-        endpointShape1 = new Konva.Circle({
-          x: sourceEndPointX + length,
-          y: sourceEndPointY + length,
-          radius: length,
-          fill: 'black',
-        });
+        // the null checks are not theoretically required
+        // but they protect from bad synchronious calls of refreshDraws()
+        if(endpointShape1 === null){
+          endpointShape1 = new Konva.Circle({
+            x: sourceEndPointX + length,
+            y: sourceEndPointY + length,
+            radius: length,
+            fill: 'black',
+          });
+        }
 
-        endpointShape2 = new Konva.Circle({
-          x: targetEndPointX + length,
-          y: targetEndPointY + length,
-          radius: length,
-          fill: 'black',
-        });
+        if(endpointShape2 === null){
+          endpointShape2 = new Konva.Circle({
+            x: targetEndPointX + length,
+            y: targetEndPointY + length,
+            radius: length,
+            fill: 'black',
+          });
+        }
 
         canvas.add(endpointShape1);
         canvas.add(endpointShape2);
@@ -771,7 +777,7 @@ module.exports = function (params, cy) {
         });
 
         cy.on('style', 'edge.edgebendediting-hasbendpoints:selected, edge.edgecontrolediting-hascontrolpoints:selected', eStyle = function () {
-          refreshDraws();
+          setTimeout(function(){refreshDraws()}, 50);
         });
 
         cy.on('remove', 'edge', eRemove = function () {
