@@ -61,7 +61,7 @@ module.exports = function (cy, anchorPointUtilities, params) {
         edge.addClass(singleClassName + " " + multiClassName);
       }
 
-      edge.select()
+      edge.select();
     }
     
     edge.trigger('cyedgeediting.changeAnchorPoints');
