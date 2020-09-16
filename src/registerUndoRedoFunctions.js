@@ -60,6 +60,8 @@ module.exports = function (cy, anchorPointUtilities, params) {
         // Had multiple anchors. Add multiple classes with space delimeted string of class names
         edge.addClass(singleClassName + " " + multiClassName);
       }
+
+      edge.select()
     }
     
     edge.trigger('cyedgeediting.changeAnchorPoints');
