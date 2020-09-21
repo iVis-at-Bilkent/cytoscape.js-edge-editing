@@ -82,6 +82,14 @@ var anchorPointUtilities = {
             edge.addClass(this.syntax[type]['multiClass']);
           }
         }
+        else {
+          edge.data(this.syntax[type]['weight'], []);
+          edge.data(this.syntax[type]['distance'], []);
+          if (edge.hasClass(this.syntax[type]['class']))
+            edge.removeClass(this.syntax[type]['class']);
+          if (edge.hasClass(this.syntax[type]['multiClass']))
+            edge.removeClass(this.syntax[type]['multiClass']);
+        }
       }
     }
   },
