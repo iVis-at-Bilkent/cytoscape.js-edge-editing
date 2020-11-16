@@ -1,6 +1,6 @@
 ;(function(){ 'use strict';
   
-  var anchorPointUtilities = require('./AnchorPointUtilities');
+  var anchorPointUtilities = require('./anchorPointUtilities');
   var debounce = require("./debounce");
   
   // registers the extension on a cytoscape lib ref

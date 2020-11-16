@@ -1,5 +1,5 @@
 var debounce = require('./debounce');
-var anchorPointUtilities = require('./AnchorPointUtilities');
+var anchorPointUtilities = require('./anchorPointUtilities');
 var reconnectionUtilities = require('./reconnectionUtilities');
 var registerUndoRedoFunctions = require('./registerUndoRedoFunctions');
 var stageId = 0;
