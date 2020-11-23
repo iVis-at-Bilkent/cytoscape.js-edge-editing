@@ -951,12 +951,10 @@ module.exports = function (params, cy) {
           }
         });
         
-        cy.on('drag', 'node', eDrag = function (event) {
-          var node = this;
-          cy.edges().unselect();
-          if(!node.selected()){
-            cy.nodes().unselect();
-          }         
+        cy.on('drag', 'node', eDrag = function () {
+          if (edgeToHighlight) {
+            refreshDraws();
+          } 
         });
         cy.on('tapdrag', eTapDrag = function (event) {
           /** 
