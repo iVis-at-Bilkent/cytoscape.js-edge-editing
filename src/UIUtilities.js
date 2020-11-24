@@ -495,6 +495,16 @@ module.exports = function (params, cy) {
         }       
         var sourcePos = edge.sourceEndpoint();
         var targetPos = edge.targetEndpoint();
+
+        // This function is called inside refreshDraws which is called
+        // for updating Konva shapes on events, but sometimes these values
+        // will be NaN and Konva will show warnings in console as a result
+        // This is a check to eliminate those cases since if these values 
+        // are NaN nothing will be drawn anyway.
+        if (!sourcePos.x || !targetPos.x) {
+          return;
+        }
+
         edge_pts.unshift(sourcePos.y);
         edge_pts.unshift(sourcePos.x);
         edge_pts.push(targetPos.x);

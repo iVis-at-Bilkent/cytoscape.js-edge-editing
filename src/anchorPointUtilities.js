@@ -70,8 +70,24 @@ var anchorPointUtilities = {
         else if(type === 'control')
           anchorPositions = controlPositionsFcn.apply(this, edge);
 
-        // calculate relative anchor positions
-        var result = this.convertToRelativePositions(edge, anchorPositions);
+        var result = {
+          weights: [],
+          distances: []
+        };
+
+        if (anchorPositions) {
+          result = this.convertToRelativePositions(edge, anchorPositions);
+        }
+        else {
+          var weights = edge.data(this.syntax[type]['weight']);
+          var distances = edge.data(this.syntax[type]['distance']);
+          if (weights && distances) {
+            result = {
+              weights: weights,
+              distances: distances
+            }
+          } 
+        }
 
         // if there are anchors set weights and distances accordingly and add class to enable style changes
         if (result.distances.length > 0) {
