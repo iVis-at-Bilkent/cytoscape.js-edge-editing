@@ -51,7 +51,9 @@
           return true;
       },
       // whether 'Remove all bend points' and 'Remove all control points' options should be presented
-      enableMultipleAnchorRemovalOption: false
+      enableMultipleAnchorRemovalOption: false,
+      // specifically for edge-editing menu items, whether trailing dividers should be used
+      useTrailingDividersAfterContextMenuOptions: false,
     };
     
     var options;

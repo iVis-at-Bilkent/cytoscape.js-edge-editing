@@ -114,10 +114,11 @@
 				
 				// demo your ext
 				cy.edgeEditing({
-									undoable: true,
-                  bendRemovalSensitivity: 16,
-                  enableMultipleAnchorRemovalOption: true,
-                  initAnchorsAutomatically: false
+					undoable: true,
+					bendRemovalSensitivity: 16,
+					enableMultipleAnchorRemovalOption: true,
+					initAnchorsAutomatically: false,
+					useTrailingDividersAfterContextMenuOptions: false,
 				});
 				
 				cy.style().update();

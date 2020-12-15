@@ -341,39 +341,45 @@ module.exports = function (params, cy) {
           id: addBendPointCxtMenuId,
           content: opts.addBendMenuItemTitle,
           selector: 'edge',
-          onClickFunction: cxtAddBendFcn
+          onClickFunction: cxtAddBendFcn,
+          hasTrailingDivider: opts.useTrailingDividersAfterContextMenuOptions,
         },
         {
           id: removeBendPointCxtMenuId,
           content: opts.removeBendMenuItemTitle,
           selector: 'edge',
-          onClickFunction: cxtRemoveAnchorFcn
+          onClickFunction: cxtRemoveAnchorFcn,
+          hasTrailingDivider: opts.useTrailingDividersAfterContextMenuOptions,
         }, 
         {
           id: removeAllBendPointCtxMenuId,
           content: opts.removeAllBendMenuItemTitle,
           selector: opts.enableMultipleAnchorRemovalOption && ':selected.edgebendediting-hasmultiplebendpoints',
-          onClickFunction: cxtRemoveAllAnchorsFcn
+          onClickFunction: cxtRemoveAllAnchorsFcn,
+          hasTrailingDivider: opts.useTrailingDividersAfterContextMenuOptions,
         },
         {
           id: addControlPointCxtMenuId,
           content: opts.addControlMenuItemTitle,
           selector: 'edge',
           coreAsWell: true,
-          onClickFunction: cxtAddControlFcn
+          onClickFunction: cxtAddControlFcn,
+          hasTrailingDivider: opts.useTrailingDividersAfterContextMenuOptions,
         },
         {
           id: removeControlPointCxtMenuId,
           content: opts.removeControlMenuItemTitle,
           selector: 'edge',
           coreAsWell: true,
-          onClickFunction: cxtRemoveAnchorFcn
+          onClickFunction: cxtRemoveAnchorFcn,
+          hasTrailingDivider: opts.useTrailingDividersAfterContextMenuOptions,
         }, 
         {
           id: removeAllControlPointCtxMenuId,
           content: opts.removeAllControlMenuItemTitle,
           selector: opts.enableMultipleAnchorRemovalOption && ':selected.edgecontrolediting-hasmultiplecontrolpoints',
-          onClickFunction: cxtRemoveAllAnchorsFcn
+          onClickFunction: cxtRemoveAllAnchorsFcn,
+          hasTrailingDivider: opts.useTrailingDividersAfterContextMenuOptions,
         },
       ];
       
