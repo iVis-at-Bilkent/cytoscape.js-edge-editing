@@ -153,8 +153,6 @@ cy.edgeEditing('initialized');
       },
       // this function is called if reconnected edge is not valid according to validateEdge function
       actOnUnsuccessfulReconnection: undefined,
-      // whether 'Remove all bend points' and 'Remove all control points' options should be presented
-      enableMultipleAnchorRemovalOption: false,
       // specifically for edge-editing menu items, whether trailing dividers should be used
       useTrailingDividersAfterContextMenuOptions: false,
     };
