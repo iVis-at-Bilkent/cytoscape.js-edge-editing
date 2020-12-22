@@ -1,4 +1,5 @@
 var anchorPointUtilities = {
+  options: undefined,
   currentCtxEdge: undefined,
   currentCtxPos: undefined,
   currentAnchorIndex: undefined,
@@ -15,7 +16,6 @@ var anchorPointUtilities = {
       distance: "cyedgebendeditingDistances",
       weightCss: "segment-weights",
       distanceCss: "segment-distances",
-      pointPos: "bendPointPositions",
     },
     control: {
       edge: "unbundled-bezier",
@@ -25,7 +25,6 @@ var anchorPointUtilities = {
       distance: "cyedgecontroleditingDistances",
       weightCss: "control-point-weights",
       distanceCss: "control-point-distances",
-      pointPos: "controlPointPositions",
     }
   },
   // gets edge type as 'bend' or 'control'
@@ -33,7 +32,7 @@ var anchorPointUtilities = {
   // example: an edge with type segment and a class 'hascontrolpoints' will be classified as unbundled bezier
   getEdgeType: function(edge){
     if(!edge)
-      return 'inconclusive';
+      return 'none';
     else if(edge.hasClass(this.syntax['bend']['class']))
       return 'bend';
     else if(edge.hasClass(this.syntax['control']['class']))
@@ -42,13 +41,13 @@ var anchorPointUtilities = {
       return 'bend';
     else if(edge.css('curve-style') === this.syntax['control']['edge'])
       return 'control';
-    else if(edge.data(this.syntax['bend']['pointPos']) && 
-            edge.data(this.syntax['bend']['pointPos']).length > 0)
+    else if(this.options.bendPointPositionsGetterFunction(edge) && 
+            this.options.bendPointPositionsGetterFunction(edge).length > 0)
       return 'bend';
-    else if(edge.data(this.syntax['control']['pointPos']) && 
-            edge.data(this.syntax['control']['pointPos']).length > 0)
+      else if(this.options.controlPointPositionsGetterFunction(edge) && 
+            this.options.controlPointPositionsGetterFunction(edge).length > 0)
       return 'control';
-    return 'inconclusive';
+    return 'none';
   },
   // initilize anchor points based on bendPositionsFcn and controlPositionFcn
   initAnchorPoints: function(bendPositionsFcn, controlPositionsFcn, edges) {
@@ -56,7 +55,7 @@ var anchorPointUtilities = {
       var edge = edges[i];
       var type = this.getEdgeType(edge);
       
-      if (type === 'inconclusive') { 
+      if (type === 'none') { 
         continue; 
       }
 
@@ -213,7 +212,7 @@ var anchorPointUtilities = {
   getAnchorsAsArray: function(edge) {
     var type = this.getEdgeType(edge);
 
-    if(type === 'inconclusive'){
+    if(type === 'none'){
       return undefined;
     }
     
@@ -488,17 +487,16 @@ var anchorPointUtilities = {
     
     var type = this.getEdgeType(edge);
 
-    if(this.edgeTypeInconclusiveShouldntHappen(type, "anchorPointUtilities.js, removeAnchor")){
+    if(this.edgeTypeNoneShouldntHappen(type, "anchorPointUtilities.js, removeAnchor")){
       return;
     }
 
     var distanceStr = this.syntax[type]['weight'];
     var weightStr = this.syntax[type]['distance'];
-    var positionDataStr = this.syntax[type]['pointPos'];
 
     var distances = edge.data(distanceStr);
     var weights = edge.data(weightStr);
-    var positions = edge.data(positionDataStr);
+    var positions = this.options.bendPointPositionsGetterFunction(edge);
 
     distances.splice(anchorIndex, 1);
     weights.splice(anchorIndex, 1);
@@ -528,7 +526,7 @@ var anchorPointUtilities = {
     }
     var type = this.getEdgeType(edge);
     
-    if(this.edgeTypeInconclusiveShouldntHappen(type, "anchorPointUtilities.js, removeAllAnchors")){
+    if(this.edgeTypeNoneShouldntHappen(type, "anchorPointUtilities.js, removeAllAnchors")){
       return;
     }
 
@@ -539,13 +537,12 @@ var anchorPointUtilities = {
     // Remove all anchor point data from edge
     var distanceStr = this.syntax[type]['weight'];
     var weightStr = this.syntax[type]['distance'];
-    var positionDataStr = this.syntax[type]['pointPos'];
     edge.data(distanceStr, []);
     edge.data(weightStr, []);
     // position data is not given in demo so it throws error here
     // but it should be from the beginning
-    if (edge.data(positionDataStr)) {
-      edge.data(positionDataStr, []);
+    if (this.options.bendPointPositionsGetterFunction(edge)) {
+      this.options.bendPointPositionsSetterFunction(edge, []);
     }
   },
   calculateDistance: function(pt1, pt2) {
@@ -567,9 +564,9 @@ var anchorPointUtilities = {
       return n1 > n2;
     }
   },
-  edgeTypeInconclusiveShouldntHappen: function(type, place){
-    if(type === 'inconclusive') {
-      console.log(`In ${place}: edge type inconclusive should never happen here!!`);
+  edgeTypeNoneShouldntHappen: function(type, place){
+    if(type === 'none') {
+      console.log(`In ${place}: edge type none should never happen here!!`);
       return true;
     }
     return false;

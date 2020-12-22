@@ -9,11 +9,11 @@ module.exports = function (cy, anchorPointUtilities, params) {
 
   function changeAnchorPoints(param) {
     var edge = cy.getElementById(param.edge.id());
-    var type = param.type !== 'inconclusive' ? param.type : anchorPointUtilities.getEdgeType(edge);
+    var type = param.type !== 'none' ? param.type : anchorPointUtilities.getEdgeType(edge);
     
     var weights, distances, weightStr, distanceStr;
 
-    if(param.type === 'inconclusive' && !param.set){
+    if(param.type === 'none' && !param.set){
       weights = [];
       distances = [];
     }
@@ -104,11 +104,16 @@ module.exports = function (cy, anchorPointUtilities, params) {
               {
                   nextAnchorsPosition.push({x: previousAnchorsPosition[i]+positionDiff.x, y: previousAnchorsPosition[i+1]+positionDiff.y});
               }
-              edge.data(anchorPointUtilities.syntax[type]['pointPos'], nextAnchorsPosition);
+              if (type === 'bend') {
+                params.bendPointPositionsSetterFunction(edge, nextAnchorsPosition);
+              }
+              else if (type === 'control') {
+                params.controlPointPositionsSetterFunction(edge, nextAnchorsPosition);
+              }
           }
       });
 
-      anchorPointUtilities.initAnchorPoints(params.bendPositionsFunction, params.controlPositionsFunction, edges);
+      anchorPointUtilities.initAnchorPoints(params.bendPointPositionsGetterFunction, params.controlPointPositionsGetterFunction, edges);
   }
 
   function reconnectEdge(param){

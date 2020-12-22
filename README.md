@@ -79,10 +79,12 @@ An instance has a number of functions available:
 * of the ith anchor. (Returns undefined if the curve style is not segments nor unbundled bezier)
 */
 instance.getAnchorsAsArray(ele);
-// Initilize anchors for the given edges using 'options.bendPositionsFunction' and 'options.controlPositionsFunction'
+// Initilize anchors for the given edges using 'options.bendPointPositionsGetterFunction' and 'options.controlPointPositionsGetterFunction'
 instance.initAnchorPoints(eles);
 // Removes anchor with some index from an edge
 instance.deleteSelectedAnchor(ele, index);
+// Get type of an edge as `bend`, `control` or `none`
+instance.getEdgeType(ele);
 ```
 
 You can also get an existing instance:
@@ -101,13 +103,19 @@ cy.edgeEditing('initialized');
     var options = {
       // this function specifies the positions of bend points
       // strictly name the property 'bendPointPositions' for the edge to be detected for bend point edititng
-      bendPositionsFunction: function(ele) {
+      bendPointPositionsGetterFunction: function(ele) {
         return ele.data('bendPointPositions');
       },
       // this function specifies the poitions of control points
       // strictly name the property 'controlPointPositions' for the edge to be detected for control point edititng
-      controlPositionsFunction: function(ele) {
+      controlPointPositionsGetterFunction: function(ele) {
         return ele.data('controlPointPositions');
+      },
+      bendPointPositionsSetterFunction: function(ele, bendPointPositions) {
+        ele.data('bendPointPositions', bendPointPositions);
+      },
+      controlPointPositionsSetterFunction: function(ele, controlPointPositions) {
+        ele.data('controlPointPositions', controlPointPositions);
       },
       // whether to initilize bend and control points on creation of this extension automatically
       initAnchorsAutomatically: true,

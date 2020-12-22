@@ -12,13 +12,19 @@
     var defaults = {
       // this function specifies the poitions of bend points
       // strictly name the property 'bendPointPositions' for the edge to be detected for bend point edititng
-      bendPositionsFunction: function(ele) {
+      bendPointPositionsGetterFunction: function(ele) {
         return ele.data('bendPointPositions');
       },
       // this function specifies the poitions of control points
       // strictly name the property 'controlPointPositions' for the edge to be detected for control point edititng
-      controlPositionsFunction: function(ele) {
+      controlPointPositionsGetterFunction: function(ele) {
         return ele.data('controlPointPositions');
+      },
+      bendPointPositionsSetterFunction: function(ele, bendPointPositions) {
+        ele.data('bendPointPositions', bendPointPositions);
+      },
+      controlPointPositionsSetterFunction: function(ele, controlPointPositions) {
+        ele.data('controlPointPositions', controlPointPositions);
       },
       // whether to initilize bend and control points on creation of this extension automatically
       initAnchorsAutomatically: true,
@@ -131,7 +137,7 @@
         // init bend positions conditionally
         if (options.initAnchorsAutomatically) {
           // CHECK THIS, options.ignoredClasses UNUSED
-          anchorPointUtilities.initAnchorPoints(options.bendPositionsFunction, options.controlPositionsFunction, cy.edges(), options.ignoredClasses);
+          anchorPointUtilities.initAnchorPoints(options.bendPointPositionsGetterFunction, options.controlPointPositionsGetterFunction, cy.edges(), options.ignoredClasses);
         }
 
         if(options.enabled)
@@ -149,12 +155,15 @@
         getAnchorsAsArray: function(ele) {
           return anchorPointUtilities.getAnchorsAsArray(ele);
         },
-        // Initilize points for the given edges using 'options.bendPositionsFunction'
+        // Initilize points for the given edges using 'options.bendPointPositionsGetterFunction'
         initAnchorPoints: function(eles) {
-          anchorPointUtilities.initAnchorPoints(options.bendPositionsFunction, options.controlPositionsFunction, eles);
+          anchorPointUtilities.initAnchorPoints(options.bendPointPositionsGetterFunction, options.controlPointPositionsGetterFunction, eles);
         },
         deleteSelectedAnchor: function(ele, index) {
           anchorPointUtilities.removeAnchor(ele, index);
+        },
+        getEdgeType: function(ele) {
+          return anchorPointUtilities.getEdgeType(ele);
         }
       } : undefined;
 
