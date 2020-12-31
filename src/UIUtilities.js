@@ -745,7 +745,7 @@ module.exports = function (params, cy) {
                 }
               }
           });
-          anchorPointUtilities.initAnchorPoints(options().bendPointPositionsGetterFunction, options().controlPointPositionsGetterFunction, edges);
+          anchorPointUtilities.initAnchorPoints(options().bendPositionsFunction, options().controlPositionsFunction, edges);
           
           // Listener defined in other extension
           // Might have compatibility issues after the unbundled bezier
@@ -1164,8 +1164,8 @@ module.exports = function (params, cy) {
                   
                   if(reconnectedEdge){
                     reconnectionUtilities.copyEdge(edge, reconnectedEdge);
-                    anchorPointUtilities.initAnchorPoints(options().bendPointPositionsGetterFunction, 
-                                              options().controlPointPositionsGetterFunction, [reconnectedEdge]);
+                    anchorPointUtilities.initAnchorPoints(options().bendPositionsFunction, 
+                                              options().controlPositionsFunction, [reconnectedEdge]);
                   }
                   
                   if(reconnectedEdge && options().undoable){

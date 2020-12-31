@@ -113,7 +113,7 @@ module.exports = function (cy, anchorPointUtilities, params) {
           }
       });
 
-      anchorPointUtilities.initAnchorPoints(params.bendPointPositionsGetterFunction, params.controlPointPositionsGetterFunction, edges);
+      anchorPointUtilities.initAnchorPoints(params.bendPositionsFunction, params.controlPositionsFunction, edges);
   }
 
   function reconnectEdge(param){

@@ -41,11 +41,11 @@ var anchorPointUtilities = {
       return 'bend';
     else if(edge.css('curve-style') === this.syntax['control']['edge'])
       return 'control';
-    else if(this.options.bendPointPositionsGetterFunction(edge) && 
-            this.options.bendPointPositionsGetterFunction(edge).length > 0)
+    else if(this.options.bendPositionsFunction(edge) && 
+            this.options.bendPositionsFunction(edge).length > 0)
       return 'bend';
-      else if(this.options.controlPointPositionsGetterFunction(edge) && 
-            this.options.controlPointPositionsGetterFunction(edge).length > 0)
+    else if(this.options.controlPositionsFunction(edge) && 
+            this.options.controlPositionsFunction(edge).length > 0)
       return 'control';
     return 'none';
   },
@@ -496,7 +496,13 @@ var anchorPointUtilities = {
 
     var distances = edge.data(distanceStr);
     var weights = edge.data(weightStr);
-    var positions = this.options.bendPointPositionsGetterFunction(edge);
+    var positions;
+    if (type === 'bend') {
+      positions = this.options.bendPositionsFunction(edge);
+    }
+    else if (type === 'control') {
+      positions = this.options.controlPositionsFunction(edge);
+    }
 
     distances.splice(anchorIndex, 1);
     weights.splice(anchorIndex, 1);
@@ -541,8 +547,11 @@ var anchorPointUtilities = {
     edge.data(weightStr, []);
     // position data is not given in demo so it throws error here
     // but it should be from the beginning
-    if (this.options.bendPointPositionsGetterFunction(edge)) {
+    if (type === 'bend' && this.options.bendPositionsFunction(edge)) {
       this.options.bendPointPositionsSetterFunction(edge, []);
+    }
+    else if (type === 'control' && this.options.controlPositionsFunction(edge)) {
+      this.options.controlPointPositionsSetterFunction(edge, []);
     }
   },
   calculateDistance: function(pt1, pt2) {

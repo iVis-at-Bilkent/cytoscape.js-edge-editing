@@ -10,19 +10,19 @@
     if( !cytoscape || !$ || !Konva){ return; } // can't register if required libraries unspecified
 
     var defaults = {
-      // this function specifies the poitions of bend points
-      // strictly name the property 'bendPointPositions' for the edge to be detected for bend point edititng
-      bendPointPositionsGetterFunction: function(ele) {
+      // A function parameter to get bend point positions, should return positions of bend points
+      bendPositionsFunction: function(ele) {
         return ele.data('bendPointPositions');
       },
-      // this function specifies the poitions of control points
-      // strictly name the property 'controlPointPositions' for the edge to be detected for control point edititng
-      controlPointPositionsGetterFunction: function(ele) {
+      // A function parameter to get control point positions, should return positions of control points
+      controlPositionsFunction: function(ele) {
         return ele.data('controlPointPositions');
       },
+      // A function parameter to set bend point positions
       bendPointPositionsSetterFunction: function(ele, bendPointPositions) {
         ele.data('bendPointPositions', bendPointPositions);
       },
+      // A function parameter to set bend point positions
       controlPointPositionsSetterFunction: function(ele, controlPointPositions) {
         ele.data('controlPointPositions', controlPointPositions);
       },
@@ -137,7 +137,7 @@
         // init bend positions conditionally
         if (options.initAnchorsAutomatically) {
           // CHECK THIS, options.ignoredClasses UNUSED
-          anchorPointUtilities.initAnchorPoints(options.bendPointPositionsGetterFunction, options.controlPointPositionsGetterFunction, cy.edges(), options.ignoredClasses);
+          anchorPointUtilities.initAnchorPoints(options.bendPositionsFunction, options.controlPositionsFunction, cy.edges(), options.ignoredClasses);
         }
 
         if(options.enabled)
@@ -155,9 +155,9 @@
         getAnchorsAsArray: function(ele) {
           return anchorPointUtilities.getAnchorsAsArray(ele);
         },
-        // Initilize points for the given edges using 'options.bendPointPositionsGetterFunction'
+        // Initilize points for the given edges using 'options.bendPositionsFunction'
         initAnchorPoints: function(eles) {
-          anchorPointUtilities.initAnchorPoints(options.bendPointPositionsGetterFunction, options.controlPointPositionsGetterFunction, eles);
+          anchorPointUtilities.initAnchorPoints(options.bendPositionsFunction, options.controlPositionsFunction, eles);
         },
         deleteSelectedAnchor: function(ele, index) {
           anchorPointUtilities.removeAnchor(ele, index);

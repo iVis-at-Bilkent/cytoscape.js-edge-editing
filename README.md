@@ -79,7 +79,7 @@ An instance has a number of functions available:
 * of the ith anchor. (Returns undefined if the curve style is not segments nor unbundled bezier)
 */
 instance.getAnchorsAsArray(ele);
-// Initilize anchors for the given edges using 'options.bendPointPositionsGetterFunction' and 'options.controlPointPositionsGetterFunction'
+// Initilize anchors for the given edges using 'options.bendPositionsFunction' and 'options.controlPositionsFunction'
 instance.initAnchorPoints(eles);
 // Removes anchor with some index from an edge
 instance.deleteSelectedAnchor(ele, index);
@@ -101,19 +101,19 @@ cy.edgeEditing('initialized');
 ## Default Options
 ```js
     var options = {
-      // this function specifies the positions of bend points
-      // strictly name the property 'bendPointPositions' for the edge to be detected for bend point edititng
-      bendPointPositionsGetterFunction: function(ele) {
+      // A function parameter to get bend point positions, should return positions of bend points
+      bendPositionsFunction: function(ele) {
         return ele.data('bendPointPositions');
       },
-      // this function specifies the poitions of control points
-      // strictly name the property 'controlPointPositions' for the edge to be detected for control point edititng
-      controlPointPositionsGetterFunction: function(ele) {
+      // A function parameter to get control point positions, should return positions of control points
+      controlPositionsFunction: function(ele) {
         return ele.data('controlPointPositions');
       },
+      // A function parameter to set bend point positions
       bendPointPositionsSetterFunction: function(ele, bendPointPositions) {
         ele.data('bendPointPositions', bendPointPositions);
       },
+      // A function parameter to set bend point positions
       controlPointPositionsSetterFunction: function(ele, controlPointPositions) {
         ele.data('controlPointPositions', controlPointPositions);
       },
