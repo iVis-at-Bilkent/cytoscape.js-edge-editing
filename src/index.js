@@ -35,9 +35,7 @@
       // the size of bend and control point shape is obtained by multipling width of edge with this parameter
       anchorShapeSizeFactor: 3,
       // z-index value of the canvas in which bend and control points are drawn
-      zIndex: 999,      
-      // whether to start the plugin in the enabled state
-      enabled: true,
+      zIndex: 999,
       //An option that controls the distance within which a bend point is considered "near" the line segment between its two neighbors and will be automatically removed
       bendRemovalSensitivity : 8,
       // title of add bend point menu item (User may need to adjust width of menu items according to length of this option)
@@ -140,10 +138,7 @@
           anchorPointUtilities.initAnchorPoints(options.bendPositionsFunction, options.controlPositionsFunction, cy.edges(), options.ignoredClasses);
         }
 
-        if(options.enabled)
-          uiUtilities(options, cy);
-        else
-          uiUtilities("unbind", cy);
+        uiUtilities(options, cy);
       }
       
       var instance = initialized ? {

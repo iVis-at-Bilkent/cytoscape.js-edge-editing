@@ -127,8 +127,6 @@ cy.edgeEditing('initialized');
       anchorShapeSizeFactor: 3,
       // z-index value of the canvas in which bend points are drawn
       zIndex: 999,
-      // whether to start the plugin in the enabled state
-      enabled: true,
        /*An option that controls the distance (in pixels) within which a bend point is considered near the line segment between 
          its two neighbors and will be automatically removed
          min value = 0 , max value = 20 , values less than 0 are set to 0 and values greater than 20 are set to 20
