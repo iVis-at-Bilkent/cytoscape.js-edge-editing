@@ -130,12 +130,6 @@
           'edge-distances': 'node-position'
         });
 
-        cy.style().selector('.edgeediting-reconnectiondummynode').css({
-          width: 1,
-          height: 1,
-          'visibility': 'hidden'
-        });
-
         anchorPointUtilities.setIgnoredClasses(options.ignoredClasses);
 
         // init bend positions conditionally
