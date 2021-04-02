@@ -130,6 +130,12 @@
           'edge-distances': 'node-position'
         });
 
+        cy.style().selector("#nwt_reconnectEdge_dummy").css({
+          'width' : '1',
+          'height' : '1',
+          'visibility' : 'hidden'
+        });
+
         anchorPointUtilities.setIgnoredClasses(options.ignoredClasses);
 
         // init bend positions conditionally

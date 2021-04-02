@@ -8,11 +8,6 @@ var reconnectionUtilities = {
               id: 'nwt_reconnectEdge_dummy',
               ports: [],
             },
-            style: {
-              width: 1,
-              height: 1,
-              'visibility': 'hidden'
-            },
             renderedPosition: position
         };
         cy.add(dummyNode);
