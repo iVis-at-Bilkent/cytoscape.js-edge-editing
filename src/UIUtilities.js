@@ -1,13 +1,11 @@
 var debounce = require('./debounce');
-var anchorPointUtilities = require('./anchorPointUtilities');
+var anchorPointUtilities = require('./AnchorPointUtilities');
 var reconnectionUtilities = require('./reconnectionUtilities');
 var registerUndoRedoFunctions = require('./registerUndoRedoFunctions');
 var stageId = 0;
 
 module.exports = function (params, cy) {
   var fn = params;
-
-  anchorPointUtilities.options = params;
 
   var addBendPointCxtMenuId = 'cy-edge-bend-editing-cxt-add-bend-point' + stageId;
   var removeBendPointCxtMenuId = 'cy-edge-bend-editing-cxt-remove-bend-point' + stageId;
@@ -85,7 +83,7 @@ module.exports = function (params, cy) {
       
       var anchorManager = {
         edge: undefined,
-        edgeType: 'none',
+        edgeType: 'inconclusive',
         anchors: [],
         // remembers the touched anchor to avoid clearing it when dragging happens
         touchedAnchor: undefined,
@@ -188,7 +186,7 @@ module.exports = function (params, cy) {
           else {
             this.anchors = [];
             this.edge = undefined;
-            this.edgeType = 'none';
+            this.edgeType = 'inconclusive';
           }
         },
         // render the bend and control shapes of the given edge
@@ -257,7 +255,7 @@ module.exports = function (params, cy) {
           var type = anchorPointUtilities.getEdgeType(edge);
           var weights, distances, weightStr, distanceStr;
 
-          if(type === 'none'){
+          if(type === 'inconclusive'){
             weights = [];
             distances = [];
           }
@@ -292,7 +290,7 @@ module.exports = function (params, cy) {
         var edge = anchorManager.edge;
         var type = anchorPointUtilities.getEdgeType(edge);
 
-        if(anchorPointUtilities.edgeTypeNoneShouldntHappen(type, "UiUtilities.js, cxtRemoveAnchorFcn")){
+        if(anchorPointUtilities.edgeTypeInconclusiveShouldntHappen(type, "UiUtilities.js, cxtRemoveAnchorFcn")){
           return;
         }
 
@@ -343,45 +341,39 @@ module.exports = function (params, cy) {
           id: addBendPointCxtMenuId,
           content: opts.addBendMenuItemTitle,
           selector: 'edge',
-          onClickFunction: cxtAddBendFcn,
-          hasTrailingDivider: opts.useTrailingDividersAfterContextMenuOptions,
+          onClickFunction: cxtAddBendFcn
         },
         {
           id: removeBendPointCxtMenuId,
           content: opts.removeBendMenuItemTitle,
           selector: 'edge',
-          onClickFunction: cxtRemoveAnchorFcn,
-          hasTrailingDivider: opts.useTrailingDividersAfterContextMenuOptions,
+          onClickFunction: cxtRemoveAnchorFcn
         }, 
         {
           id: removeAllBendPointCtxMenuId,
           content: opts.removeAllBendMenuItemTitle,
           selector: opts.enableMultipleAnchorRemovalOption && ':selected.edgebendediting-hasmultiplebendpoints',
-          onClickFunction: cxtRemoveAllAnchorsFcn,
-          hasTrailingDivider: opts.useTrailingDividersAfterContextMenuOptions,
+          onClickFunction: cxtRemoveAllAnchorsFcn
         },
         {
           id: addControlPointCxtMenuId,
           content: opts.addControlMenuItemTitle,
           selector: 'edge',
           coreAsWell: true,
-          onClickFunction: cxtAddControlFcn,
-          hasTrailingDivider: opts.useTrailingDividersAfterContextMenuOptions,
+          onClickFunction: cxtAddControlFcn
         },
         {
           id: removeControlPointCxtMenuId,
           content: opts.removeControlMenuItemTitle,
           selector: 'edge',
           coreAsWell: true,
-          onClickFunction: cxtRemoveAnchorFcn,
-          hasTrailingDivider: opts.useTrailingDividersAfterContextMenuOptions,
+          onClickFunction: cxtRemoveAnchorFcn
         }, 
         {
           id: removeAllControlPointCtxMenuId,
           content: opts.removeAllControlMenuItemTitle,
           selector: opts.enableMultipleAnchorRemovalOption && ':selected.edgecontrolediting-hasmultiplecontrolpoints',
-          onClickFunction: cxtRemoveAllAnchorsFcn,
-          hasTrailingDivider: opts.useTrailingDividersAfterContextMenuOptions,
+          onClickFunction: cxtRemoveAllAnchorsFcn
         },
       ];
       
@@ -503,16 +495,6 @@ module.exports = function (params, cy) {
         }       
         var sourcePos = edge.sourceEndpoint();
         var targetPos = edge.targetEndpoint();
-
-        // This function is called inside refreshDraws which is called
-        // for updating Konva shapes on events, but sometimes these values
-        // will be NaN and Konva will show warnings in console as a result
-        // This is a check to eliminate those cases since if these values 
-        // are NaN nothing will be drawn anyway.
-        if (!sourcePos.x || !targetPos.x) {
-          return;
-        }
-
         edge_pts.unshift(sourcePos.y);
         edge_pts.unshift(sourcePos.x);
         edge_pts.push(targetPos.x);
@@ -631,7 +613,7 @@ module.exports = function (params, cy) {
       function getContainingShapeIndex(x, y, edge) {
         var type = anchorPointUtilities.getEdgeType(edge);
 
-        if(type === 'none'){
+        if(type === 'inconclusive'){
           return -1;
         }
 
@@ -733,16 +715,11 @@ module.exports = function (params, cy) {
                 }
                 var type = anchorPointUtilities.getEdgeType(edge);
 
-                if(anchorPointUtilities.edgeTypeNoneShouldntHappen(type, "UiUtilities.js, moveAnchorPoints")){
+                if(anchorPointUtilities.edgeTypeInconclusiveShouldntHappen(type, "UiUtilities.js, moveAnchorPoints")){
                   return;
                 }
 
-                if (type === 'bend') {
-                  params.bendPointPositionsSetterFunction(edge, nextAnchorPointsPosition);
-                }
-                else if (type === 'control') {
-                  params.controlPointPositionsSetterFunction(edge, nextAnchorPointsPosition);
-                }
+                edge.data(anchorPointUtilities.syntax[type]['pointPos'], nextAnchorPointsPosition);
               }
           });
           anchorPointUtilities.initAnchorPoints(options().bendPositionsFunction, options().controlPositionsFunction, edges);
@@ -946,7 +923,7 @@ module.exports = function (params, cy) {
           var type = anchorPointUtilities.getEdgeType(edge);
 
           // to avoid errors
-          if(type === 'none')
+          if(type === 'inconclusive')
             type = 'bend';
           
           var cyPosX = tapStartPos.x;
@@ -974,10 +951,12 @@ module.exports = function (params, cy) {
           }
         });
         
-        cy.on('drag', 'node', eDrag = function () {
-          if (edgeToHighlight) {
-            refreshDraws();
-          } 
+        cy.on('drag', 'node', eDrag = function (event) {
+          var node = this;
+          cy.edges().unselect();
+          if(!node.selected()){
+            cy.nodes().unselect();
+          }         
         });
         cy.on('tapdrag', eTapDrag = function (event) {
           /** 
@@ -996,7 +975,7 @@ module.exports = function (params, cy) {
 
           var type = anchorPointUtilities.getEdgeType(edge);
 
-          if(createAnchorOnDrag && !anchorTouched && type !== 'none') {
+          if(createAnchorOnDrag && opts.enableCreateAnchorOnDrag && !anchorTouched && type !== 'inconclusive') {
             // remember state before creating anchor
             var weightStr = anchorPointUtilities.syntax[type]['weight'];
             var distanceStr = anchorPointUtilities.syntax[type]['distance'];
@@ -1209,7 +1188,7 @@ module.exports = function (params, cy) {
           var type = anchorPointUtilities.getEdgeType(edge);
 
           // to avoid errors
-          if(type === 'none'){
+          if(type === 'inconclusive'){
             type = 'bend';
           }
 

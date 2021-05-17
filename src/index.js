@@ -1,6 +1,6 @@
 ;(function(){ 'use strict';
   
-  var anchorPointUtilities = require('./anchorPointUtilities');
+  var anchorPointUtilities = require('./AnchorPointUtilities');
   var debounce = require("./debounce");
   
   // registers the extension on a cytoscape lib ref
@@ -10,21 +10,15 @@
     if( !cytoscape || !$ || !Konva){ return; } // can't register if required libraries unspecified
 
     var defaults = {
-      // A function parameter to get bend point positions, should return positions of bend points
+      // this function specifies the poitions of bend points
+      // strictly name the property 'bendPointPositions' for the edge to be detected for bend point edititng
       bendPositionsFunction: function(ele) {
         return ele.data('bendPointPositions');
       },
-      // A function parameter to get control point positions, should return positions of control points
+      // this function specifies the poitions of control points
+      // strictly name the property 'controlPointPositions' for the edge to be detected for control point edititng
       controlPositionsFunction: function(ele) {
         return ele.data('controlPointPositions');
-      },
-      // A function parameter to set bend point positions
-      bendPointPositionsSetterFunction: function(ele, bendPointPositions) {
-        ele.data('bendPointPositions', bendPointPositions);
-      },
-      // A function parameter to set bend point positions
-      controlPointPositionsSetterFunction: function(ele, controlPointPositions) {
-        ele.data('controlPointPositions', controlPointPositions);
       },
       // whether to initilize bend and control points on creation of this extension automatically
       initAnchorsAutomatically: true,
@@ -35,7 +29,9 @@
       // the size of bend and control point shape is obtained by multipling width of edge with this parameter
       anchorShapeSizeFactor: 3,
       // z-index value of the canvas in which bend and control points are drawn
-      zIndex: 999,
+      zIndex: 999,      
+      // whether to start the plugin in the enabled state
+      enabled: true,
       //An option that controls the distance within which a bend point is considered "near" the line segment between its two neighbors and will be automatically removed
       bendRemovalSensitivity : 8,
       // title of add bend point menu item (User may need to adjust width of menu items according to length of this option)
@@ -56,8 +52,8 @@
       },
       // whether 'Remove all bend points' and 'Remove all control points' options should be presented
       enableMultipleAnchorRemovalOption: false,
-      // specifically for edge-editing menu items, whether trailing dividers should be used
-      useTrailingDividersAfterContextMenuOptions: false,
+      // whether allows adding bending point by draging edge without useing ctxmenu, default is true
+      enableCreateAnchorOnDrag:true
     };
     
     var options;
@@ -130,12 +126,6 @@
           'edge-distances': 'node-position'
         });
 
-        cy.style().selector("#nwt_reconnectEdge_dummy").css({
-          'width' : '1',
-          'height' : '1',
-          'visibility' : 'hidden'
-        });
-
         anchorPointUtilities.setIgnoredClasses(options.ignoredClasses);
 
         // init bend positions conditionally
@@ -144,7 +134,10 @@
           anchorPointUtilities.initAnchorPoints(options.bendPositionsFunction, options.controlPositionsFunction, cy.edges(), options.ignoredClasses);
         }
 
-        uiUtilities(options, cy);
+        if(options.enabled)
+          uiUtilities(options, cy);
+        else
+          uiUtilities("unbind", cy);
       }
       
       var instance = initialized ? {
@@ -162,9 +155,6 @@
         },
         deleteSelectedAnchor: function(ele, index) {
           anchorPointUtilities.removeAnchor(ele, index);
-        },
-        getEdgeType: function(ele) {
-          return anchorPointUtilities.getEdgeType(ele);
         }
       } : undefined;
 
