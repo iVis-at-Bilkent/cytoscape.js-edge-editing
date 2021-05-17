@@ -53,7 +53,9 @@
       // whether 'Remove all bend points' and 'Remove all control points' options should be presented
       enableMultipleAnchorRemovalOption: false,
       // whether allows adding bending point by draging edge without useing ctxmenu, default is true
-      enableCreateAnchorOnDrag:true
+      enableCreateAnchorOnDrag:true,
+      // how to smartly move the anchor point to perfect 0 45 or 90 degree position, unit is px
+      stickyAnchorTolerence: -1  //-1 actually disable this feature, change it to 20 to test the feature
     };
     
     var options;

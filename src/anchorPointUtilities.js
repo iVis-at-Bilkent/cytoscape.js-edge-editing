@@ -280,6 +280,55 @@ var anchorPointUtilities = {
     
     return anchorList;
   },
+  convertToAnchorAbsolutePositions: function (edge, type, anchorIndex) {
+    var srcPos = edge.source().position();
+    var tgtPos = edge.target().position();
+    var weights = edge.data(this.syntax[type]['weight']);
+    var distances = edge.data(this.syntax[type]['distance']);
+    var w = weights[ anchorIndex ];
+    var d = distances[ anchorIndex ];
+    var dy = ( tgtPos.y - srcPos.y );
+    var dx = ( tgtPos.x - srcPos.x );
+    var l = Math.sqrt( dx * dx + dy * dy );
+    var vector = {
+      x: dx,
+      y: dy
+    };
+    var vectorNorm = {
+      x: vector.x / l,
+      y: vector.y / l
+    };
+    var vectorNormInverse = {
+      x: -vectorNorm.y,
+      y: vectorNorm.x
+    };
+
+    var w1 = (1 - w);
+    var w2 = w;
+    var midX= srcPos.x * w1 + tgtPos.x * w2
+    var midY= srcPos.y * w1 + tgtPos.y * w2
+    var absoluteX= midX + vectorNormInverse.x * d
+    var absoluteY= midY + vectorNormInverse.y * d
+
+    return {x:absoluteX,y:absoluteY}
+  },
+  obtainPrevAnchorAbsolutePositions: function (edge, type, anchorIndex) {
+    if(anchorIndex<=0){
+      return edge.source().position();
+    }else{
+      return this.convertToAnchorAbsolutePositions(edge,type,anchorIndex-1)
+    }
+  },
+  obtainNextAnchorAbsolutePositions: function (edge, type, anchorIndex) {
+    var weights = edge.data(this.syntax[type]['weight']);
+    var distances = edge.data(this.syntax[type]['distance']);
+    var minLengths = Math.min( weights.length, distances.length );
+    if(anchorIndex>=minLengths-1){
+      return edge.target().position();
+    }else{
+      return this.convertToAnchorAbsolutePositions(edge,type,anchorIndex+1)
+    }
+  },
   convertToRelativePosition: function (edge, point, srcTgtPointsAndTangents) {
     if (srcTgtPointsAndTangents === undefined) {
       srcTgtPointsAndTangents = this.getSrcTgtPointsAndTangents(edge);

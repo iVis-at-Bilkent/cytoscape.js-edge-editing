@@ -729,7 +729,57 @@ module.exports = function (params, cy) {
           cy.trigger('bendPointMovement'); 
       }
 
+      function _calcCostToPreferredPosition(p1, p2){
+        var currentAngle = Math.atan2(p2.y - p1.y, p2.x - p1.x);
+        var perfectAngle=[-Math.PI,-Math.PI*3/4,-Math.PI/2,-Math.PI/4,0,Math.PI/4,Math.PI/2,Math.PI*3/4,Math.PI/4]
+        var deltaAngle=[]
+        perfectAngle.forEach((angle)=>{deltaAngle.push(Math.abs(currentAngle-angle))})
+        var indexOfMin= deltaAngle.indexOf(Math.min(...deltaAngle))
+        var dy = ( p2.y - p1.y );
+        var dx = ( p2.x - p1.x );
+        var l=Math.sqrt( dx * dx + dy * dy );
+        var cost=Math.abs(l*Math.sin(deltaAngle[indexOfMin]))
+
+        var chosenAngle=perfectAngle[indexOfMin]
+        var edgeL=Math.abs(l*Math.cos(deltaAngle[indexOfMin]))
+        var targetPointX=p1.x + edgeL*Math.cos(chosenAngle)
+        var targetPointY=p1.y + edgeL*Math.sin(chosenAngle)
+
+        return {"costDistance":cost,"x":targetPointX,"y":targetPointY}
+      }
+
       function moveAnchorOnDrag(edge, type, index, position){
+        var prevPointPosition=anchorPointUtilities.obtainPrevAnchorAbsolutePositions(edge,type,index)
+        var nextPointPosition=anchorPointUtilities.obtainNextAnchorAbsolutePositions(edge,type,index)
+        var mousePosition = position;
+
+        //calcualte the cost(or offset distance) to fulfill perfect 0, or 45 or 90 degree positions according to prev and next position
+        var judgePrev=_calcCostToPreferredPosition(prevPointPosition,mousePosition)
+        var judgeNext=_calcCostToPreferredPosition(nextPointPosition,mousePosition)
+        var decisionObj=null
+        
+        var zoomLevel=cy.zoom()
+        if(judgePrev.costDistance<judgeNext.costDistance && judgePrev.costDistance*zoomLevel<opts.stickyAnchorTolerence){
+          decisionObj={x:judgePrev.x,y:judgePrev.y,angleFromPoint:prevPointPosition}
+        }else if(judgeNext.costDistance<judgePrev.costDistance && judgeNext.costDistance*zoomLevel<opts.stickyAnchorTolerence){
+          decisionObj={x:judgeNext.x,y:judgeNext.y,angleFromPoint:nextPointPosition}
+        }
+
+        if(decisionObj!=null){
+          position.x=decisionObj.x
+          position.y=decisionObj.y
+          //repeat one time for the other point, it might be able to match an angle from the other point as well 
+          var judgeAgainPoint= prevPointPosition
+          if(judgeAgainPoint==decisionObj.angleFromPoint) judgeAgainPoint=nextPointPosition
+          var judgeAgain=_calcCostToPreferredPosition(judgeAgainPoint,position)
+          var secondDecisionObj=null
+          if(judgeAgain.costDistance*zoomLevel<opts.stickyAnchorTolerence) secondDecisionObj={x:judgeAgain.x,y:judgeAgain.y}
+          if(secondDecisionObj!=null){
+            position.x=secondDecisionObj.x
+            position.y=secondDecisionObj.y
+          }
+        }
+        
         var weights = edge.data(anchorPointUtilities.syntax[type]['weight']);
         var distances = edge.data(anchorPointUtilities.syntax[type]['distance']);
         
