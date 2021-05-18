@@ -815,10 +815,10 @@ module.exports = function (params, cy) {
               var sx = judgeNext.x
               var sy = judgeNext.y
 
-              if(fy==prevY){
+              if(Math.abs(fy-prevY)<0.00001){
                 position.y=prevY
                 position.x=(sx-nexX)/(sy-nexY)*(position.y-nexY)+nexX
-              }else if(sy==nexY){
+              }else if(Math.abs(sy-nexY)<0.00001){
                 position.y=nexY
                 position.x=(fx-prevX)/(fy-prevY)*(position.y-prevY)+prevX
               }else{
