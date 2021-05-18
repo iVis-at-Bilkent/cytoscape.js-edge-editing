@@ -611,9 +611,11 @@ module.exports = function (params, cy) {
       // get the length of anchor points to be rendered
       function getAnchorShapesLength(edge) {
         var factor = options().anchorShapeSizeFactor;
+        if(options().enableAnchorSizeNotImpactByZoom) var actualFactor= factor/cy.zoom()
+        else var actualFactor= factor
         if (parseFloat(edge.css('width')) <= 2.5)
-          return 2.5 * factor;
-        else return parseFloat(edge.css('width'))*factor;
+          return 2.5 * actualFactor;
+        else return parseFloat(edge.css('width'))*actualFactor;
       }
       
       // check if the anchor represented by {x, y} is inside the point shape
@@ -752,7 +754,81 @@ module.exports = function (params, cy) {
           cy.trigger('bendPointMovement'); 
       }
 
+      function _calcCostToPreferredPosition(p1, p2){
+        var currentAngle = Math.atan2(p2.y - p1.y, p2.x - p1.x);
+        var perfectAngle=[-Math.PI,-Math.PI*3/4,-Math.PI/2,-Math.PI/4,0,Math.PI/4,Math.PI/2,Math.PI*3/4,Math.PI/4]
+        var deltaAngle=[]
+        perfectAngle.forEach((angle)=>{deltaAngle.push(Math.abs(currentAngle-angle))})
+        var indexOfMin= deltaAngle.indexOf(Math.min(...deltaAngle))
+        var dy = ( p2.y - p1.y );
+        var dx = ( p2.x - p1.x );
+        var l=Math.sqrt( dx * dx + dy * dy );
+        var cost=Math.abs(l*Math.sin(deltaAngle[indexOfMin]))
+
+        var chosenAngle=perfectAngle[indexOfMin]
+        var edgeL=Math.abs(l*Math.cos(deltaAngle[indexOfMin]))
+        var targetPointX=p1.x + edgeL*Math.cos(chosenAngle)
+        var targetPointY=p1.y + edgeL*Math.sin(chosenAngle)
+
+        return {"costDistance":cost,"x":targetPointX,"y":targetPointY,"angle":chosenAngle}
+      }
+
       function moveAnchorOnDrag(edge, type, index, position){
+        var prevPointPosition=anchorPointUtilities.obtainPrevAnchorAbsolutePositions(edge,type,index)
+        var nextPointPosition=anchorPointUtilities.obtainNextAnchorAbsolutePositions(edge,type,index)
+        var mousePosition = position;
+
+        //calcualte the cost(or offset distance) to fulfill perfect 0, or 45 or 90 degree positions according to prev and next position
+        var judgePrev=_calcCostToPreferredPosition(prevPointPosition,mousePosition)
+        var judgeNext=_calcCostToPreferredPosition(nextPointPosition,mousePosition)
+        var decisionObj=null
+        
+        var zoomLevel=cy.zoom()
+
+        if (judgePrev.costDistance * zoomLevel < opts.stickyAnchorTolerence
+          && judgeNext.costDistance * zoomLevel > opts.stickyAnchorTolerence) {
+          //choose the perfect angle point from prev anchor
+          position.x = judgePrev.x
+          position.y = judgePrev.y
+        }else if(judgePrev.costDistance * zoomLevel > opts.stickyAnchorTolerence
+          && judgeNext.costDistance * zoomLevel < opts.stickyAnchorTolerence){
+            //choose the perfect angle point from next anchor
+            position.x = judgeNext.x
+            position.y = judgeNext.y
+        }else if(judgePrev.costDistance * zoomLevel < opts.stickyAnchorTolerence
+          && judgeNext.costDistance * zoomLevel < opts.stickyAnchorTolerence){
+            //check if the two angle lines are parallel or not
+            var angle1=judgePrev.angle
+            var angle2=judgeNext.angle
+            if(angle1==angle2 || Math.abs(angle1-angle2)==Math.PI){
+              //there will be no intersection, so just choose the perfect angle point from prev anchor
+              position.x = judgePrev.x
+              position.y = judgePrev.y
+            }else{
+              //calculate the intersection as perfect anchor point
+              var prevX = prevPointPosition.x
+              var prevY = prevPointPosition.y
+              var nexX = nextPointPosition.x
+              var nexY = nextPointPosition.y
+              var fx= judgePrev.x
+              var fy = judgePrev.y
+              var sx = judgeNext.x
+              var sy = judgeNext.y
+
+              if(fy==prevY){
+                position.y=prevY
+                position.x=(sx-nexX)/(sy-nexY)*(position.y-nexY)+nexX
+              }else if(sy==nexY){
+                position.y=nexY
+                position.x=(fx-prevX)/(fy-prevY)*(position.y-prevY)+prevX
+              }else{
+                var a = (fx-prevX)/(fy-prevY)
+                var b = (sx-nexX)/(sy-nexY)
+                position.y = (a*prevY-prevX-b*nexY+nexX)/(a-b)
+                position.x = a*(position.y-prevY)+prevX
+              }
+            }
+        }
         var weights = edge.data(anchorPointUtilities.syntax[type]['weight']);
         var distances = edge.data(anchorPointUtilities.syntax[type]['distance']);
         
@@ -996,7 +1072,7 @@ module.exports = function (params, cy) {
 
           var type = anchorPointUtilities.getEdgeType(edge);
 
-          if(createAnchorOnDrag && !anchorTouched && type !== 'none') {
+          if(createAnchorOnDrag && opts.enableCreateAnchorOnDrag && !anchorTouched && type !== 'none') {
             // remember state before creating anchor
             var weightStr = anchorPointUtilities.syntax[type]['weight'];
             var distanceStr = anchorPointUtilities.syntax[type]['distance'];
@@ -1132,7 +1208,7 @@ module.exports = function (params, cy) {
                 
               }
               
-              if( nearToLine )
+              if(opts.enableRemoveAnchorMidOfNearLine &&  nearToLine )
               {
                 anchorPointUtilities.removeAnchor(edge, index);
               }

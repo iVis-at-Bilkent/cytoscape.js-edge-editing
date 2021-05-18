@@ -117,8 +117,11 @@
 					undoable: true,
 					bendRemovalSensitivity: 16,
 					enableMultipleAnchorRemovalOption: true,
-					initAnchorsAutomatically: false,
-					useTrailingDividersAfterContextMenuOptions: false,
+					stickyAnchorTolerence: 20,
+					anchorShapeSizeFactor: 5,
+					enableAnchorSizeNotImpactByZoom:true,
+					enableRemoveAnchorMidOfNearLine:false,
+					enableCreateAnchorOnDrag:false
 				});
 				
 				cy.style().update();
