@@ -36,6 +36,7 @@ module.exports = function (cy, anchorPointUtilities, params) {
 
     //Check if we need to set the weights and distances by the param values
     if (param.set) {
+
       var hadAnchorPoint = param.weights && param.weights.length > 0;
       var hadMultipleAnchorPoints = hadAnchorPoint && param.weights.length > 1;
 
@@ -60,6 +61,7 @@ module.exports = function (cy, anchorPointUtilities, params) {
         // Had multiple anchors. Add multiple classes with space delimeted string of class names
         edge.addClass(singleClassName + " " + multiClassName);
       }
+
       if (!edge.selected())
         edge.select();
       else {

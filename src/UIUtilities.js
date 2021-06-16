@@ -15,7 +15,7 @@ module.exports = function (params, cy) {
   var addControlPointCxtMenuId = 'cy-edge-control-editing-cxt-add-control-point' + stageId;
   var removeControlPointCxtMenuId = 'cy-edge-control-editing-cxt-remove-control-point' + stageId;
   var removeAllControlPointCtxMenuId = 'cy-edge-bend-editing-cxt-remove-multiple-control-point' + stageId;
-  var eStyle, eRemove, eAdd, eZoom, eSelect, eUnselect, eTapStart, eTapStartOnEdge, eTapDrag, eTapEnd, eCxtTap, eDrag;
+  var eStyle, eRemove, eAdd, eZoom, eSelect, eUnselect, eTapStart, eTapStartOnEdge, eTapDrag, eTapEnd, eCxtTap, eDrag, eData;
   // last status of gestures
   var lastPanningEnabled, lastZoomingEnabled, lastBoxSelectionEnabled;
   var lastActiveBgOpacity;
@@ -790,8 +790,7 @@ module.exports = function (params, cy) {
           refreshDraws();
         });
 
-        // cy.off is never called on this listener
-        cy.on('data', 'edge',  function () {
+        cy.on('data', 'edge', eData = function () {
           if ( !edgeToHighlight ) {
             return;
           }
@@ -1515,7 +1514,8 @@ module.exports = function (params, cy) {
           .off('tapdrag', eTapDrag)
           .off('tapend', eTapEnd)
           .off('cxttap', eCxtTap)
-          .off('drag', 'node',eDrag);
+          .off('drag', 'node',eDrag)
+          .off('data', 'edge', eData);
 
         cy.unbind("zoom pan", eZoom);
     }
