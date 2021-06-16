@@ -22,9 +22,10 @@ Please cite the following paper when using this extension:
 
 U. Dogrusoz , A. Karacelik, I. Safarli, H. Balci, L. Dervishi, and M.C. Siper, "[Efficient methods and readily customizable libraries for managing complexity of large networks](https://doi.org/10.1371/journal.pone.0197238)", PLoS ONE, 13(5): e0197238, 2018.
 
-## Demo
-
-Click [here](https://raw.githack.com/iVis-at-Bilkent/cytoscape.js-edge-editing/unstable/demo.html) for demo
+Here is a demo:
+<p align="center">
+<a href="https://raw.githack.com/iVis-at-Bilkent/cytoscape.js-edge-editing/unstable/demo.html"><img src="https://www.cs.bilkent.edu.tr/~ivis/images/demo1.png" height=42px></a>
+</p>
 
 ## Dependencies
 
@@ -184,8 +185,8 @@ This project is set up to automatically be published to npm and bower.  To publi
 
 ## Team
 
-  * [Metin Can Siper](https://github.com/metincansiper), [Muhammed Salih Altun](https://github.com/msalihaltun), [Gledis Zeneli](https://github.com/gledis69), [Ugur Dogrusoz](https://github.com/ugurdogrusoz) of [i-Vis at Bilkent University](http://www.cs.bilkent.edu.tr/~ivis)
+  * [Muhammed Salih Altun](https://github.com/msalihaltun), [Gledis Zeneli](https://github.com/gledis69), [Ugur Dogrusoz](https://github.com/ugurdogrusoz) of [i-Vis at Bilkent University](http://www.cs.bilkent.edu.tr/~ivis)
 
 ### Alumni
 
-  * [Ahmet Candiroglu](https://github.com/ahmetcandiroglu)
+  * [Metin Can Siper](https://github.com/metincansiper), [Ahmet Candiroglu](https://github.com/ahmetcandiroglu)
