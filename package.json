@@ -30,8 +30,8 @@
     "babel-preset-env": "^1.7.0",
     "camelcase": "^6.0.0",
     "cross-env": "^7.0.2",
-    "webpack": "^4.44.1",
-    "webpack-cli": "^3.3.12"
+    "webpack": "^5.36.1",
+    "webpack-cli": "^4.6.0"
   },
   "peerDependencies": {
     "cytoscape": "^3.3.0",
