@@ -40,8 +40,10 @@ module.exports = function (cy, anchorPointUtilities, params) {
       var hadAnchorPoint = param.weights && param.weights.length > 0;
       var hadMultipleAnchorPoints = hadAnchorPoint && param.weights.length > 1;
 
-      hadAnchorPoint ? edge.data(weightStr, param.weights) : edge.removeData(weightStr);
-      hadAnchorPoint ? edge.data(distanceStr, param.distances) : edge.removeData(distanceStr);
+      if (hadAnchorPoint) {
+        edge.data(weightStr, param.weights);
+        edge.data(distanceStr, param.distances)
+      }
 
       var singleClassName = anchorPointUtilities.syntax[type]['class'];
       var multiClassName = anchorPointUtilities.syntax[type]['multiClass'];
@@ -60,6 +62,11 @@ module.exports = function (cy, anchorPointUtilities, params) {
       else {
         // Had multiple anchors. Add multiple classes with space delimeted string of class names
         edge.addClass(singleClassName + " " + multiClassName);
+      }
+
+      if (!hadAnchorPoint) {
+        edge.data(weightStr, []);
+        edge.data(distanceStr, []);
       }
 
       if (!edge.selected())
