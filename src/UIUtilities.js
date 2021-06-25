@@ -31,6 +31,7 @@ module.exports = function (params, cy) {
   
   var functions = {
     init: function () {
+      var contextMenusAvailable = !!cy.contextMenus
       // register undo redo functions
       registerUndoRedoFunctions(cy, anchorPointUtilities, params);
       
@@ -385,7 +386,7 @@ module.exports = function (params, cy) {
         },
       ];
       
-      if(cy.contextMenus) {
+      if(contextMenusAvailable) {
         var menus = cy.contextMenus('get');
         // If context menus is active just append menu items else activate the extension
         // with initial menu items
@@ -1325,7 +1326,7 @@ module.exports = function (params, cy) {
           }
 
           var menus;
-          if (cy.contextMenus) { 
+          if (contextMenusAvailable) { 
               menus = cy.contextMenus('get'); // get context menus instance
               if(!edgeToHighlight || edgeToHighlight.id() != edge.id() || anchorPointUtilities.isIgnoredEdge(edge) ||
                   edgeToHighlight !== edge) {
@@ -1341,7 +1342,7 @@ module.exports = function (params, cy) {
           var selectedIndex = getContainingShapeIndex(cyPos.x, cyPos.y, edge);
           // not clicked on an anchor
           if (selectedIndex == -1) {
-            if (menus) {
+            if (contextMenusAvailable) {
                 menus.hideMenuItem(removeBendPointCxtMenuId);
                 menus.hideMenuItem(removeControlPointCxtMenuId);
                 if(type === 'control' && targetIsEdge){
@@ -1365,7 +1366,7 @@ module.exports = function (params, cy) {
           }
           // clicked on an anchor
           else {
-            if (menus) {
+            if (contextMenusAvailable) {
                 menus.hideMenuItem(addBendPointCxtMenuId);
                 menus.hideMenuItem(addControlPointCxtMenuId);
                 if(type === 'control'){
