@@ -354,13 +354,6 @@ module.exports = function (params, cy) {
           hasTrailingDivider: opts.useTrailingDividersAfterContextMenuOptions,
         }, 
         {
-          id: removeAllBendPointCtxMenuId,
-          content: opts.removeAllBendMenuItemTitle,
-          selector: opts.enableMultipleAnchorRemovalOption && ':selected.edgebendediting-hasmultiplebendpoints',
-          onClickFunction: cxtRemoveAllAnchorsFcn,
-          hasTrailingDivider: opts.useTrailingDividersAfterContextMenuOptions,
-        },
-        {
           id: addControlPointCxtMenuId,
           content: opts.addControlMenuItemTitle,
           selector: 'edge',
@@ -376,14 +369,24 @@ module.exports = function (params, cy) {
           onClickFunction: cxtRemoveAnchorFcn,
           hasTrailingDivider: opts.useTrailingDividersAfterContextMenuOptions,
         }, 
-        {
-          id: removeAllControlPointCtxMenuId,
-          content: opts.removeAllControlMenuItemTitle,
-          selector: opts.enableMultipleAnchorRemovalOption && ':selected.edgecontrolediting-hasmultiplecontrolpoints',
+      ];
+
+      if (opts.enableMultipleAnchorRemovalOption) {
+        menuItems.push({
+          id: removeAllBendPointCtxMenuId,
+          content: opts.removeAllBendMenuItemTitle,
+          selector: ':selected.edgebendediting-hasmultiplebendpoints',
           onClickFunction: cxtRemoveAllAnchorsFcn,
           hasTrailingDivider: opts.useTrailingDividersAfterContextMenuOptions,
-        },
-      ];
+        });
+        menuItems.push({
+          id: removeAllControlPointCtxMenuId,
+          content: opts.removeAllControlMenuItemTitle,
+          selector: ':selected.edgecontrolediting-hasmultiplecontrolpoints',
+          onClickFunction: cxtRemoveAllAnchorsFcn,
+          hasTrailingDivider: opts.useTrailingDividersAfterContextMenuOptions,
+        });
+      }
       
       if(cy.contextMenus) {
         var menus = cy.contextMenus('get');
