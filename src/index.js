@@ -59,7 +59,15 @@
       // specifically for edge-editing menu items, whether trailing dividers should be used
       useTrailingDividersAfterContextMenuOptions: false,
       // Enable / disable drag creation of anchor points when there is at least one anchor already on the edge
-      enableCreateAnchorOnDrag: true
+      enableCreateAnchorOnDrag: true,
+      // whether to show 'add bend point' menu item on the context menu of an edge
+      enableAddBendOnEdge: true,
+      // whether to show 'remove bend point' menu item on the context menu of an edge
+      enableRemoveBendOnEdge: true,
+      // whether to show 'add control point' menu item on the context menu of an edge
+      enableAddControlOnEdge: true,
+      // whether to show 'remove control point' menu item on the context menu of an edge
+      enableRemoveControlOnEdge: true,
     };
     
     var options;

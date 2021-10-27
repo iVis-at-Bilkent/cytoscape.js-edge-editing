@@ -338,39 +338,45 @@ module.exports = function (params, cy) {
       // function to be called on invalid edge reconnection
       var actOnUnsuccessfulReconnection = opts.actOnUnsuccessfulReconnection;
       
-      var menuItems = [
-        {
+      var menuItems = [];
+      if (opts.enableAddBendOnEdge) {
+        menuItems.push({
           id: addBendPointCxtMenuId,
           content: opts.addBendMenuItemTitle,
           selector: 'edge',
           onClickFunction: cxtAddBendFcn,
           hasTrailingDivider: opts.useTrailingDividersAfterContextMenuOptions,
-        },
-        {
+        });
+      }
+      if (opts.enableRemoveBendOnEdge) {
+        menuItems.push({
           id: removeBendPointCxtMenuId,
           content: opts.removeBendMenuItemTitle,
           selector: 'edge',
           onClickFunction: cxtRemoveAnchorFcn,
           hasTrailingDivider: opts.useTrailingDividersAfterContextMenuOptions,
-        }, 
-        {
+        });
+      }
+      if (opts.enableAddControlOnEdge) {
+        menuItems.push({
           id: addControlPointCxtMenuId,
           content: opts.addControlMenuItemTitle,
           selector: 'edge',
           coreAsWell: true,
           onClickFunction: cxtAddControlFcn,
           hasTrailingDivider: opts.useTrailingDividersAfterContextMenuOptions,
-        },
-        {
+        });
+      }
+      if (opts.enableRemoveControlOnEdge) {
+        menuItems.push({
           id: removeControlPointCxtMenuId,
           content: opts.removeControlMenuItemTitle,
           selector: 'edge',
           coreAsWell: true,
           onClickFunction: cxtRemoveAnchorFcn,
           hasTrailingDivider: opts.useTrailingDividersAfterContextMenuOptions,
-        }, 
-      ];
-
+        })
+      }
       if (opts.enableMultipleAnchorRemovalOption) {
         menuItems.push({
           id: removeAllBendPointCtxMenuId,
@@ -1331,10 +1337,18 @@ module.exports = function (params, cy) {
           
           if(!edgeToHighlight || edgeToHighlight.id() != edge.id() || anchorPointUtilities.isIgnoredEdge(edge) ||
               edgeToHighlight !== edge) {
-            menus.hideMenuItem(removeBendPointCxtMenuId);
-            menus.hideMenuItem(addBendPointCxtMenuId);
-            menus.hideMenuItem(removeControlPointCxtMenuId);
-            menus.hideMenuItem(addControlPointCxtMenuId);
+            if (opts.enableRemoveBendOnEdge) {
+              menus.hideMenuItem(removeBendPointCxtMenuId);
+            }
+            if (opts.enableAddBendOnEdge){
+              menus.hideMenuItem(addBendPointCxtMenuId);
+            }
+            if (opts.enableRemoveControlOnEdge) {
+              menus.hideMenuItem(removeControlPointCxtMenuId);
+            }
+            if (opts.enableAddControlOnEdge) {
+              menus.hideMenuItem(addControlPointCxtMenuId);
+            }
             return;
           }
 
@@ -1342,46 +1356,84 @@ module.exports = function (params, cy) {
           var selectedIndex = getContainingShapeIndex(cyPos.x, cyPos.y, edge);
           // not clicked on an anchor
           if (selectedIndex == -1) {
-            menus.hideMenuItem(removeBendPointCxtMenuId);
-            menus.hideMenuItem(removeControlPointCxtMenuId);
+            if (opts.enableRemoveBendOnEdge) {
+              menus.hideMenuItem(removeBendPointCxtMenuId);
+            }
+            if (opts.enableRemoveControlOnEdge) {
+              menus.hideMenuItem(removeControlPointCxtMenuId);
+            }
             if(type === 'control' && targetIsEdge){
-              menus.showMenuItem(addControlPointCxtMenuId);
-              menus.hideMenuItem(addBendPointCxtMenuId);
+              if (opts.enableAddControlOnEdge) {
+                menus.showMenuItem(addControlPointCxtMenuId);
+              }
+              if (opts.enableAddBendOnEdge) {
+                menus.hideMenuItem(addBendPointCxtMenuId);
+              }
             }
             else if(type === 'bend' && targetIsEdge){
-              menus.showMenuItem(addBendPointCxtMenuId);
-              menus.hideMenuItem(addControlPointCxtMenuId);
+              if (opts.enableAddBendOnEdge) {
+                menus.showMenuItem(addBendPointCxtMenuId);
+              }
+              if (opts.enableAddControlOnEdge) {
+                menus.hideMenuItem(addControlPointCxtMenuId);
+              }
             }
             else if (targetIsEdge){
-              menus.showMenuItem(addBendPointCxtMenuId);
-              menus.showMenuItem(addControlPointCxtMenuId);
+              if (opts.enableAddBendOnEdge) {
+                menus.showMenuItem(addBendPointCxtMenuId);
+              }
+              if (opts.enableAddControlOnEdge) { 
+                menus.showMenuItem(addControlPointCxtMenuId);
+              }
             }
             else {
-              menus.hideMenuItem(addBendPointCxtMenuId);
-              menus.hideMenuItem(addControlPointCxtMenuId);
+              if (opts.enableAddBendOnEdge) {
+                menus.hideMenuItem(addBendPointCxtMenuId);
+              }
+              if (opts.enableAddControlOnEdge) {
+                menus.hideMenuItem(addControlPointCxtMenuId);
+              }
             }
             anchorPointUtilities.currentCtxPos = cyPos;
           }
           // clicked on an anchor
           else {
-            menus.hideMenuItem(addBendPointCxtMenuId);
-            menus.hideMenuItem(addControlPointCxtMenuId);
+            if (opts.enableAddBendOnEdge) {
+              menus.hideMenuItem(addBendPointCxtMenuId);
+            }
+            if (opts.enableAddControlOnEdge) {
+              menus.hideMenuItem(addControlPointCxtMenuId);
+            }
             if(type === 'control'){
-              menus.showMenuItem(removeControlPointCxtMenuId);
-              menus.hideMenuItem(removeBendPointCxtMenuId);
+              if (opts.enableRemoveControlOnEdge) {
+                menus.showMenuItem(removeControlPointCxtMenuId);
+              }
+              if (opts.enableRemoveBendOnEdge) {
+                menus.hideMenuItem(removeBendPointCxtMenuId);
+              }
               if (opts.enableMultipleAnchorRemovalOption && 
                   edge.hasClass('edgecontrolediting-hasmultiplecontrolpoints')) {
                 menus.showMenuItem(removeAllControlPointCtxMenuId);
               }
             }
             else if(type === 'bend'){
-              menus.showMenuItem(removeBendPointCxtMenuId);
-              menus.hideMenuItem(removeControlPointCxtMenuId);
+              if (opts.enableRemoveBendOnEdge) {
+                menus.showMenuItem(removeBendPointCxtMenuId);
+              }
+              if (opts.enableRemoveControlOnEdge) {
+                menus.hideMenuItem(removeControlPointCxtMenuId);
+              }
             }
-            else{
-              menus.hideMenuItem(removeBendPointCxtMenuId);
-              menus.hideMenuItem(removeControlPointCxtMenuId);
-              menus.hideMenuItem(removeAllControlPointCtxMenuId);
+            else {
+              if (opts.enableRemoveBendOnEdge) {
+                menus.hideMenuItem(removeBendPointCxtMenuId);
+              }
+              if (opts.enableRemoveControlOnEdge) {
+                menus.hideMenuItem(removeControlPointCxtMenuId);
+              }
+              if (opts.enableMultipleAnchorRemovalOption) {
+                menus.hideMenuItem(removeAllControlPointCtxMenuId);
+              }
             }
             anchorPointUtilities.currentAnchorIndex = selectedIndex;
           }

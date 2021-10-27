@@ -147,6 +147,14 @@ cy.edgeEditing('initialized');
       removeAllControlMenuItemTitle: "Remove All Control Points",
       // whether 'Remove all bend points' and 'Remove all control points' options should be presented to the user
       enableMultipleAnchorRemovalOption: false,
+      // whether to show 'add bend point' menu item on the context menu of an edge
+      enableAddBendOnEdge: true,
+      // whether to show 'remove bend point' menu item on the context menu of an edge
+      enableRemoveBendOnEdge: true,
+      // whether to show 'add control point' menu item on the context menu of an edge
+      enableAddControlOnEdge: true,
+      // whether to show 'remove control point' menu item on the context menu of an edge
+      enableRemoveControlOnEdge: true,
       // whether the bend and control points can be moved by arrows
       moveSelectedAnchorsOnKeyEvents: function () {
           return true;
