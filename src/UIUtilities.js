@@ -1333,6 +1333,18 @@ module.exports = function (params, cy) {
             type = anchorManager.edgeType;
           }
 
+          var cyPos = event.position || event.cyPosition;
+          var selectedIndex = getContainingShapeIndex(cyPos.x, cyPos.y, edge);
+          if (selectedIndex == -1) {
+            anchorPointUtilities.currentCtxPos = cyPos;
+          } else {
+            anchorPointUtilities.currentAnchorIndex = selectedIndex;
+          }
+          anchorPointUtilities.currentCtxEdge = edge;
+          if (!cy.contextMenus) {
+            return;
+          }
+
           var menus = cy.contextMenus('get'); // get context menus instance
           
           if(!edgeToHighlight || edgeToHighlight.id() != edge.id() || anchorPointUtilities.isIgnoredEdge(edge) ||
@@ -1352,8 +1364,6 @@ module.exports = function (params, cy) {
             return;
           }
 
-          var cyPos = event.position || event.cyPosition;
-          var selectedIndex = getContainingShapeIndex(cyPos.x, cyPos.y, edge);
           // not clicked on an anchor
           if (selectedIndex == -1) {
             if (opts.enableRemoveBendOnEdge) {
@@ -1394,7 +1404,6 @@ module.exports = function (params, cy) {
                 menus.hideMenuItem(addControlPointCxtMenuId);
               }
             }
-            anchorPointUtilities.currentCtxPos = cyPos;
           }
           // clicked on an anchor
           else {
@@ -1435,10 +1444,7 @@ module.exports = function (params, cy) {
                 menus.hideMenuItem(removeAllControlPointCtxMenuId);
               }
             }
-            anchorPointUtilities.currentAnchorIndex = selectedIndex;
           }
-
-          anchorPointUtilities.currentCtxEdge = edge;
         });
         
         cy.on('cyedgeediting.changeAnchorPoints', 'edge', function() {
