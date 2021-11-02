@@ -30,7 +30,6 @@ Here is a demo:
 ## Dependencies
 
  * Cytoscape.js ^3.3.0
- * jQuery ^1.7.0 || ^2.0.0 || ^3.0.0
  * Konva ^7.0.3
  * cytoscape-undo-redo.js(optional) ^1.0.1
  * cytoscape-context-menus.js(optional) ^2.0.0
@@ -48,17 +47,16 @@ Download the library:
 CommonJS:
 ```js
 var cytoscape = require('cytoscape');
-var jquery = require('jquery');
 var konva = require('konva');
 var edgeEditing = require('cytoscape-edge-editing');
 
-edgeEditing( cytoscape, jquery, konva ); // register extension
+edgeEditing( cytoscape, konva ); // register extension
 ```
 
 AMD:
 ```js
-require(['cytoscape', 'cytoscape-edge-editing', 'jquery', 'konva'], function( cytoscape, edge-editing, jquery, konva ){
-  edge-editing( cytoscape, jquery, konva ); // register extension
+require(['cytoscape', 'cytoscape-edge-editing', 'konva'], function( cytoscape, edge-editing, konva ){
+  edge-editing( cytoscape, konva ); // register extension
 });
 ```
 
