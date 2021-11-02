@@ -34,7 +34,6 @@ module.exports = function (params, cy) {
       // register undo redo functions
       registerUndoRedoFunctions(cy, anchorPointUtilities, params);
       
-      var self = this;
       var opts = params;
 
       /*
@@ -44,12 +43,14 @@ module.exports = function (params, cy) {
         Without the below logic, an empty canvasElement would be created
         for one of these extensions for no reason.
       */
-      var $container = $(this);
+      var $container = cy.container();
+      var containerMetaData = null;
       var canvasElementId = 'cy-node-edge-editing-stage' + stageId;
       stageId++;
-      var $canvasElement = $('<div id="' + canvasElementId + '"></div>');
+      var $canvasElement = document.createElement('div');
+      $canvasElement.setAttribute('id', canvasElementId);
 
-      if ($container.find('#' + canvasElementId).length < 1) {
+      if (!$container.querySelector('#' + canvasElementId)) {
         $container.append($canvasElement);
       }
 
@@ -66,8 +67,8 @@ module.exports = function (params, cy) {
         stage = new Konva.Stage({
           id: 'node-edge-editing-stage',
           container: canvasElementId,   // id of container <div>
-          width: $container.width(),
-          height: $container.height()
+          width: $container.clientWidth,
+          height: $container.clientHeight
         });
       }
       else {
@@ -409,30 +410,22 @@ module.exports = function (params, cy) {
       }
       
       var _sizeCanvas = debounce(function () {
-        $canvasElement
-          .attr('height', $container.height())
-          .attr('width', $container.width())
-          .css({
-            'position': 'absolute',
-            'top': 0,
-            'left': 0,
-            'z-index': options().zIndex
-          })
-        ;
-
+        $canvasElement.setAttribute('height', $container.clientHeight);
+        $canvasElement.setAttribute('width', $container.clientWidth);
+        $canvasElement.style.position = 'absolute';
+        $canvasElement.style.top = '0';
+        $canvasElement.style.left = '0';
+        $canvasElement.style.zIndex = options().zIndex;
+        
         setTimeout(function () {
-          var canvasBb = $canvasElement.offset();
-          var containerBb = $container.offset();
+          var canvasBb = offset($canvasElement);
+          var containerBb = offset($container);
 
-          $canvasElement
-            .css({
-              'top': -(canvasBb.top - containerBb.top),
-              'left': -(canvasBb.left - containerBb.left)
-            })
-          ;
-
-          canvas.getStage().setWidth($container.width());
-          canvas.getStage().setHeight($container.height());
+          $canvasElement.style.top = '' + -(canvasBb.top - containerBb.top);
+          $canvasElement.style.left = '' + -(canvasBb.left - containerBb.left);
+         
+          canvas.getStage().setWidth($container.clientWidth);
+          canvas.getStage().setHeight($container.clientHeight);
 
           // redraw on canvas resize
           if(cy){
@@ -442,18 +435,26 @@ module.exports = function (params, cy) {
 
       }, 250);
 
+      function offset(el) {
+        var rect = el.getBoundingClientRect();
+        return {
+          top: rect.top + window.scrollY,
+          left: rect.left + window.scrollX,
+        };
+      }
+
       function sizeCanvas() {
         _sizeCanvas();
       }
 
       sizeCanvas();
 
-      $(window).bind('resize', function () {
+      window.addEventListener('resize', function () {
         sizeCanvas();
       });
       
       // write options to data
-      var data = $container.data('cyedgeediting');
+      var data = containerMetaData;
       if (data == null) {
         data = {};
       }
@@ -462,7 +463,7 @@ module.exports = function (params, cy) {
       var optCache;
 
       function options() {
-        return optCache || (optCache = $container.data('cyedgeediting').options);
+        return optCache || (optCache = containerMetaData.options);
       }
 
       // we will need to convert model positons to rendered positions
@@ -1562,7 +1563,7 @@ module.exports = function (params, cy) {
       document.addEventListener("keydown",keyDown, true);
       document.addEventListener("keyup",keyUp, true);
 
-      $container.data('cyedgeediting', data);
+      containerMetaData = data;
     },
     unbind: function () {
         cy.off('remove', 'node', eRemove)
@@ -1583,12 +1584,12 @@ module.exports = function (params, cy) {
   };
 
   if (functions[fn]) {
-    return functions[fn].apply($(cy.container()), Array.prototype.slice.call(arguments, 1));
+    return functions[fn].apply(cy.container(), Array.prototype.slice.call(arguments, 1));
   } else if (typeof fn == 'object' || !fn) {
-    return functions.init.apply($(cy.container()), arguments);
+    return functions.init.apply(cy.container(), arguments);
   } else {
-    $.error('No such function `' + fn + '` for cytoscape.js-edge-editing');
+    console.error('No such function `' + fn + '` for cytoscape.js-edge-editing');
   }
 
-  return $(this);
+  return this;
 };

@@ -4,10 +4,10 @@
   var debounce = require("./debounce");
   
   // registers the extension on a cytoscape lib ref
-  var register = function( cytoscape, $, Konva){
+  var register = function( cytoscape, Konva){
     var uiUtilities = require('./UIUtilities');
     
-    if( !cytoscape || !$ || !Konva){ return; } // can't register if required libraries unspecified
+    if( !cytoscape || !Konva){ return; } // can't register if required libraries unspecified
 
     var defaults = {
       // A function parameter to get bend point positions, should return positions of bend points
@@ -193,8 +193,8 @@
     });
   }
 
-  if( typeof cytoscape !== 'undefined' && $ && Konva){ // expose to global cytoscape (i.e. window.cytoscape)
-    register( cytoscape, $, Konva );
+  if( typeof cytoscape !== 'undefined' && Konva){ // expose to global cytoscape (i.e. window.cytoscape)
+    register( cytoscape, Konva );
   }
 
 })();
