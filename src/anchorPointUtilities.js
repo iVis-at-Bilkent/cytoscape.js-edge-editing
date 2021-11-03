@@ -342,26 +342,6 @@ var anchorPointUtilities = {
       distances: distances
     };
   },
-  getDistancesString: function (edge, type) {
-    var str = "";
-
-    var distances = edge.data(this.syntax[type]['distance']);
-    for (var i = 0; distances && i < distances.length; i++) {
-      str = str + " " + distances[i];
-    }
-    
-    return str;
-  },
-  getWeightsString: function (edge, type) {
-    var str = "";
-
-    var weights = edge.data(this.syntax[type]['weight']);
-    for (var i = 0; weights && i < weights.length; i++) {
-      str = str + " " + weights[i];
-    }
-    
-    return str;
-  },
   addAnchorPoint: function(edge, newAnchorPoint, type = undefined) {
     if(edge === undefined || newAnchorPoint === undefined){
       edge = this.currentCtxEdge;

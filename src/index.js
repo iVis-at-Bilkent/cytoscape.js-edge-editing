@@ -111,24 +111,16 @@
         // define edgebendediting-hasbendpoints css class
         cy.style().selector('.edgebendediting-hasbendpoints').css({
           'curve-style': 'segments',
-          'segment-distances': function (ele) {
-            return anchorPointUtilities.getDistancesString(ele, 'bend');
-          },
-          'segment-weights': function (ele) {
-            return anchorPointUtilities.getWeightsString(ele, 'bend');
-          },
+          'segment-distances': 'data(cyedgebendeditingDistances)',
+          'segment-weights': 'data(cyedgebendeditingWeights)',
           'edge-distances': 'node-position'
         });
 
         // define edgecontrolediting-hascontrolpoints css class
         cy.style().selector('.edgecontrolediting-hascontrolpoints').css({
           'curve-style': 'unbundled-bezier',
-          'control-point-distances': function (ele) {
-            return anchorPointUtilities.getDistancesString(ele, 'control');
-          },
-          'control-point-weights': function (ele) {
-            return anchorPointUtilities.getWeightsString(ele, 'control');
-          },
+          'control-point-distances': 'data(cyedgecontroleditingDistances)',
+          'control-point-weights': 'data(cyedgecontroleditingWeights)',
           'edge-distances': 'node-position'
         });
 
