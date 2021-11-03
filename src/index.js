@@ -58,6 +58,7 @@
       useTrailingDividersAfterContextMenuOptions: false,
       // Enable / disable drag creation of anchor points when there is at least one anchor already on the edge
       enableCreateAnchorOnDrag: true,
+      handleReconnectEdge: true
     };
     
     var options;

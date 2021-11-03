@@ -332,8 +332,6 @@ module.exports = function (params, cy) {
         setTimeout(function(){refreshDraws();edge.select();}, 50);
       }
       
-      // function to reconnect edge
-      var handleReconnectEdge = opts.handleReconnectEdge;
       // function to validate edge source and target on reconnection
       var validateEdge = opts.validateEdge; 
       // function to be called on invalid edge reconnection
@@ -505,7 +503,7 @@ module.exports = function (params, cy) {
       
       // render the end points shapes of the given edge
       function renderEndPointShapes(edge) {
-        if(!edge){
+        if (!edge || !opts.handleReconnectEdge) {
           return;
         }
 
@@ -877,7 +875,6 @@ module.exports = function (params, cy) {
           if(edge.target().connectedEdges().length == 0 || edge.source().connectedEdges().length == 0){
             return;
           }
-
          
           numberOfSelectedEdges = numberOfSelectedEdges + 1;
           
@@ -966,7 +963,7 @@ module.exports = function (params, cy) {
           // Get which end point has been clicked (Source:0, Target:1, None:-1)
           var endPoint = getContainingEndPoint(cyPosX, cyPosY, edge);
 
-          if(endPoint == 0 || endPoint == 1){
+          if (opts.handleReconnectEdge && (endPoint == 0 || endPoint == 1)) {
             edge.unselect();
             movedEndPoint = endPoint;
             detachedNode = (endPoint == 0) ? movedEdge.source() : movedEdge.target();
@@ -990,6 +987,7 @@ module.exports = function (params, cy) {
             refreshDraws();
           } 
         });
+        
         cy.on('tapdrag', eTapDrag = function (event) {
           /** 
            * if there is a selected edge set autounselectify false
@@ -1169,9 +1167,8 @@ module.exports = function (params, cy) {
               edge = reconnectionUtilities.connectEdge(edge, detachedNode, location);
 
               if(detachedNode.id() !== newNode.id()){
-                // use given handleReconnectEdge function 
-                if(typeof handleReconnectEdge === 'function'){
-                  var reconnectedEdge = handleReconnectEdge(newSource.id(), newTarget.id(), edge.data());
+                if (typeof opts.handleReconnectEdge === 'function') {
+                  var reconnectedEdge = opts.handleReconnectEdge(newSource.id(), newTarget.id(), edge.data());
                   
                   if(reconnectedEdge){
                     reconnectionUtilities.copyEdge(edge, reconnectedEdge);

@@ -148,9 +148,9 @@ cy.edgeEditing('initialized');
       moveSelectedAnchorsOnKeyEvents: function () {
           return true;
       },
-      // this function handles reconnection of the edge, if undefined simply connect edge to its new source/target 
-      // handleReconnectEdge (newSource.id(), newTarget.id(), edge.data())
-      handleReconnectEdge: undefined,
+      // Can be a function or boolean. If `false`, edge reconnection won't be active. If `true`, connects edge to its new source/target as usual. 
+      // If a function is given, the function will be called with parameters: newSource.id(), newTarget.id(), edge.data()
+      handleReconnectEdge: true,
       // this function checks validation of the edge and its new source/target
       validateEdge: function (edge, newSource, newTarget) {
          return 'valid';
