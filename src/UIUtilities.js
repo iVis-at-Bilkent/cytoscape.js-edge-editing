@@ -197,17 +197,14 @@ module.exports = function (params, cy) {
           this.edge = edge;
           this.edgeType = anchorPointUtilities.getEdgeType(edge);
 
-          if(!edge.hasClass('edgebendediting-hasbendpoints') &&
-              !edge.hasClass('edgecontrolediting-hascontrolpoints')) {
+          if (!opts.handleAnchors || (!edge.hasClass('edgebendediting-hasbendpoints') &&
+            !edge.hasClass('edgecontrolediting-hascontrolpoints'))) {
             return;
           }
           
           var anchorList = anchorPointUtilities.getAnchorsAsArray(edge);//edge._private.rdata.segpts;
           var length = getAnchorShapesLength(edge) * 0.65;
           
-          var srcPos = edge.source().position();
-          var tgtPos = edge.target().position();
-
           for(var i = 0; anchorList && i < anchorList.length; i = i + 2){
             var anchorX = anchorList[i];
             var anchorY = anchorList[i + 1];
@@ -393,6 +390,15 @@ module.exports = function (params, cy) {
           onClickFunction: cxtRemoveAllAnchorsFcn,
           hasTrailingDivider: opts.useTrailingDividersAfterContextMenuOptions,
         });
+      }
+      if (!opts.handleAnchors) {
+        menuItems = [];
+        opts.removeAllControlMenuItemTitle = false;
+        opts.removeAllBendMenuItemTitle = false;
+        opts.removeControlMenuItemTitle = false;
+        opts.addControlMenuItemTitle = false;
+        opts.removeBendMenuItemTitle = false;
+        opts.addBendMenuItemTitle = false;
       }
       
       if(cy.contextMenus) {
@@ -976,7 +982,7 @@ module.exports = function (params, cy) {
 
             disableGestures();
           }
-          else {
+          else if (opts.handleAnchors) {
             movedAnchorIndex = undefined;
             createAnchorOnDrag = true;
           }

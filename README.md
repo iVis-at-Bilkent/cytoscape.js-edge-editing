@@ -151,6 +151,8 @@ cy.edgeEditing('initialized');
       // Can be a function or boolean. If `false`, edge reconnection won't be active. If `true`, connects edge to its new source/target as usual. 
       // If a function is given, the function will be called with parameters: newSource.id(), newTarget.id(), edge.data()
       handleReconnectEdge: true,
+      // Can be `false` or `true`. If `false`, it won't interact with anchors (control and bend points). If `false`, it won't show any context menu items as well.
+      handleAnchors: true,
       // this function checks validation of the edge and its new source/target
       validateEdge: function (edge, newSource, newTarget) {
          return 'valid';
