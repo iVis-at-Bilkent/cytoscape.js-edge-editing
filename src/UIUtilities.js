@@ -340,7 +340,7 @@ module.exports = function (params, cy) {
       var actOnUnsuccessfulReconnection = opts.actOnUnsuccessfulReconnection;
       
       var menuItems = [];
-      if (opts.enableAddBendOnEdge) {
+      if (opts.addBendMenuItemTitle) {
         menuItems.push({
           id: addBendPointCxtMenuId,
           content: opts.addBendMenuItemTitle,
@@ -349,7 +349,7 @@ module.exports = function (params, cy) {
           hasTrailingDivider: opts.useTrailingDividersAfterContextMenuOptions,
         });
       }
-      if (opts.enableRemoveBendOnEdge) {
+      if (opts.removeBendMenuItemTitle) {
         menuItems.push({
           id: removeBendPointCxtMenuId,
           content: opts.removeBendMenuItemTitle,
@@ -358,7 +358,7 @@ module.exports = function (params, cy) {
           hasTrailingDivider: opts.useTrailingDividersAfterContextMenuOptions,
         });
       }
-      if (opts.enableAddControlOnEdge) {
+      if (opts.addControlMenuItemTitle) {
         menuItems.push({
           id: addControlPointCxtMenuId,
           content: opts.addControlMenuItemTitle,
@@ -368,7 +368,7 @@ module.exports = function (params, cy) {
           hasTrailingDivider: opts.useTrailingDividersAfterContextMenuOptions,
         });
       }
-      if (opts.enableRemoveControlOnEdge) {
+      if (opts.removeControlMenuItemTitle) {
         menuItems.push({
           id: removeControlPointCxtMenuId,
           content: opts.removeControlMenuItemTitle,
@@ -378,7 +378,7 @@ module.exports = function (params, cy) {
           hasTrailingDivider: opts.useTrailingDividersAfterContextMenuOptions,
         })
       }
-      if (opts.enableMultipleAnchorRemovalOption) {
+      if (opts.removeAllBendMenuItemTitle) {
         menuItems.push({
           id: removeAllBendPointCtxMenuId,
           content: opts.removeAllBendMenuItemTitle,
@@ -386,6 +386,8 @@ module.exports = function (params, cy) {
           onClickFunction: cxtRemoveAllAnchorsFcn,
           hasTrailingDivider: opts.useTrailingDividersAfterContextMenuOptions,
         });
+      }
+      if (opts.removeAllControlMenuItemTitle) {
         menuItems.push({
           id: removeAllControlPointCtxMenuId,
           content: opts.removeAllControlMenuItemTitle,
@@ -1350,16 +1352,16 @@ module.exports = function (params, cy) {
           
           if(!edgeToHighlight || edgeToHighlight.id() != edge.id() || anchorPointUtilities.isIgnoredEdge(edge) ||
               edgeToHighlight !== edge) {
-            if (opts.enableRemoveBendOnEdge) {
+            if (opts.removeBendMenuItemTitle) {
               menus.hideMenuItem(removeBendPointCxtMenuId);
             }
-            if (opts.enableAddBendOnEdge){
+            if (opts.addBendMenuItemTitle){
               menus.hideMenuItem(addBendPointCxtMenuId);
             }
-            if (opts.enableRemoveControlOnEdge) {
+            if (opts.removeControlMenuItemTitle) {
               menus.hideMenuItem(removeControlPointCxtMenuId);
             }
-            if (opts.enableAddControlOnEdge) {
+            if (opts.addControlMenuItemTitle) {
               menus.hideMenuItem(addControlPointCxtMenuId);
             }
             return;
@@ -1367,81 +1369,81 @@ module.exports = function (params, cy) {
 
           // not clicked on an anchor
           if (selectedIndex == -1) {
-            if (opts.enableRemoveBendOnEdge) {
+            if (opts.removeBendMenuItemTitle) {
               menus.hideMenuItem(removeBendPointCxtMenuId);
             }
-            if (opts.enableRemoveControlOnEdge) {
+            if (opts.removeControlMenuItemTitle) {
               menus.hideMenuItem(removeControlPointCxtMenuId);
             }
             if(type === 'control' && targetIsEdge){
-              if (opts.enableAddControlOnEdge) {
+              if (opts.addControlMenuItemTitle) {
                 menus.showMenuItem(addControlPointCxtMenuId);
               }
-              if (opts.enableAddBendOnEdge) {
+              if (opts.addBendMenuItemTitle) {
                 menus.hideMenuItem(addBendPointCxtMenuId);
               }
             }
             else if(type === 'bend' && targetIsEdge){
-              if (opts.enableAddBendOnEdge) {
+              if (opts.addBendMenuItemTitle) {
                 menus.showMenuItem(addBendPointCxtMenuId);
               }
-              if (opts.enableAddControlOnEdge) {
+              if (opts.addControlMenuItemTitle) {
                 menus.hideMenuItem(addControlPointCxtMenuId);
               }
             }
             else if (targetIsEdge){
-              if (opts.enableAddBendOnEdge) {
+              if (opts.addBendMenuItemTitle) {
                 menus.showMenuItem(addBendPointCxtMenuId);
               }
-              if (opts.enableAddControlOnEdge) { 
+              if (opts.addControlMenuItemTitle) { 
                 menus.showMenuItem(addControlPointCxtMenuId);
               }
             }
             else {
-              if (opts.enableAddBendOnEdge) {
+              if (opts.addBendMenuItemTitle) {
                 menus.hideMenuItem(addBendPointCxtMenuId);
               }
-              if (opts.enableAddControlOnEdge) {
+              if (opts.addControlMenuItemTitle) {
                 menus.hideMenuItem(addControlPointCxtMenuId);
               }
             }
           }
           // clicked on an anchor
           else {
-            if (opts.enableAddBendOnEdge) {
+            if (opts.addBendMenuItemTitle) {
               menus.hideMenuItem(addBendPointCxtMenuId);
             }
-            if (opts.enableAddControlOnEdge) {
+            if (opts.addControlMenuItemTitle) {
               menus.hideMenuItem(addControlPointCxtMenuId);
             }
             if(type === 'control'){
-              if (opts.enableRemoveControlOnEdge) {
+              if (opts.removeControlMenuItemTitle) {
                 menus.showMenuItem(removeControlPointCxtMenuId);
               }
-              if (opts.enableRemoveBendOnEdge) {
+              if (opts.removeBendMenuItemTitle) {
                 menus.hideMenuItem(removeBendPointCxtMenuId);
               }
-              if (opts.enableMultipleAnchorRemovalOption && 
+              if (opts.removeAllControlMenuItemTitle && 
                   edge.hasClass('edgecontrolediting-hasmultiplecontrolpoints')) {
                 menus.showMenuItem(removeAllControlPointCtxMenuId);
               }
             }
             else if(type === 'bend'){
-              if (opts.enableRemoveBendOnEdge) {
+              if (opts.removeBendMenuItemTitle) {
                 menus.showMenuItem(removeBendPointCxtMenuId);
               }
-              if (opts.enableRemoveControlOnEdge) {
+              if (opts.removeControlMenuItemTitle) {
                 menus.hideMenuItem(removeControlPointCxtMenuId);
               }
             }
             else {
-              if (opts.enableRemoveBendOnEdge) {
+              if (opts.removeBendMenuItemTitle) {
                 menus.hideMenuItem(removeBendPointCxtMenuId);
               }
-              if (opts.enableRemoveControlOnEdge) {
+              if (opts.removeControlMenuItemTitle) {
                 menus.hideMenuItem(removeControlPointCxtMenuId);
               }
-              if (opts.enableMultipleAnchorRemovalOption) {
+              if (opts.removeAllControlMenuItemTitle) {
                 menus.hideMenuItem(removeAllControlPointCtxMenuId);
               }
             }
