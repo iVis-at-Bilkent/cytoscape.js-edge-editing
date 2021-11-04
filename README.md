@@ -162,7 +162,11 @@ cy.edgeEditing('initialized');
       // specifically for edge-editing menu items, whether trailing dividers should be used
       useTrailingDividersAfterContextMenuOptions: false,
       // Enable / disable drag creation of anchor points when there is at least one anchor already on the edge
-      enableCreateAnchorOnDrag: true
+      enableCreateAnchorOnDrag: true,
+      // size of anchor point can be auto changed to compensate the impact of zoom
+      enableFixedAnchorSize: false,
+      // automatically remove anchor (bend point) if its previous segment and next segment is almost in a same line
+      enableRemoveAnchorMidOfNearLine: true
     };
 ```
 
