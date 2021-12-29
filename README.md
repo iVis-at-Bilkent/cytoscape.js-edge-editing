@@ -157,7 +157,7 @@ cy.edgeEditing('initialized');
       validateEdge: function (edge, newSource, newTarget) {
          return 'valid';
       },
-      // this function is called if reconnected edge is not valid according to validateEdge function
+      // this function is called with reconnected edge if reconnected edge is not valid according to `validateEdge` function
       actOnUnsuccessfulReconnection: undefined,
       // specifically for edge-editing menu items, whether trailing dividers should be used
       useTrailingDividersAfterContextMenuOptions: false,
