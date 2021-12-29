@@ -229,7 +229,7 @@ module.exports = function (params, cy) {
             y: renderedTopLeftPos.y,
             width: length,
             height: length,
-            fill: 'black',
+            fill: opts.anchorColor,
             strokeWidth: 0,
             draggable: true
           });
@@ -605,7 +605,7 @@ module.exports = function (params, cy) {
             x: sourceEndPointX + length,
             y: sourceEndPointY + length,
             radius: length,
-            fill: 'black',
+            fill: opts.endPointColor,
           });
         }
 
@@ -614,7 +614,7 @@ module.exports = function (params, cy) {
             x: targetEndPointX + length,
             y: targetEndPointY + length,
             radius: length,
-            fill: 'black',
+            fill: opts.endPointColor,
           });
         }
 
@@ -859,7 +859,7 @@ module.exports = function (params, cy) {
           refreshDraws();
         });
         
-         cy.on('add', 'edge', eAdd = function () {
+        cy.on('add', 'edge', eAdd = function () {
           var edge = this;
           if (edge.selected()) {
             numberOfSelectedEdges = numberOfSelectedEdges + 1;
@@ -883,9 +883,7 @@ module.exports = function (params, cy) {
           refreshDraws();
         });
         
-        cy.on('select', 'edge', eSelect = function () {
-          var edge = this;
-
+        eSelect = function (edge) {
           if(edge.target().connectedEdges().length == 0 || edge.source().connectedEdges().length == 0){
             return;
           }
@@ -908,9 +906,17 @@ module.exports = function (params, cy) {
           
           cy.endBatch();
           refreshDraws();
+        };
+
+        cy.on('select', 'edge', function (event) {
+          if (opts.isShowHandleOnHover) {
+            return;
+          }
+          eSelect(event.target);
         });
         
-        cy.on('unselect', 'edge', eUnselect = function () {
+        eUnselect = function () {
+          
           numberOfSelectedEdges = numberOfSelectedEdges - 1;
             
           cy.startBatch();
@@ -938,8 +944,29 @@ module.exports = function (params, cy) {
           
           cy.endBatch();
           refreshDraws();
+        };
+
+        cy.on('unselect', 'edge', function () {
+          if (opts.isShowHandleOnHover) {
+            return;
+          }
+          eUnselect();
         });
         
+        cy.on('mouseover', 'edge', function (event) {
+          if (!opts.isShowHandleOnHover) {
+            return;
+          }
+          eSelect(event.target);
+        });
+
+        cy.on('mouseout', 'edge', function () {
+          if (!opts.isShowHandleOnHover) {
+            return;
+          }
+          eUnselect();
+        });
+
         var movedAnchorIndex;
         var tapStartPos;
         var movedEdge;
@@ -1166,7 +1193,7 @@ module.exports = function (params, cy) {
 
               if (detachedNode.id() !== newNode.id()) {
                 if (typeof opts.handleReconnectEdge === 'function') {
-                  var reconnectedEdge = opts.handleReconnectEdge(newSource.id(), newTarget.id(), edge.data());
+                  var reconnectedEdge = opts.handleReconnectEdge(newSource.id(), newTarget.id(), edge.data(), location);
 
                   if (reconnectedEdge) {
                     reconnectionUtilities.copyEdge(edge, reconnectedEdge);
@@ -1565,6 +1592,8 @@ module.exports = function (params, cy) {
           .off('style', 'edge.edgebendediting-hasbendpoints:selected, edge.edgecontrolediting-hascontrolpoints:selected', eStyle)
           .off('select', 'edge', eSelect)
           .off('unselect', 'edge', eUnselect)
+          .off('mouseover', 'edge', eSelect)
+          .off('mouseout', 'edge', eUnselect)
           .off('tapstart', eTapStart)
           .off('tapstart', 'edge', eTapStartOnEdge)
           .off('tapdrag', eTapDrag)

@@ -63,7 +63,11 @@
       // size of anchor point can be auto changed to compensate the impact of zoom
       enableFixedAnchorSize: false,
       // automatically remove anchor (bend point) if its previous segment and next segment is almost in a same line
-      enableRemoveAnchorMidOfNearLine: true
+      enableRemoveAnchorMidOfNearLine: true,
+      // edge reconnection handles can be shown with select or hover events
+      isShowHandleOnHover: false,
+      anchorColor: '#d50000',
+      endPointColor: '#00c853'
     };
     
     var options;

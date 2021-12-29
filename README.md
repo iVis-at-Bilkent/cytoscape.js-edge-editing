@@ -149,7 +149,7 @@ cy.edgeEditing('initialized');
           return true;
       },
       // Can be a function or boolean. If `false`, edge reconnection won't be active. If `true`, connects edge to its new source/target as usual. 
-      // If a function is given, the function will be called with parameters: newSource.id(), newTarget.id(), edge.data()
+      // If a function is given, the function will be called with parameters: newSource.id(), newTarget.id(), edge.data(), location
       handleReconnectEdge: true,
       // Can be `false` or `true`. If `false`, it won't interact with anchors (control and bend points). If `false`, it won't show any context menu items as well.
       handleAnchors: true,
@@ -166,7 +166,9 @@ cy.edgeEditing('initialized');
       // size of anchor point can be auto changed to compensate the impact of zoom
       enableFixedAnchorSize: false,
       // automatically remove anchor (bend point) if its previous segment and next segment is almost in a same line
-      enableRemoveAnchorMidOfNearLine: true
+      enableRemoveAnchorMidOfNearLine: true,
+      // edge reconnection handles can be shown with select or hover events
+      isShowHandleOnHover: false
     };
 ```
 
