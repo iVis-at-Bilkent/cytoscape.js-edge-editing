@@ -168,7 +168,9 @@ cy.edgeEditing('initialized');
       // automatically remove anchor (bend point) if its previous segment and next segment is almost in a same line
       enableRemoveAnchorMidOfNearLine: true,
       // edge reconnection handles can be shown with select or hover events
-      isShowHandleOnHover: false
+      isShowHandleOnHover: false,
+      anchorColor: '#000000',  // default anchor color is black
+      endPointColor: '#000000' // default endpoint color is black
     };
 ```
 

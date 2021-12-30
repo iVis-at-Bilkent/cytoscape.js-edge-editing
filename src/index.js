@@ -66,8 +66,8 @@
       enableRemoveAnchorMidOfNearLine: true,
       // edge reconnection handles can be shown with select or hover events
       isShowHandleOnHover: false,
-      anchorColor: '#d50000',
-      endPointColor: '#00c853'
+      anchorColor: '#000000',
+      endPointColor: '#000000'
     };
     
     var options;
