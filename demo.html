@@ -7,7 +7,7 @@
 
 		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1">
                 
-    <link href="https://unpkg.com/cytoscape-context-menus/cytoscape-context-menus.css" rel="stylesheet" type="text/css" />
+    <link href="https://cdn.jsdelivr.net/gh/iVis-at-Bilkent/cytoscape.js-context-menus@unstable/cytoscape-context-menus.css" rel="stylesheet" type="text/css" />
 		
 		<script src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
 		<script src="https://unpkg.com/konva@7.0.3/konva.min.js"></script>
@@ -15,7 +15,7 @@
 		<!-- for testing with local version of cytoscape.js -->
 		<!--<script src="../cytoscape.js/build/cytoscape.js"></script>-->
                 
-		<script src="https://unpkg.com/cytoscape-context-menus/cytoscape-context-menus.js"></script>
+		<script src="https://cdn.jsdelivr.net/gh/iVis-at-Bilkent/cytoscape.js-context-menus@unstable/cytoscape-context-menus.js"></script>
 		<script src="https://unpkg.com/cytoscape-undo-redo/cytoscape-undo-redo.js"></script>
 		<script src="cytoscape-edge-editing.js"></script>
 
@@ -110,7 +110,7 @@
 						]
 					},
 				});
-				
+				// cy.contextMenus({evtType: 'tap'});
 				// demo your ext
 				cy.edgeEditing({
 					undoable: true,

@@ -67,7 +67,8 @@
       // edge reconnection handles can be shown with select or hover events
       isShowHandleOnHover: false,
       anchorColor: '#000000',
-      endPointColor: '#000000'
+      endPointColor: '#000000',
+      contexMenuShowEvent: 'cxttap'
     };
     
     var options;

@@ -358,7 +358,6 @@ module.exports = function (params, cy) {
           id: addControlPointCxtMenuId,
           content: opts.addControlMenuItemTitle,
           selector: 'edge',
-          coreAsWell: true,
           onClickFunction: cxtAddControlFcn,
           hasTrailingDivider: opts.useTrailingDividersAfterContextMenuOptions,
         });
@@ -368,7 +367,6 @@ module.exports = function (params, cy) {
           id: removeControlPointCxtMenuId,
           content: opts.removeControlMenuItemTitle,
           selector: 'edge',
-          coreAsWell: true,
           onClickFunction: cxtRemoveAnchorFcn,
           hasTrailingDivider: opts.useTrailingDividersAfterContextMenuOptions,
         })
@@ -403,6 +401,7 @@ module.exports = function (params, cy) {
       
       if(cy.contextMenus) {
         var menus = cy.contextMenus('get');
+        opts.contexMenuShowEvent = menus.getOptions().evtType;
         // If context menus is active just append menu items else activate the extension
         // with initial menu items
         if (menus.isActive()) {
@@ -410,6 +409,7 @@ module.exports = function (params, cy) {
         }
         else {
           cy.contextMenus({
+            evtType: opts.contexMenuShowEvent,
             menuItems: menuItems
           });
         }
@@ -1334,7 +1334,7 @@ module.exports = function (params, cy) {
             }
         });
 
-        cy.on('cxttap', eCxtTap = function (event) {
+        cy.on(opts.contexMenuShowEvent, eCxtTap = function (event) {
           var target = event.target || event.cyTarget;
           var targetIsEdge = false;
 
