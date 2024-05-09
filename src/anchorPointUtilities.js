@@ -37,7 +37,7 @@ var anchorPointUtilities = {
       return 'bend';
     else if(edge.hasClass(this.syntax['control']['class']))
       return 'control';
-    else if(edge.css('curve-style') === this.syntax['bend']['edge'])
+    else if(edge.css('curve-style').includes(this.syntax['bend']['edge']))
       return 'bend';
     else if(edge.css('curve-style') === this.syntax['control']['edge'])
       return 'control';
