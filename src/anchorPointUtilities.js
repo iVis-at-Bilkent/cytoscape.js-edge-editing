@@ -216,7 +216,7 @@ var anchorPointUtilities = {
       return undefined;
     }
     
-    if( edge.css('curve-style') !== this.syntax[type]['edge'] ) {
+    if(!edge.css('curve-style').includes(this.syntax[type]['edge'] )) {
       return undefined;
     }
     
