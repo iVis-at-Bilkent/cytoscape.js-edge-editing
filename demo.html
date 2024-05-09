@@ -89,7 +89,17 @@
 								source: 'j', 
 								target: 'e',
 								cyedgebendeditingWeights: [1],
-								cyedgebendeditingDistances: [175] 
+								cyedgebendeditingDistances: [175],
+								round:false
+							  },
+							  classes: 'edgebendediting-hasbendpoints',
+							},
+							 {  data: { 
+								source: 'k', 
+								target: 'e',
+								cyedgebendeditingWeights: [1],
+								cyedgebendeditingDistances: [110],
+								round:true
 							  },
 							  classes: 'edgebendediting-hasbendpoints',
 						 	},
@@ -119,7 +129,8 @@
 					enableMultipleAnchorRemovalOption: true,
 					initAnchorsAutomatically: false,
 					useTrailingDividersAfterContextMenuOptions: false,
-					enableCreateAnchorOnDrag: true
+					enableCreateAnchorOnDrag: true,
+					bendCornersIsRoundFunction(e) {return e.data('round')} 
 				});
 				
 				cy.style().update();

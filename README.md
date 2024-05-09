@@ -105,6 +105,10 @@ cy.edgeEditing('initialized');
       bendPositionsFunction: function(ele) {
         return ele.data('bendPointPositions');
       },
+      // Return true to draw rounded corners for the bend points. Requires Cytoscape^3.29.0
+      bendCornersIsRoundFunction: function(ele) {
+        return false;
+      },
       // A function parameter to get control point positions, should return positions of control points
       controlPositionsFunction: function(ele) {
         return ele.data('controlPointPositions');
