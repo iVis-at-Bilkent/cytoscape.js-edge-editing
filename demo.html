@@ -2,156 +2,146 @@
 
 <html>
 
-	<head>
-		<title>cytoscape-edge-editing.js demo</title>
+<head>
+	<title>cytoscape-edge-editing.js demo</title>
 
-		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1">
-                
-    <link href="https://unpkg.com/cytoscape-context-menus/cytoscape-context-menus.css" rel="stylesheet" type="text/css" />
-		
-		<script src="https://code.jquery.com/jquery-3.0.0.js"></script>
-		<script src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
-		<script src="https://unpkg.com/konva@7.0.3/konva.min.js"></script>
+	<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1">
 
-		<!-- for testing with local version of cytoscape.js -->
-		<!--<script src="../cytoscape.js/build/cytoscape.js"></script>-->
-                
-		<script src="https://unpkg.com/cytoscape-context-menus/cytoscape-context-menus.js"></script>
-		<script src="https://unpkg.com/cytoscape-undo-redo/cytoscape-undo-redo.js"></script>
-		<script src="cytoscape-edge-editing.js"></script>
+	<link href="https://unpkg.com/cytoscape-context-menus/cytoscape-context-menus.css" rel="stylesheet" type="text/css" />
 
-		<style>
-			body {
-				font-family: helvetica neue, helvetica, liberation sans, arial, sans-serif;
-				font-size: 14px;
-			}
+	<script src="https://code.jquery.com/jquery-3.0.0.js"></script>
+	<script src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
+	<script src="https://unpkg.com/konva@7.0.3/konva.min.js"></script>
 
-			#cy {
-				position: absolute;
-				left: 0;
-				top: 0;
-				bottom: 0;
-				right: 0;
-				z-index: 999;
-			}
+	<!-- for testing with local version of cytoscape.js -->
+	<!--<script src="../cytoscape.js/build/cytoscape.js"></script>-->
 
-			h1 {
-				opacity: 0.5;
-				font-size: 1em;
-				font-weight: bold;
-			}
-		</style>
+	<script src="https://unpkg.com/cytoscape-context-menus/cytoscape-context-menus.js"></script>
+	<script src="https://unpkg.com/cytoscape-undo-redo/cytoscape-undo-redo.js"></script>
+	<script src="cytoscape-edge-editing.js"></script>
 
-		<script>
-			document.addEventListener('DOMContentLoaded', function(){
+	<style>
+		body {
+			font-family: helvetica neue, helvetica, liberation sans, arial, sans-serif;
+			font-size: 14px;
+		}
 
-				var cy = window.cy = cytoscape({
-					container: document.getElementById('cy'),
+		#cy {
+			position: absolute;
+			left: 0;
+			top: 0;
+			bottom: 0;
+			right: 0;
+			z-index: 999;
+		}
 
-					style: [
-						{
-							selector: 'node[name]',
-							style: {
-								'content': 'data(name)'
-							}
-						},
+		h1 {
+			opacity: 0.5;
+			font-size: 1em;
+			font-weight: bold;
+		}
+	</style>
 
-						{
-							selector: 'edge',
-							style: {
-								'target-arrow-shape': 'triangle',
-								'curve-style': 'straight'
-							}
-						},
+	<script>
+		document.addEventListener('DOMContentLoaded', function () {
 
-						{
-							selector: ':selected',
-							style: {
+			var cy = window.cy = cytoscape({
+				container: document.getElementById('cy'),
 
-							}
-						},
-						
+				style: [
+					{
+						selector: 'node[name]',
+						style: {
+							'content': 'data(name)'
+						}
+					},
+
+					{
+						selector: 'edge',
+						style: {
+							'target-arrow-shape': 'triangle',
+							'curve-style': 'straight'
+						}
+					}
+
+				],
+
+				layout: { name: 'grid', rows: 2, cols: 2 },
+
+				wheelSensitivity: 0.1,
+
+				elements: {
+					nodes: [
+						{ data: { id: 'j', name: 'Jerry' } },
+						{ data: { id: 'e', name: 'Elaine' } },
+						{ data: { id: 'k', name: 'Kramer' } },
+						{ data: { id: 'g', name: 'George' } }
 					],
-					
-					layout: { name: 'grid', rows: 2, cols: 2},
-
-					wheelSensitivity: 0.1,
-
-					elements: {
-						nodes: [
-							{ data: { id: 'j', name: 'Jerry' } },
-							{ data: { id: 'e', name: 'Elaine' } },
-							{ data: { id: 'k', name: 'Kramer' } },
-							{ data: { id: 'g', name: 'George' } }
-						],
-						edges: [
-							{ data: { 
-								source: 'j', 
+					edges: [
+						{
+							data: {
+								source: 'j',
 								target: 'e',
 								cyedgebendeditingWeights: [1],
 								cyedgebendeditingDistances: [175],
-								round:false
-							  },
-							  classes: 'edgebendediting-hasbendpoints',
+								round: false
 							},
-							 {  data: { 
-								source: 'k', 
-								target: 'e',
-								cyedgebendeditingWeights: [1],
-								cyedgebendeditingDistances: [110],
-								round:true
-							  },
-							  classes: 'edgebendediting-hasbendpoints',
-						 	},
-							{ data: { 
-								source: 'j', 
+							classes: 'edgebendediting-hasbendpoints',
+						},
+						{
+							data: {
+								source: 'k',
+								target: 'g',
+								cyedgebendeditingWeights: [0.2],
+								cyedgebendeditingDistances: [-110],
+								round: true
+							},
+							classes: 'edgebendediting-hasbendpoints',
+						},
+						{
+							data: {
+								source: 'j',
 								target: 'k',
 								cyedgecontroleditingWeights: [0.5],
-								cyedgecontroleditingDistances: [50] 
-							  },
-							  classes: 'edgecontrolediting-hascontrolpoints',
+								cyedgecontroleditingDistances: [50]
 							},
-							{ data: { source: 'j', target: 'g' } },
-//							{ data: { source: 'e', target: 'j' } },
-//							{ data: { source: 'e', target: 'k' } },
-//							{ data: { source: 'k', target: 'j' } },
-//							{ data: { source: 'k', target: 'e' } },
-//							{ data: { source: 'k', target: 'g' } },
-//							{ data: { source: 'g', target: 'j' } }
-						]
-					},
-				});
-				
-				// demo your ext
-				cy.edgeEditing({
-					undoable: true,
-					bendRemovalSensitivity: 16,
-					enableMultipleAnchorRemovalOption: true,
-					initAnchorsAutomatically: false,
-					useTrailingDividersAfterContextMenuOptions: false,
-					enableCreateAnchorOnDrag: true,
-					bendCornersIsRoundFunction(e) {return e.data('round')} 
-				});
-				
-				cy.style().update();
+							classes: 'edgecontrolediting-hascontrolpoints',
+						},
+						{ data: { source: 'j', target: 'g' } }
+					]
+				},
 			});
-                        
-                        document.addEventListener('keydown', function (e){
-                                if (e.ctrlKey && e.which == '90') {
-                                        cy.undoRedo().undo();	     
-                                }
-                                else if (e.ctrlKey && e.which == '89') {
-                                        cy.undoRedo().redo();     
-                                }
-                        }, true );
-		</script>
-	</head>
 
-	<body>
-		<h1>cytoscape-edge-editing demo</h1>
+			// demo your ext
+			cy.edgeEditing({
+				undoable: true,
+				bendRemovalSensitivity: 16,
+				enableMultipleAnchorRemovalOption: true,
+				initAnchorsAutomatically: false,
+				useTrailingDividersAfterContextMenuOptions: false,
+				enableCreateAnchorOnDrag: true,
+				bendCornersIsRoundFunction(e) { return e.data('round') }
+			});
 
-		<div id="cy"></div>
+			cy.style().update();
+		});
 
-	</body>
+		document.addEventListener('keydown', function (e) {
+			if (e.ctrlKey && e.which == '90') {
+				cy.undoRedo().undo();
+			}
+			else if (e.ctrlKey && e.which == '89') {
+				cy.undoRedo().redo();
+			}
+		}, true);
+	</script>
+</head>
+
+<body>
+	<h1>cytoscape-edge-editing demo</h1>
+
+	<div id="cy"></div>
+
+</body>
 
 </html>

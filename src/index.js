@@ -113,15 +113,11 @@
 
         // define edgebendediting-hasbendpoints css class
         cy.style().selector('.edgebendediting-hasbendpoints').css({
-          'curve-style': function (ele) {
-            return options.bendCornersIsRoundFunction(ele)?'round-segments':'segments';
-          },
-          'segment-distances': function (ele) {
-            return anchorPointUtilities.getDistancesString(ele, 'bend');
-          },
-          'segment-weights': function (ele) {
-            return anchorPointUtilities.getWeightsString(ele, 'bend');
-          },
+					'curve-style': function (ele) {
+						return options.bendCornersIsRoundFunction(ele)?'round-segments':'segments';
+					},
+          'segment-distances': 'data(cyedgebendeditingDistances)',
+          'segment-weights': 'data(cyedgebendeditingWeights)',
           'edge-distances': 'node-position'
         });
 
