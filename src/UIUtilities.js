@@ -34,7 +34,6 @@ module.exports = function (params, cy) {
       // register undo redo functions
       registerUndoRedoFunctions(cy, anchorPointUtilities, params);
       
-      var self = this;
       var opts = params;
 
       /*
@@ -44,12 +43,14 @@ module.exports = function (params, cy) {
         Without the below logic, an empty canvasElement would be created
         for one of these extensions for no reason.
       */
-      var $container = $(this);
+      var $container = cy.container();
+      var containerMetaData = null;
       var canvasElementId = 'cy-node-edge-editing-stage' + stageId;
       stageId++;
-      var $canvasElement = $('<div id="' + canvasElementId + '"></div>');
+      var $canvasElement = document.createElement('div');
+      $canvasElement.setAttribute('id', canvasElementId);
 
-      if ($container.find('#' + canvasElementId).length < 1) {
+      if (!$container.querySelector('#' + canvasElementId)) {
         $container.append($canvasElement);
       }
 
@@ -66,8 +67,8 @@ module.exports = function (params, cy) {
         stage = new Konva.Stage({
           id: 'node-edge-editing-stage',
           container: canvasElementId,   // id of container <div>
-          width: $container.width(),
-          height: $container.height()
+          width: $container.clientWidth,
+          height: $container.clientHeight
         });
       }
       else {
@@ -196,17 +197,14 @@ module.exports = function (params, cy) {
           this.edge = edge;
           this.edgeType = anchorPointUtilities.getEdgeType(edge);
 
-          if(!edge.hasClass('edgebendediting-hasbendpoints') &&
-              !edge.hasClass('edgecontrolediting-hascontrolpoints')) {
+          if (!opts.handleAnchors || (!edge.hasClass('edgebendediting-hasbendpoints') &&
+            !edge.hasClass('edgecontrolediting-hascontrolpoints'))) {
             return;
           }
           
           var anchorList = anchorPointUtilities.getAnchorsAsArray(edge);//edge._private.rdata.segpts;
           var length = getAnchorShapesLength(edge) * 0.65;
           
-          var srcPos = edge.source().position();
-          var tgtPos = edge.target().position();
-
           for(var i = 0; anchorList && i < anchorList.length; i = i + 2){
             var anchorX = anchorList[i];
             var anchorY = anchorList[i + 1];
@@ -231,7 +229,7 @@ module.exports = function (params, cy) {
             y: renderedTopLeftPos.y,
             width: length,
             height: length,
-            fill: 'black',
+            fill: opts.anchorColor,
             strokeWidth: 0,
             draggable: true
           });
@@ -331,62 +329,79 @@ module.exports = function (params, cy) {
         setTimeout(function(){refreshDraws();edge.select();}, 50);
       }
       
-      // function to reconnect edge
-      var handleReconnectEdge = opts.handleReconnectEdge;
       // function to validate edge source and target on reconnection
       var validateEdge = opts.validateEdge; 
       // function to be called on invalid edge reconnection
       var actOnUnsuccessfulReconnection = opts.actOnUnsuccessfulReconnection;
       
-      var menuItems = [
-        {
+      var menuItems = [];
+      if (opts.addBendMenuItemTitle) {
+        menuItems.push({
           id: addBendPointCxtMenuId,
           content: opts.addBendMenuItemTitle,
           selector: 'edge',
           onClickFunction: cxtAddBendFcn,
           hasTrailingDivider: opts.useTrailingDividersAfterContextMenuOptions,
-        },
-        {
+        });
+      }
+      if (opts.removeBendMenuItemTitle) {
+        menuItems.push({
           id: removeBendPointCxtMenuId,
           content: opts.removeBendMenuItemTitle,
           selector: 'edge',
           onClickFunction: cxtRemoveAnchorFcn,
           hasTrailingDivider: opts.useTrailingDividersAfterContextMenuOptions,
-        }, 
-        {
-          id: removeAllBendPointCtxMenuId,
-          content: opts.removeAllBendMenuItemTitle,
-          selector: opts.enableMultipleAnchorRemovalOption && ':selected.edgebendediting-hasmultiplebendpoints',
-          onClickFunction: cxtRemoveAllAnchorsFcn,
-          hasTrailingDivider: opts.useTrailingDividersAfterContextMenuOptions,
-        },
-        {
+        });
+      }
+      if (opts.addControlMenuItemTitle) {
+        menuItems.push({
           id: addControlPointCxtMenuId,
           content: opts.addControlMenuItemTitle,
           selector: 'edge',
-          coreAsWell: true,
           onClickFunction: cxtAddControlFcn,
           hasTrailingDivider: opts.useTrailingDividersAfterContextMenuOptions,
-        },
-        {
+        });
+      }
+      if (opts.removeControlMenuItemTitle) {
+        menuItems.push({
           id: removeControlPointCxtMenuId,
           content: opts.removeControlMenuItemTitle,
           selector: 'edge',
-          coreAsWell: true,
           onClickFunction: cxtRemoveAnchorFcn,
           hasTrailingDivider: opts.useTrailingDividersAfterContextMenuOptions,
-        }, 
-        {
-          id: removeAllControlPointCtxMenuId,
-          content: opts.removeAllControlMenuItemTitle,
-          selector: opts.enableMultipleAnchorRemovalOption && ':selected.edgecontrolediting-hasmultiplecontrolpoints',
+        })
+      }
+      if (opts.removeAllBendMenuItemTitle) {
+        menuItems.push({
+          id: removeAllBendPointCtxMenuId,
+          content: opts.removeAllBendMenuItemTitle,
+          selector: ':selected.edgebendediting-hasmultiplebendpoints',
           onClickFunction: cxtRemoveAllAnchorsFcn,
           hasTrailingDivider: opts.useTrailingDividersAfterContextMenuOptions,
-        },
-      ];
+        });
+      }
+      if (opts.removeAllControlMenuItemTitle) {
+        menuItems.push({
+          id: removeAllControlPointCtxMenuId,
+          content: opts.removeAllControlMenuItemTitle,
+          selector: ':selected.edgecontrolediting-hasmultiplecontrolpoints',
+          onClickFunction: cxtRemoveAllAnchorsFcn,
+          hasTrailingDivider: opts.useTrailingDividersAfterContextMenuOptions,
+        });
+      }
+      if (!opts.handleAnchors) {
+        menuItems = [];
+        opts.removeAllControlMenuItemTitle = false;
+        opts.removeAllBendMenuItemTitle = false;
+        opts.removeControlMenuItemTitle = false;
+        opts.addControlMenuItemTitle = false;
+        opts.removeBendMenuItemTitle = false;
+        opts.addBendMenuItemTitle = false;
+      }
       
       if(cy.contextMenus) {
         var menus = cy.contextMenus('get');
+        opts.contexMenuShowEvent = menus.getOptions().evtType;
         // If context menus is active just append menu items else activate the extension
         // with initial menu items
         if (menus.isActive()) {
@@ -394,36 +409,29 @@ module.exports = function (params, cy) {
         }
         else {
           cy.contextMenus({
+            evtType: opts.contexMenuShowEvent,
             menuItems: menuItems
           });
         }
       }
       
       var _sizeCanvas = debounce(function () {
-        $canvasElement
-          .attr('height', $container.height())
-          .attr('width', $container.width())
-          .css({
-            'position': 'absolute',
-            'top': 0,
-            'left': 0,
-            'z-index': options().zIndex
-          })
-        ;
-
+        $canvasElement.setAttribute('height', $container.clientHeight);
+        $canvasElement.setAttribute('width', $container.clientWidth);
+        $canvasElement.style.position = 'absolute';
+        $canvasElement.style.top = '0';
+        $canvasElement.style.left = '0';
+        $canvasElement.style.zIndex = options().zIndex;
+        
         setTimeout(function () {
-          var canvasBb = $canvasElement.offset();
-          var containerBb = $container.offset();
+          var canvasBb = offset($canvasElement);
+          var containerBb = offset($container);
 
-          $canvasElement
-            .css({
-              'top': -(canvasBb.top - containerBb.top),
-              'left': -(canvasBb.left - containerBb.left)
-            })
-          ;
-
-          canvas.getStage().setWidth($container.width());
-          canvas.getStage().setHeight($container.height());
+          $canvasElement.style.top = '' + -(canvasBb.top - containerBb.top);
+          $canvasElement.style.left = '' + -(canvasBb.left - containerBb.left);
+         
+          canvas.getStage().setWidth($container.clientWidth);
+          canvas.getStage().setHeight($container.clientHeight);
 
           // redraw on canvas resize
           if(cy){
@@ -433,18 +441,26 @@ module.exports = function (params, cy) {
 
       }, 250);
 
+      function offset(el) {
+        var rect = el.getBoundingClientRect();
+        return {
+          top: rect.top + window.scrollY,
+          left: rect.left + window.scrollX,
+        };
+      }
+
       function sizeCanvas() {
         _sizeCanvas();
       }
 
       sizeCanvas();
 
-      $(window).bind('resize', function () {
+      window.addEventListener('resize', function () {
         sizeCanvas();
       });
       
       // write options to data
-      var data = $container.data('cyedgeediting');
+      var data = containerMetaData;
       if (data == null) {
         data = {};
       }
@@ -453,7 +469,7 @@ module.exports = function (params, cy) {
       var optCache;
 
       function options() {
-        return optCache || (optCache = $container.data('cyedgeediting').options);
+        return optCache || (optCache = containerMetaData.options);
       }
 
       // we will need to convert model positons to rendered positions
@@ -493,7 +509,7 @@ module.exports = function (params, cy) {
       
       // render the end points shapes of the given edge
       function renderEndPointShapes(edge) {
-        if(!edge){
+        if (!edge || !opts.handleReconnectEdge) {
           return;
         }
 
@@ -589,7 +605,7 @@ module.exports = function (params, cy) {
             x: sourceEndPointX + length,
             y: sourceEndPointY + length,
             radius: length,
-            fill: 'black',
+            fill: opts.endPointColor,
           });
         }
 
@@ -598,7 +614,7 @@ module.exports = function (params, cy) {
             x: targetEndPointX + length,
             y: targetEndPointY + length,
             radius: length,
-            fill: 'black',
+            fill: opts.endPointColor,
           });
         }
 
@@ -610,10 +626,18 @@ module.exports = function (params, cy) {
 
       // get the length of anchor points to be rendered
       function getAnchorShapesLength(edge) {
-        var factor = options().anchorShapeSizeFactor;
-        if (parseFloat(edge.css('width')) <= 2.5)
-          return 2.5 * factor;
-        else return parseFloat(edge.css('width'))*factor;
+        var factor = opts.anchorShapeSizeFactor;
+        var actualFactor = 0;
+        if (opts.enableFixedAnchorSize) {
+          actualFactor = factor / cy.zoom();
+        }
+        else {
+          actualFactor = factor
+        }
+        if (parseFloat(edge.css('width')) <= 2.5) {
+          return 2.5 * actualFactor;
+        }
+        return parseFloat(edge.css('width')) * actualFactor;
       }
       
       // check if the anchor represented by {x, y} is inside the point shape
@@ -835,7 +859,7 @@ module.exports = function (params, cy) {
           refreshDraws();
         });
         
-         cy.on('add', 'edge', eAdd = function () {
+        cy.on('add', 'edge', eAdd = function () {
           var edge = this;
           if (edge.selected()) {
             numberOfSelectedEdges = numberOfSelectedEdges + 1;
@@ -859,13 +883,10 @@ module.exports = function (params, cy) {
           refreshDraws();
         });
         
-        cy.on('select', 'edge', eSelect = function () {
-          var edge = this;
-
+        eSelect = function (edge) {
           if(edge.target().connectedEdges().length == 0 || edge.source().connectedEdges().length == 0){
             return;
           }
-
          
           numberOfSelectedEdges = numberOfSelectedEdges + 1;
           
@@ -885,9 +906,17 @@ module.exports = function (params, cy) {
           
           cy.endBatch();
           refreshDraws();
+        };
+
+        cy.on('select', 'edge', function (event) {
+          if (opts.isShowHandleOnHover) {
+            return;
+          }
+          eSelect(event.target);
         });
         
-        cy.on('unselect', 'edge', eUnselect = function () {
+        eUnselect = function () {
+          
           numberOfSelectedEdges = numberOfSelectedEdges - 1;
             
           cy.startBatch();
@@ -915,8 +944,29 @@ module.exports = function (params, cy) {
           
           cy.endBatch();
           refreshDraws();
+        };
+
+        cy.on('unselect', 'edge', function () {
+          if (opts.isShowHandleOnHover) {
+            return;
+          }
+          eUnselect();
         });
         
+        cy.on('mouseover', 'edge', function (event) {
+          if (!opts.isShowHandleOnHover) {
+            return;
+          }
+          eSelect(event.target);
+        });
+
+        cy.on('mouseout', 'edge', function () {
+          if (!opts.isShowHandleOnHover) {
+            return;
+          }
+          eUnselect();
+        });
+
         var movedAnchorIndex;
         var tapStartPos;
         var movedEdge;
@@ -954,7 +1004,7 @@ module.exports = function (params, cy) {
           // Get which end point has been clicked (Source:0, Target:1, None:-1)
           var endPoint = getContainingEndPoint(cyPosX, cyPosY, edge);
 
-          if(endPoint == 0 || endPoint == 1){
+          if (opts.handleReconnectEdge && (endPoint == 0 || endPoint == 1)) {
             edge.unselect();
             movedEndPoint = endPoint;
             detachedNode = (endPoint == 0) ? movedEdge.source() : movedEdge.target();
@@ -967,7 +1017,7 @@ module.exports = function (params, cy) {
 
             disableGestures();
           }
-          else {
+          else if (opts.handleAnchors) {
             movedAnchorIndex = undefined;
             createAnchorOnDrag = true;
           }
@@ -978,6 +1028,7 @@ module.exports = function (params, cy) {
             refreshDraws();
           } 
         });
+        
         cy.on('tapdrag', eTapDrag = function (event) {
           /** 
            * if there is a selected edge set autounselectify false
@@ -1067,49 +1118,37 @@ module.exports = function (params, cy) {
         
         cy.on('tapend', eTapEnd = function (event) {
 
-          if(mouseOut){
+          if (mouseOut) {
             canvas.getStage().fire("contentMouseup");
           }
 
-          var edge = movedEdge || anchorManager.edge; 
-          
-          if( edge !== undefined ) {
+          var edge = movedEdge || anchorManager.edge;
+
+          if (edge !== undefined) {
             var index = anchorManager.touchedAnchorIndex;
-            if( index != undefined ) {
+            if (index != undefined) {
               var startX = edge.source().position('x');
               var startY = edge.source().position('y');
               var endX = edge.target().position('x');
               var endY = edge.target().position('y');
-              
+
               var anchorList = anchorPointUtilities.getAnchorsAsArray(edge);
               var allAnchors = [startX, startY].concat(anchorList).concat([endX, endY]);
-              
+
               var anchorIndex = index + 1;
               var preIndex = anchorIndex - 1;
               var posIndex = anchorIndex + 1;
-              
-              var anchor = {
-                x: allAnchors[2 * anchorIndex],
-                y: allAnchors[2 * anchorIndex + 1]
-              };
-              
-              var preAnchorPoint = {
-                x: allAnchors[2 * preIndex],
-                y: allAnchors[2 * preIndex + 1]
-              };
-              
-              var posAnchorPoint = {
-                x: allAnchors[2 * posIndex],
-                y: allAnchors[2 * posIndex + 1]
-              };
-              
+
+              var anchor = { x: allAnchors[2 * anchorIndex], y: allAnchors[2 * anchorIndex + 1] };
+              var preAnchorPoint = { x: allAnchors[2 * preIndex], y: allAnchors[2 * preIndex + 1] };
+              var posAnchorPoint = { x: allAnchors[2 * posIndex], y: allAnchors[2 * posIndex + 1] };
               var nearToLine;
-              
-              if( ( anchor.x === preAnchorPoint.x && anchor.y === preAnchorPoint.y ) || ( anchor.x === preAnchorPoint.x && anchor.y === preAnchorPoint.y ) ) {
+
+              if ((anchor.x === preAnchorPoint.x && anchor.y === preAnchorPoint.y) || (anchor.x === preAnchorPoint.x && anchor.y === preAnchorPoint.y)) {
                 nearToLine = true;
               }
               else {
-                var m1 = ( preAnchorPoint.y - posAnchorPoint.y ) / ( preAnchorPoint.x - posAnchorPoint.x );
+                var m1 = (preAnchorPoint.y - posAnchorPoint.y) / (preAnchorPoint.x - posAnchorPoint.x);
                 var m2 = -1 / m1;
 
                 var srcTgtPointsAndTangents = {
@@ -1120,34 +1159,30 @@ module.exports = function (params, cy) {
                 };
 
                 var currentIntersection = anchorPointUtilities.getIntersection(edge, anchor, srcTgtPointsAndTangents);
-                var dist = Math.sqrt( Math.pow( (anchor.x - currentIntersection.x), 2 ) 
-                        + Math.pow( (anchor.y - currentIntersection.y), 2 ));
-                
+                var dist = Math.sqrt(Math.pow((anchor.x - currentIntersection.x), 2)
+                  + Math.pow((anchor.y - currentIntersection.y), 2));
+
                 // remove the bend point if segment edge becomes straight
                 var type = anchorPointUtilities.getEdgeType(edge);
-                if( (type === 'bend' && dist  < options().bendRemovalSensitivity)) {
+                if ((type === 'bend' && dist < options().bendRemovalSensitivity)) {
                   nearToLine = true;
                 }
-                
               }
-              
-              if( nearToLine )
-              {
+
+              if (opts.enableRemoveAnchorMidOfNearLine && nearToLine) {
                 anchorPointUtilities.removeAnchor(edge, index);
               }
-              
             }
-            else if(dummyNode != undefined && (movedEndPoint == 0 || movedEndPoint == 1) ){
-              
+            else if (dummyNode != undefined && (movedEndPoint == 0 || movedEndPoint == 1)) {
               var newNode = detachedNode;
               var isValid = 'valid';
               var location = (movedEndPoint == 0) ? 'source' : 'target';
 
               // validate edge reconnection
-              if(nodeToAttach){
+              if (nodeToAttach) {
                 var newSource = (movedEndPoint == 0) ? nodeToAttach : edge.source();
                 var newTarget = (movedEndPoint == 1) ? nodeToAttach : edge.target();
-                if(typeof validateEdge === "function")
+                if (typeof validateEdge === "function")
                   isValid = validateEdge(edge, newSource, newTarget);
                 newNode = (isValid === 'valid') ? nodeToAttach : detachedNode;
               }
@@ -1156,35 +1191,31 @@ module.exports = function (params, cy) {
               var newTarget = (movedEndPoint == 1) ? newNode : edge.target();
               edge = reconnectionUtilities.connectEdge(edge, detachedNode, location);
 
-              if(detachedNode.id() !== newNode.id()){
-                // use given handleReconnectEdge function 
-                if(typeof handleReconnectEdge === 'function'){
-                  var reconnectedEdge = handleReconnectEdge(newSource.id(), newTarget.id(), edge.data());
-                  
-                  if(reconnectedEdge){
+              if (detachedNode.id() !== newNode.id()) {
+                if (typeof opts.handleReconnectEdge === 'function') {
+                  var reconnectedEdge = opts.handleReconnectEdge(newSource.id(), newTarget.id(), edge.data(), location);
+
+                  if (reconnectedEdge) {
                     reconnectionUtilities.copyEdge(edge, reconnectedEdge);
-                    anchorPointUtilities.initAnchorPoints(options().bendPositionsFunction, 
-                                              options().controlPositionsFunction, [reconnectedEdge]);
+                    anchorPointUtilities.initAnchorPoints(options().bendPositionsFunction,
+                      options().controlPositionsFunction, [reconnectedEdge]);
                   }
-                  
-                  if(reconnectedEdge && options().undoable){
-                    var params = {
-                      newEdge: reconnectedEdge,
-                      oldEdge: edge
-                    };
+
+                  if (reconnectedEdge && options().undoable) {
+                    var params = { newEdge: reconnectedEdge, oldEdge: edge };
                     cy.undoRedo().do('removeReconnectedEdge', params);
                     edge = reconnectedEdge;
                   }
-                  else if(reconnectedEdge){
+                  else if (reconnectedEdge) {
                     cy.remove(edge);
                     edge = reconnectedEdge;
                   }
                 }
-                else{
-                  var loc = (movedEndPoint == 0) ? {source: newNode.id()} : {target: newNode.id()};
-                  var oldLoc = (movedEndPoint == 0) ? {source: detachedNode.id()} : {target: detachedNode.id()};
-                  
-                  if(options().undoable && newNode.id() !== detachedNode.id()) {
+                else {
+                  var loc = (movedEndPoint == 0) ? { source: newNode.id() } : { target: newNode.id() };
+                  var oldLoc = (movedEndPoint == 0) ? { source: detachedNode.id() } : { target: detachedNode.id() };
+
+                  if (options().undoable && newNode.id() !== detachedNode.id()) {
                     var param = {
                       edge: edge,
                       location: loc,
@@ -1194,12 +1225,12 @@ module.exports = function (params, cy) {
                     edge = result.edge;
                     //edge.select();
                   }
-                }  
+                }
               }
 
               // invalid edge reconnection callback
-              if(isValid !== 'valid' && typeof actOnUnsuccessfulReconnection === 'function'){
-                actOnUnsuccessfulReconnection();
+              if (isValid !== 'valid' && typeof actOnUnsuccessfulReconnection === 'function') {
+                actOnUnsuccessfulReconnection(edge);
               }
               edge.select();
               cy.remove(dummyNode);
@@ -1208,31 +1239,31 @@ module.exports = function (params, cy) {
           var type = anchorPointUtilities.getEdgeType(edge);
 
           // to avoid errors
-          if(type === 'none'){
+          if (type === 'none') {
             type = 'bend';
           }
 
-          if(anchorManager.touchedAnchorIndex === undefined && !anchorCreatedByDrag){
+          if (anchorManager.touchedAnchorIndex === undefined && !anchorCreatedByDrag) {
             moveAnchorParam = undefined;
           }
 
           var weightStr = anchorPointUtilities.syntax[type]['weight'];
-          if (edge !== undefined && moveAnchorParam !== undefined && 
+          if (edge !== undefined && moveAnchorParam !== undefined &&
             (edge.data(weightStr) ? edge.data(weightStr).toString() : null) != moveAnchorParam.weights.toString()) {
-            
-            // anchor created from drag
-            if(anchorCreatedByDrag){
-            edge.select(); 
 
-            // stops the unbundled bezier edges from being unselected
-            cy.autounselectify(true);
+            // anchor created from drag
+            if (anchorCreatedByDrag) {
+              edge.select();
+
+              // stops the unbundled bezier edges from being unselected
+              cy.autounselectify(true);
             }
 
-            if(options().undoable) {
+            if (options().undoable) {
               cy.undoRedo().do('changeAnchorPoints', moveAnchorParam);
             }
           }
-          
+
           movedAnchorIndex = undefined;
           movedEdge = undefined;
           moveAnchorParam = undefined;
@@ -1244,10 +1275,10 @@ module.exports = function (params, cy) {
           tapStartPos = undefined;
           anchorCreatedByDrag = false;
 
-          anchorManager.touchedAnchorIndex = undefined; 
+          anchorManager.touchedAnchorIndex = undefined;
 
           resetGestures();
-          setTimeout(function(){refreshDraws()}, 50);
+          setTimeout(function () { refreshDraws() }, 50);
         });
 
         //Variables used for starting and ending the movement of anchor points with arrows
@@ -1303,7 +1334,7 @@ module.exports = function (params, cy) {
             }
         });
 
-        cy.on('cxttap', eCxtTap = function (event) {
+        cy.on(opts.contexMenuShowEvent, eCxtTap = function (event) {
           var target = event.target || event.cyTarget;
           var targetIsEdge = false;
 
@@ -1324,66 +1355,118 @@ module.exports = function (params, cy) {
             type = anchorManager.edgeType;
           }
 
+          var cyPos = event.position || event.cyPosition;
+          var selectedIndex = getContainingShapeIndex(cyPos.x, cyPos.y, edge);
+          if (selectedIndex == -1) {
+            anchorPointUtilities.currentCtxPos = cyPos;
+          } else {
+            anchorPointUtilities.currentAnchorIndex = selectedIndex;
+          }
+          anchorPointUtilities.currentCtxEdge = edge;
+          if (!cy.contextMenus) {
+            return;
+          }
+
           var menus = cy.contextMenus('get'); // get context menus instance
           
           if(!edgeToHighlight || edgeToHighlight.id() != edge.id() || anchorPointUtilities.isIgnoredEdge(edge) ||
               edgeToHighlight !== edge) {
-            menus.hideMenuItem(removeBendPointCxtMenuId);
-            menus.hideMenuItem(addBendPointCxtMenuId);
-            menus.hideMenuItem(removeControlPointCxtMenuId);
-            menus.hideMenuItem(addControlPointCxtMenuId);
+            if (opts.removeBendMenuItemTitle) {
+              menus.hideMenuItem(removeBendPointCxtMenuId);
+            }
+            if (opts.addBendMenuItemTitle){
+              menus.hideMenuItem(addBendPointCxtMenuId);
+            }
+            if (opts.removeControlMenuItemTitle) {
+              menus.hideMenuItem(removeControlPointCxtMenuId);
+            }
+            if (opts.addControlMenuItemTitle) {
+              menus.hideMenuItem(addControlPointCxtMenuId);
+            }
             return;
           }
 
-          var cyPos = event.position || event.cyPosition;
-          var selectedIndex = getContainingShapeIndex(cyPos.x, cyPos.y, edge);
           // not clicked on an anchor
           if (selectedIndex == -1) {
-            menus.hideMenuItem(removeBendPointCxtMenuId);
-            menus.hideMenuItem(removeControlPointCxtMenuId);
+            if (opts.removeBendMenuItemTitle) {
+              menus.hideMenuItem(removeBendPointCxtMenuId);
+            }
+            if (opts.removeControlMenuItemTitle) {
+              menus.hideMenuItem(removeControlPointCxtMenuId);
+            }
             if(type === 'control' && targetIsEdge){
-              menus.showMenuItem(addControlPointCxtMenuId);
-              menus.hideMenuItem(addBendPointCxtMenuId);
+              if (opts.addControlMenuItemTitle) {
+                menus.showMenuItem(addControlPointCxtMenuId);
+              }
+              if (opts.addBendMenuItemTitle) {
+                menus.hideMenuItem(addBendPointCxtMenuId);
+              }
             }
             else if(type === 'bend' && targetIsEdge){
-              menus.showMenuItem(addBendPointCxtMenuId);
-              menus.hideMenuItem(addControlPointCxtMenuId);
+              if (opts.addBendMenuItemTitle) {
+                menus.showMenuItem(addBendPointCxtMenuId);
+              }
+              if (opts.addControlMenuItemTitle) {
+                menus.hideMenuItem(addControlPointCxtMenuId);
+              }
             }
             else if (targetIsEdge){
-              menus.showMenuItem(addBendPointCxtMenuId);
-              menus.showMenuItem(addControlPointCxtMenuId);
+              if (opts.addBendMenuItemTitle) {
+                menus.showMenuItem(addBendPointCxtMenuId);
+              }
+              if (opts.addControlMenuItemTitle) { 
+                menus.showMenuItem(addControlPointCxtMenuId);
+              }
             }
             else {
-              menus.hideMenuItem(addBendPointCxtMenuId);
-              menus.hideMenuItem(addControlPointCxtMenuId);
+              if (opts.addBendMenuItemTitle) {
+                menus.hideMenuItem(addBendPointCxtMenuId);
+              }
+              if (opts.addControlMenuItemTitle) {
+                menus.hideMenuItem(addControlPointCxtMenuId);
+              }
             }
-            anchorPointUtilities.currentCtxPos = cyPos;
           }
           // clicked on an anchor
           else {
-            menus.hideMenuItem(addBendPointCxtMenuId);
-            menus.hideMenuItem(addControlPointCxtMenuId);
+            if (opts.addBendMenuItemTitle) {
+              menus.hideMenuItem(addBendPointCxtMenuId);
+            }
+            if (opts.addControlMenuItemTitle) {
+              menus.hideMenuItem(addControlPointCxtMenuId);
+            }
             if(type === 'control'){
-              menus.showMenuItem(removeControlPointCxtMenuId);
-              menus.hideMenuItem(removeBendPointCxtMenuId);
-              if (opts.enableMultipleAnchorRemovalOption && 
+              if (opts.removeControlMenuItemTitle) {
+                menus.showMenuItem(removeControlPointCxtMenuId);
+              }
+              if (opts.removeBendMenuItemTitle) {
+                menus.hideMenuItem(removeBendPointCxtMenuId);
+              }
+              if (opts.removeAllControlMenuItemTitle && 
                   edge.hasClass('edgecontrolediting-hasmultiplecontrolpoints')) {
                 menus.showMenuItem(removeAllControlPointCtxMenuId);
               }
             }
             else if(type === 'bend'){
-              menus.showMenuItem(removeBendPointCxtMenuId);
-              menus.hideMenuItem(removeControlPointCxtMenuId);
+              if (opts.removeBendMenuItemTitle) {
+                menus.showMenuItem(removeBendPointCxtMenuId);
+              }
+              if (opts.removeControlMenuItemTitle) {
+                menus.hideMenuItem(removeControlPointCxtMenuId);
+              }
             }
-            else{
-              menus.hideMenuItem(removeBendPointCxtMenuId);
-              menus.hideMenuItem(removeControlPointCxtMenuId);
-              menus.hideMenuItem(removeAllControlPointCtxMenuId);
+            else {
+              if (opts.removeBendMenuItemTitle) {
+                menus.hideMenuItem(removeBendPointCxtMenuId);
+              }
+              if (opts.removeControlMenuItemTitle) {
+                menus.hideMenuItem(removeControlPointCxtMenuId);
+              }
+              if (opts.removeAllControlMenuItemTitle) {
+                menus.hideMenuItem(removeAllControlPointCtxMenuId);
+              }
             }
-            anchorPointUtilities.currentAnchorIndex = selectedIndex;
           }
-
-          anchorPointUtilities.currentCtxEdge = edge;
         });
         
         cy.on('cyedgeediting.changeAnchorPoints', 'edge', function() {
@@ -1501,7 +1584,7 @@ module.exports = function (params, cy) {
       document.addEventListener("keydown",keyDown, true);
       document.addEventListener("keyup",keyUp, true);
 
-      $container.data('cyedgeediting', data);
+      containerMetaData = data;
     },
     unbind: function () {
         cy.off('remove', 'node', eRemove)
@@ -1509,6 +1592,8 @@ module.exports = function (params, cy) {
           .off('style', 'edge.edgebendediting-hasbendpoints:selected, edge.edgecontrolediting-hascontrolpoints:selected', eStyle)
           .off('select', 'edge', eSelect)
           .off('unselect', 'edge', eUnselect)
+          .off('mouseover', 'edge', eSelect)
+          .off('mouseout', 'edge', eUnselect)
           .off('tapstart', eTapStart)
           .off('tapstart', 'edge', eTapStartOnEdge)
           .off('tapdrag', eTapDrag)
@@ -1522,12 +1607,12 @@ module.exports = function (params, cy) {
   };
 
   if (functions[fn]) {
-    return functions[fn].apply($(cy.container()), Array.prototype.slice.call(arguments, 1));
+    return functions[fn].apply(cy.container(), Array.prototype.slice.call(arguments, 1));
   } else if (typeof fn == 'object' || !fn) {
-    return functions.init.apply($(cy.container()), arguments);
+    return functions.init.apply(cy.container(), arguments);
   } else {
-    $.error('No such function `' + fn + '` for cytoscape.js-edge-editing');
+    console.error('No such function `' + fn + '` for cytoscape.js-edge-editing');
   }
 
-  return $(this);
+  return this;
 };

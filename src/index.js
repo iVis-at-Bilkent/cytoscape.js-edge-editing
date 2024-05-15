@@ -4,10 +4,10 @@
   var debounce = require("./debounce");
   
   // registers the extension on a cytoscape lib ref
-  var register = function( cytoscape, $, Konva){
+  var register = function( cytoscape, Konva){
     var uiUtilities = require('./UIUtilities');
     
-    if( !cytoscape || !$ || !Konva){ return; } // can't register if required libraries unspecified
+    if( !cytoscape || !Konva){ return; } // can't register if required libraries unspecified
 
     var defaults = {
       // A function parameter to get bend point positions, should return positions of bend points
@@ -57,12 +57,21 @@
       moveSelectedAnchorsOnKeyEvents: function () {
           return true;
       },
-      // whether 'Remove all bend points' and 'Remove all control points' options should be presented
-      enableMultipleAnchorRemovalOption: false,
       // specifically for edge-editing menu items, whether trailing dividers should be used
       useTrailingDividersAfterContextMenuOptions: false,
       // Enable / disable drag creation of anchor points when there is at least one anchor already on the edge
-      enableCreateAnchorOnDrag: true
+      enableCreateAnchorOnDrag: true,
+      handleReconnectEdge: true,
+      handleAnchors: true,
+      // size of anchor point can be auto changed to compensate the impact of zoom
+      enableFixedAnchorSize: false,
+      // automatically remove anchor (bend point) if its previous segment and next segment is almost in a same line
+      enableRemoveAnchorMidOfNearLine: true,
+      // edge reconnection handles can be shown with select or hover events
+      isShowHandleOnHover: false,
+      anchorColor: '#000000',
+      endPointColor: '#000000',
+      contexMenuShowEvent: 'cxttap'
     };
     
     var options;
@@ -124,12 +133,8 @@
         // define edgecontrolediting-hascontrolpoints css class
         cy.style().selector('.edgecontrolediting-hascontrolpoints').css({
           'curve-style': 'unbundled-bezier',
-          'control-point-distances': function (ele) {
-            return anchorPointUtilities.getDistancesString(ele, 'control');
-          },
-          'control-point-weights': function (ele) {
-            return anchorPointUtilities.getWeightsString(ele, 'control');
-          },
+          'control-point-distances': 'data(cyedgecontroleditingDistances)',
+          'control-point-weights': 'data(cyedgecontroleditingWeights)',
           'edge-distances': 'node-position'
         });
 
@@ -186,8 +191,8 @@
     });
   }
 
-  if( typeof cytoscape !== 'undefined' && $ && Konva){ // expose to global cytoscape (i.e. window.cytoscape)
-    register( cytoscape, $, Konva );
+  if( typeof cytoscape !== 'undefined' && Konva){ // expose to global cytoscape (i.e. window.cytoscape)
+    register( cytoscape, Konva );
   }
 
 })();
