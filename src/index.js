@@ -14,6 +14,9 @@
       bendPositionsFunction: function(ele) {
         return ele.data('bendPointPositions');
       },
+      bendCornersIsRoundFunction: function(ele) {
+        return false
+      },
       // A function parameter to get control point positions, should return positions of control points
       controlPositionsFunction: function(ele) {
         return ele.data('controlPointPositions');
@@ -119,7 +122,9 @@
 
         // define edgebendediting-hasbendpoints css class
         cy.style().selector('.edgebendediting-hasbendpoints').css({
-          'curve-style': 'segments',
+					'curve-style': function (ele) {
+						return options.bendCornersIsRoundFunction(ele)?'round-segments':'segments';
+					},
           'segment-distances': 'data(cyedgebendeditingDistances)',
           'segment-weights': 'data(cyedgebendeditingWeights)',
           'edge-distances': 'node-position'
