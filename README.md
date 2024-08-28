@@ -24,7 +24,7 @@ U. Dogrusoz , A. Karacelik, I. Safarli, H. Balci, L. Dervishi, and M.C. Siper, "
 
 Here is a demo:
 <p align="center">
-<a href="https://raw.githack.com/iVis-at-Bilkent/cytoscape.js-edge-editing/unstable/demo.html"><img src="https://www.cs.bilkent.edu.tr/~ivis/images/demo1.png" height=42px></a>
+<a href="https://ivis-at-bilkent.github.io/cytoscape.js-edge-editing/demo.html"><img src="https://www.cs.bilkent.edu.tr/~ivis/images/demo1.png" height=42px></a>
 </p>
 
 ## Dependencies
