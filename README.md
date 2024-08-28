@@ -22,14 +22,14 @@ Please cite the following paper when using this extension:
 
 U. Dogrusoz , A. Karacelik, I. Safarli, H. Balci, L. Dervishi, and M.C. Siper, "[Efficient methods and readily customizable libraries for managing complexity of large networks](https://doi.org/10.1371/journal.pone.0197238)", PLoS ONE, 13(5): e0197238, 2018.
 
-## Demo
-
-Click [here](https://ivis-at-bilkent.github.io/cytoscape.js-edge-editing/demo.html) for demo
+Here is a demo:
+<p align="center">
+<a href="https://raw.githack.com/iVis-at-Bilkent/cytoscape.js-edge-editing/unstable/demo.html"><img src="https://www.cs.bilkent.edu.tr/~ivis/images/demo1.png" height=42px></a>
+</p>
 
 ## Dependencies
 
  * Cytoscape.js ^3.3.0
- * jQuery ^1.7.0 || ^2.0.0 || ^3.0.0
  * Konva ^7.0.3
  * cytoscape-undo-redo.js(optional) ^1.0.1
  * cytoscape-context-menus.js(optional) ^2.0.0
@@ -47,17 +47,16 @@ Download the library:
 CommonJS:
 ```js
 var cytoscape = require('cytoscape');
-var jquery = require('jquery');
 var konva = require('konva');
 var edgeEditing = require('cytoscape-edge-editing');
 
-edgeEditing( cytoscape, jquery, konva ); // register extension
+edgeEditing( cytoscape, konva ); // register extension
 ```
 
 AMD:
 ```js
-require(['cytoscape', 'cytoscape-edge-editing', 'jquery', 'konva'], function( cytoscape, edge-editing, jquery, konva ){
-  edge-editing( cytoscape, jquery, konva ); // register extension
+require(['cytoscape', 'cytoscape-edge-editing', 'konva'], function( cytoscape, edge-editing, konva ){
+  edge-editing( cytoscape, konva ); // register extension
 });
 ```
 
@@ -105,6 +104,10 @@ cy.edgeEditing('initialized');
       bendPositionsFunction: function(ele) {
         return ele.data('bendPointPositions');
       },
+      // Return true to draw rounded corners for the bend points. Requires Cytoscape^3.29.0
+      bendCornersIsRoundFunction: function(ele) {
+        return false;
+      },
       // A function parameter to get control point positions, should return positions of control points
       controlPositionsFunction: function(ele) {
         return ele.data('controlPointPositions');
@@ -132,6 +135,7 @@ cy.edgeEditing('initialized');
          min value = 0 , max value = 20 , values less than 0 are set to 0 and values greater than 20 are set to 20
        */
       bendRemovalSensitivity : 8,
+      // to not show a menu item, pass `false` for corresponding menu item title. Below are 6 menu item titles.
       // title of add bend point menu item (User may need to adjust width of menu items according to length of this option)
       addBendMenuItemTitle: "Add Bend Point",
       // title of remove bend point menu item (User may need to adjust width of menu items according to length of this option)
@@ -144,25 +148,33 @@ cy.edgeEditing('initialized');
       removeControlMenuItemTitle: "Remove Control Point",
       // title of remove all control points menu item
       removeAllControlMenuItemTitle: "Remove All Control Points",
-      // whether 'Remove all bend points' and 'Remove all control points' options should be presented to the user
-      enableMultipleAnchorRemovalOption: false,
       // whether the bend and control points can be moved by arrows
       moveSelectedAnchorsOnKeyEvents: function () {
           return true;
       },
-      // this function handles reconnection of the edge, if undefined simply connect edge to its new source/target 
-      // handleReconnectEdge (newSource.id(), newTarget.id(), edge.data())
-      handleReconnectEdge: undefined,
+      // Can be a function or boolean. If `false`, edge reconnection won't be active. If `true`, connects edge to its new source/target as usual. 
+      // If a function is given, the function will be called with parameters: newSource.id(), newTarget.id(), edge.data(), location
+      handleReconnectEdge: true,
+      // Can be `false` or `true`. If `false`, it won't interact with anchors (control and bend points). If `false`, it won't show any context menu items as well.
+      handleAnchors: true,
       // this function checks validation of the edge and its new source/target
       validateEdge: function (edge, newSource, newTarget) {
          return 'valid';
       },
-      // this function is called if reconnected edge is not valid according to validateEdge function
+      // this function is called with reconnected edge if reconnected edge is not valid according to `validateEdge` function
       actOnUnsuccessfulReconnection: undefined,
       // specifically for edge-editing menu items, whether trailing dividers should be used
       useTrailingDividersAfterContextMenuOptions: false,
       // Enable / disable drag creation of anchor points when there is at least one anchor already on the edge
-      enableCreateAnchorOnDrag: true
+      enableCreateAnchorOnDrag: true,
+      // size of anchor point can be auto changed to compensate the impact of zoom
+      enableFixedAnchorSize: false,
+      // automatically remove anchor (bend point) if its previous segment and next segment is almost in a same line
+      enableRemoveAnchorMidOfNearLine: true,
+      // edge reconnection handles can be shown with select or hover events
+      isShowHandleOnHover: false,
+      anchorColor: '#000000',  // default anchor color is black
+      endPointColor: '#000000' // default endpoint color is black
     };
 ```
 
@@ -184,8 +196,8 @@ This project is set up to automatically be published to npm and bower.  To publi
 
 ## Team
 
-  * [Metin Can Siper](https://github.com/metincansiper), [Muhammed Salih Altun](https://github.com/msalihaltun), [Gledis Zeneli](https://github.com/gledis69), [Ugur Dogrusoz](https://github.com/ugurdogrusoz) of [i-Vis at Bilkent University](http://www.cs.bilkent.edu.tr/~ivis)
+  * [Muhammed Salih Altun](https://github.com/msalihaltun), [Gledis Zeneli](https://github.com/gledis69), [Ugur Dogrusoz](https://github.com/ugurdogrusoz) of [i-Vis at Bilkent University](http://www.cs.bilkent.edu.tr/~ivis)
 
 ### Alumni
 
-  * [Ahmet Candiroglu](https://github.com/ahmetcandiroglu)
+  * [Metin Can Siper](https://github.com/metincansiper), [Ahmet Candiroglu](https://github.com/ahmetcandiroglu)

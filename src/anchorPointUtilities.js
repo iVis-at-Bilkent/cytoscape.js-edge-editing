@@ -37,7 +37,7 @@ var anchorPointUtilities = {
       return 'bend';
     else if(edge.hasClass(this.syntax['control']['class']))
       return 'control';
-    else if(edge.css('curve-style') === this.syntax['bend']['edge'])
+    else if(edge.css('curve-style').includes(this.syntax['bend']['edge']))
       return 'bend';
     else if(edge.css('curve-style') === this.syntax['control']['edge'])
       return 'control';
@@ -216,7 +216,7 @@ var anchorPointUtilities = {
       return undefined;
     }
     
-    if( edge.css('curve-style') !== this.syntax[type]['edge'] ) {
+    if(!edge.css('curve-style').includes(this.syntax[type]['edge'] )) {
       return undefined;
     }
     
@@ -341,26 +341,6 @@ var anchorPointUtilities = {
       weights: weights,
       distances: distances
     };
-  },
-  getDistancesString: function (edge, type) {
-    var str = "";
-
-    var distances = edge.data(this.syntax[type]['distance']);
-    for (var i = 0; distances && i < distances.length; i++) {
-      str = str + " " + distances[i];
-    }
-    
-    return str;
-  },
-  getWeightsString: function (edge, type) {
-    var str = "";
-
-    var weights = edge.data(this.syntax[type]['weight']);
-    for (var i = 0; weights && i < weights.length; i++) {
-      str = str + " " + weights[i];
-    }
-    
-    return str;
   },
   addAnchorPoint: function(edge, newAnchorPoint, type = undefined) {
     if(edge === undefined || newAnchorPoint === undefined){
