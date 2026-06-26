@@ -15,7 +15,7 @@ module.exports = function (params, cy) {
   var addControlPointCxtMenuId = 'cy-edge-control-editing-cxt-add-control-point' + stageId;
   var removeControlPointCxtMenuId = 'cy-edge-control-editing-cxt-remove-control-point' + stageId;
   var removeAllControlPointCtxMenuId = 'cy-edge-bend-editing-cxt-remove-multiple-control-point' + stageId;
-  var eStyle, eRemove, eAdd, eZoom, eSelect, eUnselect, eTapStart, eTapStartOnEdge, eTapDrag, eTapEnd, eCxtTap, eDrag, eData;
+  var eStyle, eRemove, eAdd, eZoom, eSelect, eUnselect, eTapStart, eTapStartOnEdge, eTapDrag, eTapEnd, eCxtTap, eGrab, eDrag, eFree, eData;
   // last status of gestures
   var lastPanningEnabled, lastZoomingEnabled, lastBoxSelectionEnabled;
   var lastActiveBgOpacity;
@@ -231,7 +231,7 @@ module.exports = function (params, cy) {
             height: length,
             fill: opts.anchorColor,
             strokeWidth: 0,
-            draggable: true
+            draggable: false
           });
 
           this.anchors.push(newAnchor);
@@ -776,9 +776,66 @@ module.exports = function (params, cy) {
           cy.trigger('bendPointMovement'); 
       }
 
-      function moveAnchorOnDrag(edge, type, index, position){
+      function snapAnchorPosition(edge, type, index, position, phase) {
+        if (typeof params.snapAnchorPositionFunction === 'function') {
+          return params.snapAnchorPositionFunction(position, edge, type, index, phase) || position;
+        }
+
+        return position;
+      }
+
+      function anchorPointsChanged(edge, type, previousParam) {
+        if (edge === undefined || previousParam === undefined) {
+          return false;
+        }
+
+        var weightStr = anchorPointUtilities.syntax[type]['weight'];
+        var distanceStr = anchorPointUtilities.syntax[type]['distance'];
+        var weightsChanged = (edge.data(weightStr) ? edge.data(weightStr).toString() : null) != previousParam.weights.toString();
+        var distancesChanged = (edge.data(distanceStr) ? edge.data(distanceStr).toString() : null) != previousParam.distances.toString();
+
+        return weightsChanged || distancesChanged;
+      }
+
+      function snapAnchorOnRelease(edge, type, index) {
+        if (index === undefined) {
+          return;
+        }
+
+        var anchorList = anchorPointUtilities.getAnchorsAsArray(edge);
+        if (!anchorList || anchorList.length <= 2 * index + 1) {
+          return;
+        }
+
+        var position = {
+          x: anchorList[2 * index],
+          y: anchorList[2 * index + 1]
+        };
+
+        moveAnchorOnDrag(edge, type, index, position, 'release');
+      }
+
+      function moveTouchedAnchorShape(position) {
+        var anchor = anchorManager.touchedAnchor;
+        if (!anchor) {
+          return;
+        }
+
+        var renderedPosition = convertToRenderedPosition(position);
+        anchor.position({
+          x: renderedPosition.x - anchor.width() / 2,
+          y: renderedPosition.y - anchor.height() / 2
+        });
+        canvas.draw();
+      }
+
+      function moveAnchorOnDrag(edge, type, index, position, phase){
         var weights = edge.data(anchorPointUtilities.syntax[type]['weight']);
         var distances = edge.data(anchorPointUtilities.syntax[type]['distance']);
+        position = snapAnchorPosition(edge, type, index, position, phase || 'drag');
+        if (anchorManager.edge === edge && anchorManager.touchedAnchorIndex === index) {
+          moveTouchedAnchorShape(position);
+        }
         
         var relativeAnchorPosition = anchorPointUtilities.convertToRelativePosition(edge, position);
         weights[index] = relativeAnchorPosition.weight;
@@ -786,6 +843,67 @@ module.exports = function (params, cy) {
         
         edge.data(anchorPointUtilities.syntax[type]['weight'], weights);
         edge.data(anchorPointUtilities.syntax[type]['distance'], distances);
+      }
+
+      var fixedBendPointsOnNodeDrag;
+
+      function getDraggedNodes(node) {
+        var nodes = node.selected() ? node.cy().nodes(':selected') : node;
+        return nodes.union(nodes.descendants());
+      }
+
+      function shouldKeepBendPointsFixedOnNodeDrag() {
+        var keepFixed = options().keepBendPointsFixedOnNodeDrag;
+        return typeof keepFixed === 'function' ? keepFixed() : keepFixed;
+      }
+
+      function cacheBendPointsForNodeDrag(node) {
+        if (!shouldKeepBendPointsFixedOnNodeDrag()) {
+          return;
+        }
+
+        fixedBendPointsOnNodeDrag = {};
+        getDraggedNodes(node).connectedEdges().forEach(function(edge) {
+          if (anchorPointUtilities.getEdgeType(edge) !== 'bend' || anchorPointUtilities.isIgnoredEdge(edge)) {
+            return;
+          }
+
+          var anchorList = anchorPointUtilities.getAnchorsAsArray(edge);
+          if (!anchorList || anchorList.length === 0) {
+            return;
+          }
+
+          fixedBendPointsOnNodeDrag[edge.id()] = [];
+          for (var i = 0; i < anchorList.length; i += 2) {
+            fixedBendPointsOnNodeDrag[edge.id()].push({
+              x: anchorList[i],
+              y: anchorList[i + 1]
+            });
+          }
+        });
+      }
+
+      function keepBendPointsFixedOnNodeDrag() {
+        if (!fixedBendPointsOnNodeDrag) {
+          return;
+        }
+
+        Object.keys(fixedBendPointsOnNodeDrag).forEach(function(edgeId) {
+          var edge = cy.getElementById(edgeId);
+          if (!edge || edge.length === 0 || anchorPointUtilities.getEdgeType(edge) !== 'bend') {
+            return;
+          }
+
+          var positions = fixedBendPointsOnNodeDrag[edgeId];
+          var relativePositions = anchorPointUtilities.convertToRelativePositions(edge, positions);
+
+          edge.data(anchorPointUtilities.syntax.bend.weight, relativePositions.weights);
+          edge.data(anchorPointUtilities.syntax.bend.distance, relativePositions.distances);
+        });
+      }
+
+      function clearFixedBendPointsOnNodeDrag() {
+        fixedBendPointsOnNodeDrag = undefined;
       }
 
       // debounced due to large amout of calls to tapdrag
@@ -1023,10 +1141,20 @@ module.exports = function (params, cy) {
           }
         });
         
+        cy.on('grab', 'node', eGrab = function (event) {
+          var node = event.target || event.cyTarget || this;
+          cacheBendPointsForNodeDrag(node);
+        });
+
         cy.on('drag', 'node', eDrag = function () {
+          keepBendPointsFixedOnNodeDrag();
           if (edgeToHighlight) {
             refreshDraws();
           } 
+        });
+
+        cy.on('free', 'node', eFree = function () {
+          clearFixedBendPointsOnNodeDrag();
         });
         
         cy.on('tapdrag', eTapDrag = function (event) {
@@ -1125,6 +1253,18 @@ module.exports = function (params, cy) {
           var edge = movedEdge || anchorManager.edge;
 
           if (edge !== undefined) {
+            var releaseType = anchorPointUtilities.getEdgeType(edge);
+            if (releaseType === 'none') {
+              releaseType = 'bend';
+            }
+
+            var releaseAnchorIndex = anchorManager.touchedAnchorIndex !== undefined
+              ? anchorManager.touchedAnchorIndex
+              : movedAnchorIndex;
+            if (anchorPointsChanged(edge, releaseType, moveAnchorParam)) {
+              snapAnchorOnRelease(edge, releaseType, releaseAnchorIndex);
+            }
+
             var index = anchorManager.touchedAnchorIndex;
             if (index != undefined) {
               var startX = edge.source().position('x');
@@ -1247,9 +1387,7 @@ module.exports = function (params, cy) {
             moveAnchorParam = undefined;
           }
 
-          var weightStr = anchorPointUtilities.syntax[type]['weight'];
-          if (edge !== undefined && moveAnchorParam !== undefined &&
-            (edge.data(weightStr) ? edge.data(weightStr).toString() : null) != moveAnchorParam.weights.toString()) {
+          if (anchorPointsChanged(edge, type, moveAnchorParam)) {
 
             // anchor created from drag
             if (anchorCreatedByDrag) {
@@ -1599,7 +1737,9 @@ module.exports = function (params, cy) {
           .off('tapdrag', eTapDrag)
           .off('tapend', eTapEnd)
           .off('cxttap', eCxtTap)
+          .off('grab', 'node', eGrab)
           .off('drag', 'node',eDrag)
+          .off('free', 'node', eFree)
           .off('data', 'edge', eData);
 
         cy.unbind("zoom pan", eZoom);

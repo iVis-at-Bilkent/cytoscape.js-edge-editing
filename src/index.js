@@ -29,6 +29,12 @@
       controlPointPositionsSetterFunction: function(ele, controlPointPositions) {
         ele.data('controlPointPositions', controlPointPositions);
       },
+      // A function parameter to optionally snap anchor positions while editing
+      snapAnchorPositionFunction: function(position, edge, type, index, phase) {
+        return position;
+      },
+      // whether bend points keep their absolute positions when connected nodes are dragged
+      keepBendPointsFixedOnNodeDrag: false,
       // whether to initilize bend and control points on creation of this extension automatically
       initAnchorsAutomatically: true,
       // the classes of those edges that should be ignored
