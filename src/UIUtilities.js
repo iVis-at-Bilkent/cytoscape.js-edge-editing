@@ -1304,7 +1304,7 @@ module.exports = function (params, cy) {
 
                 // remove the bend point if segment edge becomes straight
                 var type = anchorPointUtilities.getEdgeType(edge);
-                if ((type === 'bend' && dist < options().bendRemovalSensitivity)) {
+                if ((type === 'bend' && dist <= options().bendRemovalSensitivity)) {
                   nearToLine = true;
                 }
               }
